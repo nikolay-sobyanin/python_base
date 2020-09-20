@@ -52,7 +52,31 @@ print('Лампа -', lamps_quantity, 'шт, стоимость', lamps_cost, '�
 # WARNING для знающих циклы: БЕЗ циклов. Да, с переменными; да, неэффективно; да, копипаста.
 # Это задание на ручное вычисление - что бы потом понять как работают циклы и насколько с ними проще жить.
 
-# TODO здесь ваш код
+#Столы
+table_code = goods['Стол']
+table_cost_1 = store[table_code][0]['quantity'] * store[table_code][0]['price']
+table_cost_2 = store[table_code][1]['quantity'] * store[table_code][1]['price']
+table_cost = table_cost_1 + table_cost_2
+table_quantity = store[table_code][0]['quantity'] + store[table_code][1]['quantity']
+print('Стол -', table_quantity, 'шт, стоимость', table_cost, 'руб')
+
+#Диваны
+divan_code = goods['Диван']
+divan_cost_1 = store[divan_code][0]['quantity'] * store[divan_code][0]['price']
+divan_cost_2 = store[divan_code][1]['quantity'] * store[divan_code][1]['price']
+divan_cost = divan_cost_1 + divan_cost_2
+divan_quantity = store[divan_code][0]['quantity'] + store[divan_code][1]['quantity']
+print('Диван -', divan_quantity, 'шт, стоимость', divan_cost, 'руб')
+
+#Стул
+chair_code = goods['Стул']
+chair_cost_1 = store[chair_code][0]['quantity'] * store[chair_code][0]['price']
+chair_cost_2 = store[chair_code][1]['quantity'] * store[chair_code][1]['price']
+chair_cost_3 = store[chair_code][2]['quantity'] * store[chair_code][2]['price']
+chair_cost = chair_cost_1 + chair_cost_2 + chair_cost_3
+chair_quantity = store[chair_code][0]['quantity'] + store[chair_code][1]['quantity'] + store[chair_code][2]['quantity']
+print('Стул -', chair_quantity, 'шт, стоимость', chair_cost, 'руб')
+
 
 ##########################################################################################
 # ВНИМАНИЕ! После того как __ВСЯ__ домашняя работа сделана и запушена на сервер,         #

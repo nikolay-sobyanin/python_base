@@ -23,6 +23,8 @@ violator_songs_list = [
 
 all_time_music_1 = violator_songs_list[3][1] + violator_songs_list[5][1] + violator_songs_list[-1][1]
 all_time_music_1 = round(all_time_music_1, 2)
+
+# TODO: используйте .format() для вывода
 print('Три песни звучат ' + str(all_time_music_1) + ' минут')
 
 # Есть словарь песен группы Depeche Mode
@@ -42,7 +44,10 @@ violator_songs_dict = {
 #   А другие три песни звучат приблизительно ХХХ минут
 
 all_time_music_2 = violator_songs_dict['Sweetest Perfection'] + violator_songs_dict['Policy of Truth'] + violator_songs_dict['Blue Dress']
+# TODO: правильно выполнили округление)) Распространенная ошибка, но не для вас
 all_time_music_2 = round(all_time_music_2)
+
+# TODO: сделать вывод через f-строку
 print('А другие три песни звучат преблизительно ' + str(all_time_music_2) + ' минут')
 
 # Обратите внимание, что делать много вычислений внутри print() - плохой стиль.

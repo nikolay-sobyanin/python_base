@@ -17,7 +17,7 @@ my_favorite_movies = 'Терминатор, Пятый элемент, Ават�
 
 first_film = my_favorite_movies[:10]
 last_film = my_favorite_movies[-15:]
-second_film = my_favorite_movies[12:24]
+second_film = my_favorite_movies[12:25]
 last_film_2 = my_favorite_movies[-22:-17]
 
 print(first_film)
@@ -25,4 +25,3 @@ print(last_film)
 print(second_film)
 print(last_film_2)
 
-# TODO: у фильма с Брюсом Уиллисом потерялась буква.

@@ -33,3 +33,5 @@ serial_number_lark = zoo.index('lark') + 1
 
 print(f'Порядковый номер льва - {serial_number_lion}.')
 print(f'Порядковый номер жаворонка - {serial_number_lark}.')
+
+# зачет!

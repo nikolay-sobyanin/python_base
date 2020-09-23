@@ -89,3 +89,5 @@ distances_2 = {
 
 print(distances == distances_2)
 pprint(distances_2)
+
+# зачет!

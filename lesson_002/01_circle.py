@@ -47,4 +47,4 @@ print(distance_point_2 < radius)
 # False
 # False
 
-
+# зачет!

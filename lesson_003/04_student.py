@@ -11,4 +11,10 @@
 
 educational_grant, expenses = 10000, 12000
 
-# TODO здесь ваш код
+deficit, i = 0, 0
+while i < 10:
+    expenses += expenses * 0.03
+    expenses = round(expenses, 2)
+    deficit += expenses - educational_grant
+    i += 1
+print(f'Студенту надо попросить {deficit} рублей')

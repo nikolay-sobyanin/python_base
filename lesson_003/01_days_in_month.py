@@ -11,4 +11,41 @@ user_input = input('Введите, пожалуйста, номер месяц�
 month = int(user_input)
 print('Вы ввели', month)
 
-# TODO здесь ваш код
+if month == 1:
+    quantity_day = 31
+    print(f'Количество дней в месяце №{month}: {quantity_day}')
+elif month == 2:
+    quantity_day = 28
+    print(f'Количество дней в месяце №{month}: {quantity_day}')
+elif month == 3:
+    quantity_day = 31
+    print(f'Количество дней в месяце №{month}: {quantity_day}')
+elif month == 4:
+    quantity_day = 30
+    print(f'Количество дней в месяце №{month}: {quantity_day}')
+elif month == 5:
+    quantity_day = 31
+    print(f'Количество дней в месяце №{month}: {quantity_day}')
+elif month == 6:
+    quantity_day = 30
+    print(f'Количество дней в месяце №{month}: {quantity_day}')
+elif month == 7:
+    quantity_day = 31
+    print(f'Количество дней в месяце №{month}: {quantity_day}')
+elif month == 8:
+    quantity_day = 31
+    print(f'Количество дней в месяце №{month}: {quantity_day}')
+elif month == 9:
+    quantity_day = 30
+    print(f'Количество дней в месяце №{month}: {quantity_day}')
+elif month == 10:
+    quantity_day = 31
+    print(f'Количество дней в месяце №{month}: {quantity_day}')
+elif month == 11:
+    quantity_day = 30
+    print(f'Количество дней в месяце №{month}: {quantity_day}')
+elif month == 12:
+    quantity_day = 31
+    print(f'Количество дней в месяце №{month}: {quantity_day}')
+else:
+    print('Неверно указан номер месяца')

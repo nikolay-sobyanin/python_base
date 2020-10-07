@@ -17,3 +17,5 @@ while c <= a:
     c = i * b
 result = i - 1
 print(f'Целочисленное деление {a} на {b} дает {result}')
+
+# TODO: что будет, если a=370, b=37?

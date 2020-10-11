@@ -15,30 +15,25 @@ for _ in range(3):
 sd.sleep(seconds=2)
 
 
-# TODO: начиная с 3го модуля мы стремимся соблюдать PEP8.
-#     Перемеинуйте функцию bubble в слово/словосочетание, глагол, чтобы он отражал суть - "нарисовать пузырек".
-#     Функции и методы должны носить названия-глаголы. А объекты - названия-существительные. И bubble сейчас как раз
-#     больше похож на существительное, а должен быть похож на глагол/сказуемое.
 # Написать функцию рисования пузырька, принммающую 3 (или более) параметра: точка рисования, шаг и цвет
-def bubble(point, radius, step, color, width):
+def draw_a_bubble(point, radius, step, color, width):
     for _ in range(3):
         sd.circle(center_position=point, radius=radius, color=color, width=width)
         radius += step
 
 
 # Нарисовать 10 пузырьков в ряд
-quantity_bubbles = 10
-for x in range(100, (quantity_bubbles*100+1), 100):
+quantity_draw_a_bubbles = 10
+for x in range(100, (quantity_draw_a_bubbles * 100 + 1), 100):
     point_2 = sd.get_point(x, 400)
-    bubble(point=point_2, radius=20, step=5, color=sd.COLOR_RED, width=2)
+    draw_a_bubble(point=point_2, radius=20, step=5, color=sd.COLOR_RED, width=2)
 sd.sleep(seconds=2)
-
 
 # Нарисовать три ряда по 10 пузырьков
 for y in range(100, (3 * 100 + 1), 100):
-    for x in range(100, (quantity_bubbles * 100 + 1), 100):
+    for x in range(100, (quantity_draw_a_bubbles * 100 + 1), 100):
         point_3 = sd.get_point(x, y)
-        bubble(point=point_3, radius=20, step=5, color=sd.COLOR_GREEN, width=1)
+        draw_a_bubble(point=point_3, radius=20, step=5, color=sd.COLOR_GREEN, width=1)
 sd.sleep(seconds=2)
 
 # Нарисовать 100 пузырьков в произвольных местах экрана случайными цветами
@@ -46,8 +41,6 @@ for _ in range(100):
     random_point = sd.random_point()
     random_color = sd.random_color()
     random_radius = sd.randint(10, 21)
-    bubble(point=random_point, radius=random_radius, step=5, color=random_color, width=1)
+    draw_a_bubble(point=random_point, radius=random_radius, step=5, color=random_color, width=1)
 
 sd.pause()
-
-# почти да

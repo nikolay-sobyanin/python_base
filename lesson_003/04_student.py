@@ -12,11 +12,8 @@
 educational_grant, expenses = 10000, 12000
 
 deficit, i = 0, 0
-# TODO: в первый месяц процентов не должно быть: "Рост цен ежемесячно увеличивает расходы на 3%, кроме первого месяца"
 while i < 10:
-    expenses += expenses * 0.03
-    # TODO: округлять стоит при выводе. Внутри программы окгулять число Никогда не стоит. Иначе теряем точность.
-    expenses = round(expenses, 2)
     deficit += expenses - educational_grant
+    expenses += expenses * 0.03
     i += 1
-print(f'Студенту надо попросить {deficit} рублей')
+print(f'Студенту надо попросить {round(deficit, 2)} рублей')

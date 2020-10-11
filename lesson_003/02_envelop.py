@@ -28,8 +28,6 @@ elif paper_x <= envelop_y and paper_y <= envelop_x:
 else:
     print('НЕТ')
 
-# TODO: Тут ок)
-
 # Усложненное задание, решать по желанию.
 # Заданы размеры hole_x, hole_y прямоугольного отверстия и размеры brick_х, brick_у, brick_z кирпича (все размеры
 # могут быть в диапазоне от 1 до 1000)
@@ -37,13 +35,13 @@ else:
 # Определить, пройдет ли кирпич через отверстие (грани кирпича параллельны сторонам отверстия)
 
 hole_x, hole_y = 8, 9
-brick_x, brick_y, brick_z = 11, 10, 2
+# brick_x, brick_y, brick_z = 11, 10, 2
 # brick_x, brick_y, brick_z = 11, 2, 10
 # brick_x, brick_y, brick_z = 10, 11, 2
 # brick_x, brick_y, brick_z = 10, 2, 11
 # brick_x, brick_y, brick_z = 2, 10, 11
 # brick_x, brick_y, brick_z = 2, 11, 10
-# brick_x, brick_y, brick_z = 3, 5, 6
+brick_x, brick_y, brick_z = 3, 5, 6
 # brick_x, brick_y, brick_z = 3, 6, 5
 # brick_x, brick_y, brick_z = 6, 3, 5
 # brick_x, brick_y, brick_z = 6, 5, 3
@@ -58,24 +56,12 @@ brick_x, brick_y, brick_z = 11, 10, 2
 # (просто раскоментировать нужную строку и проверить свой код)
 
 
-# TODO: усложненную версию можно сделать с меньшим количество if|else, не перебирая все варианты влоб. Как?
-#  Мы можем поместить параметры кирпичика в список. Найти максимальное значение в нем с помощью max().
-#  Удалить этот элемент из списка.
-#  .
-#  В итоге остается 2 наименьших параметра в списке и 2 параметра отверстия. Задача сведется к дефолтной версии.
-if brick_x <= hole_x and brick_y <= hole_y:
+brick_dimensions = [brick_x, brick_y, brick_z]
+brick_dimensions.remove(max(brick_dimensions))
+
+if brick_dimensions[0] <= hole_x and brick_dimensions[1] <= hole_y:
     print('Кирпич проходит')
-elif brick_x <= hole_y and brick_y <= hole_x:
+elif brick_dimensions[0] <= hole_y and brick_dimensions[1] <= hole_x:
     print('Кирпич проходит')
 else:
-    if brick_x <= hole_x and brick_z <= hole_y:
-        print('Кирпич проходит')
-    elif brick_x <= hole_y and brick_z <= hole_x:
-        print('Кирпич проходит')
-    else:
-        if brick_y <= hole_x and brick_z <= hole_y:
-            print('Кирпич проходит')
-        elif brick_y <= hole_y and brick_z <= hole_x:
-            print('Кирпич проходит')
-        else:
-            print('Кирпич НЕ проходит')
+    print('Кирпич НЕ проходит')

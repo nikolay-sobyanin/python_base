@@ -9,8 +9,8 @@ import simple_draw as sd
 # Параметры функции: кордината X, координата Y, цвет.
 # Вывести 10 смайликов в произвольных точках экрана.
 
-# TODO: поправить имя ф-ции, чтобы оно стало звучать как глагол/сказуемое ("нарисовать смайлик" вместо "смайлик")
-def smile(x, y, color):
+
+def draw_a_smile(x, y, color):
     # Элипс
     left_bottom_ellipse = sd.get_point(x - 50, y - 40)
     right_top_ellipse = sd.get_point(x + 50, y + 40)
@@ -33,8 +33,7 @@ def smile(x, y, color):
 for _ in range(10):
     x = sd.random_number(50, sd.resolution[0] - 50)
     y = sd.random_number(50, sd.resolution[1] - 50)
-    smile(x=x, y=y, color=sd.COLOR_YELLOW)
-
+    draw_a_smile(x=x, y=y, color=sd.COLOR_YELLOW)
 
 sd.pause()
 

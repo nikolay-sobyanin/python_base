@@ -44,3 +44,7 @@ for _ in range(100):
     draw_a_bubble(point=random_point, radius=random_radius, step=5, color=random_color, width=1)
 
 sd.pause()
+
+# TODO: можно просто draw_bubble (предлоги и союзы как правило опускают, как в телеграммах)
+
+# зачет!

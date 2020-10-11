@@ -65,3 +65,5 @@ elif brick_dimensions[0] <= hole_y and brick_dimensions[1] <= hole_x:
     print('Кирпич проходит')
 else:
     print('Кирпич НЕ проходит')
+
+# зачет!

@@ -17,3 +17,6 @@ while i < 10:
     expenses += expenses * 0.03
     i += 1
 print(f'Студенту надо попросить {round(deficit, 2)} рублей')
+
+
+# зачет!

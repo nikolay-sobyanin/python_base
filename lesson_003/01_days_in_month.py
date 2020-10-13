@@ -11,23 +11,11 @@ user_input = input('Введите, пожалуйста, номер месяц�
 month = int(user_input)
 print('Вы ввели', month)
 
-days_in_a_month = {
-    1: 31,
-    2: 28,
-    3: 31,
-    4: 30,
-    5: 31,
-    6: 30,
-    7: 31,
-    8: 31,
-    9: 31,
-    10: 31,
-    11: 30,
-    12: 31,
-}
+month_days = (31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
 
 if 1 <= month <= 12:
-    quantity_day = days_in_a_month[month]
+    quantity_day = month_days[month - 1]
     print(f'В {month} месяце {quantity_day} дн.')
 else:
     print('Неверно указан номер месяца')
+

@@ -9,8 +9,11 @@ import simple_draw as sd
 CANVAS_LENGTH = 1000
 CANVAS_HEIGHT = 500
 
-BRICK_LENGTH = 100
-BRICK_HEIGHT = 50
+# TODO: как проверить, что все готово? Сделайте экран 800 на 600, а размер кирпича: длина=40, высота=20.
+#  И сразу вопрос: почему стена покосилась? Надо сделать фикс, такой, чтобы при изменении параметров стены/кирпича
+#  больше таких перекосов не было.
+BRICK_LENGTH = 40
+BRICK_HEIGHT = 20
 
 sd.resolution = (CANVAS_LENGTH, CANVAS_HEIGHT)
 

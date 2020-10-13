@@ -36,5 +36,3 @@ for _ in range(10):
     draw_a_smile(x=x, y=y, color=sd.COLOR_YELLOW)
 
 sd.pause()
-
-# зачет!

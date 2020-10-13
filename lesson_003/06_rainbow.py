@@ -34,5 +34,3 @@ for color in rainbow_colors:
     radius += step_radius
 
 sd.pause()
-
-# зачет!

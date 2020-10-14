@@ -15,7 +15,7 @@ BRICK_HEIGHT = 20
 sd.resolution = (CANVAS_LENGTH, CANVAS_HEIGHT)
 
 for row_number, y in enumerate(range(0, CANVAS_HEIGHT + 1, BRICK_HEIGHT)):
-    step = 0 if row_number % 2 == 1 else BRICK_LENGTH // 2
+    step = 0 if row_number % 2 == 1 else BRICK_LENGTH // 2      # TODO: верно)
     for x in range(step, CANVAS_LENGTH + 1, BRICK_LENGTH):
         left_bottom = sd.get_point(x, y)
         right_top = sd.get_point(x + BRICK_LENGTH, y + BRICK_HEIGHT)
@@ -32,3 +32,5 @@ for row_number, y in enumerate(range(0, CANVAS_HEIGHT + 1, BRICK_HEIGHT)):
 #           рисуем кирпич
 
 sd.pause()
+
+# зачет!

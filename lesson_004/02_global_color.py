@@ -26,22 +26,25 @@ def draw(point, angle, length, quantity_corners, color):
         quantity_corners -= 1
     sd.line(start_point=start_point, end_point=point, color=color, width=3)
 
-
+# TODO: добавить параметр color
 def draw_triangle(point, angle, length):
     n = 3  # количество углов
     draw(point=point, angle=angle, length=length, quantity_corners=n, color=color)
 
 
+# TODO: добавить параметр color
 def draw_square(point, angle, length):
     n = 4  # количество углов
     draw(point=point, angle=angle, length=length, quantity_corners=n, color=color)
 
 
+# TODO: добавить параметр color
 def draw_pentagon(point, angle, length):
     n = 5  # количество углов
     draw(point=point, angle=angle, length=length, quantity_corners=n, color=color)
 
 
+# TODO: добавить параметр color
 def draw_hexagon(point, angle, length):
     n = 6  # количество углов
     draw(point=point, angle=angle, length=length, quantity_corners=n, color=color)
@@ -66,9 +69,18 @@ all_color = {
 list_color = list(all_color)
 list_print(*list_color)
 
+# TODO: код ниже упаковать в вечный цикл. До тех пор пока пользователь не ввел нормальный цвет - не отпускаем его.
+#  Сейчас он 100500 и прога упадет.
 number_color = int(input('Введите номер цвета: '))
 
 if 0 <= number_color <= len(list_color) - 1:
+    # TODO: строка ниже - самое слабое, с точки зрения читабельности код, место в задаче.
+    #  Ее пришлось сделать потому что all_color - это словарь.
+    #  Сделайте из all_color кортеж, которых хранит словари. Каждый словарик - это инфа об одно цвете. У каждого словаря
+    #  2 ключа: имя цвета и сам цвет. Тогда цвет можно будет достать так:
+    #       number_color = 0
+    #       color_name = all_color[number_color]['name']
+    #       color = all_color[number_color]['color']
     color = all_color[list_color[number_color]]
 else:
     print('Неккоректно введен номер цвета!')

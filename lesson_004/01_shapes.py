@@ -125,15 +125,10 @@ import simple_draw as sd
 def draw(point, angle, length, quantity_corners):
     start_point = point
     delta = 360 / quantity_corners
-
-    # TODO: сможете сделать из него for цикл? Если сможете - выиграете 2 строки
-    while quantity_corners > 1:
-        v = sd.get_vector(start_point=start_point, angle=angle, length=length, width=3)
+    for i in range(0, quantity_corners - 1):
+        v = sd.get_vector(start_point=start_point, angle=angle + i * delta, length=length, width=3)
         v.draw()
         start_point = v.end_point
-        # TODO: 2 ниже не придется писать. Можете считать это челленджем) А сама задача зачтена.
-        angle += delta
-        quantity_corners -= 1
     sd.line(start_point=start_point, end_point=point, width=3)
 
 

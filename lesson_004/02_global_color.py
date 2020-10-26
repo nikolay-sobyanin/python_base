@@ -18,83 +18,100 @@ import simple_draw as sd
 def draw(point, angle, length, quantity_corners, color):
     start_point = point
     delta = 360 / quantity_corners
-    while quantity_corners > 1:
-        v = sd.get_vector(start_point=start_point, angle=angle, length=length, width=3)
+    for i in range(0, quantity_corners - 1):
+        v = sd.get_vector(start_point=start_point, angle=angle + i * delta, length=length, width=3)
         v.draw(color=color)
         start_point = v.end_point
-        angle += delta
-        quantity_corners -= 1
     sd.line(start_point=start_point, end_point=point, color=color, width=3)
 
-# TODO: добавить параметр color
-def draw_triangle(point, angle, length):
+
+def draw_triangle(point, angle, length, color):
     n = 3  # количество углов
     draw(point=point, angle=angle, length=length, quantity_corners=n, color=color)
 
 
-# TODO: добавить параметр color
-def draw_square(point, angle, length):
+def draw_square(point, angle, length, color):
     n = 4  # количество углов
     draw(point=point, angle=angle, length=length, quantity_corners=n, color=color)
 
 
-# TODO: добавить параметр color
-def draw_pentagon(point, angle, length):
+def draw_pentagon(point, angle, length, color):
     n = 5  # количество углов
     draw(point=point, angle=angle, length=length, quantity_corners=n, color=color)
 
 
-# TODO: добавить параметр color
-def draw_hexagon(point, angle, length):
+def draw_hexagon(point, angle, length, color):
     n = 6  # количество углов
     draw(point=point, angle=angle, length=length, quantity_corners=n, color=color)
 
 
-def list_print(*args):
+def list_print(*args, key='name'):
     print('Возможные цвета фигуры:')
     for i, arg in enumerate(args):
-        print(f'{i}  :   {arg}')
+        print(f'{i}  :   {arg[key]}')
 
 
-all_color = {
-    'red': sd.COLOR_RED,
-    'orange': sd.COLOR_ORANGE,
-    'yellow': sd.COLOR_YELLOW,
-    'green': sd.COLOR_GREEN,
-    'cyan': sd.COLOR_CYAN,
-    'blue': sd.COLOR_BLUE,
-    'purple': sd.COLOR_PURPLE,
-}
+# all_color = {
+#     'red': sd.COLOR_RED,
+#     'orange': sd.COLOR_ORANGE,
+#     'yellow': sd.COLOR_YELLOW,
+#     'green': sd.COLOR_GREEN,
+#     'cyan': sd.COLOR_CYAN,
+#     'blue': sd.COLOR_BLUE,
+#     'purple': sd.COLOR_PURPLE,
+# }
 
-list_color = list(all_color)
-list_print(*list_color)
+all_color = (
+    {
+        'name': 'red',
+        'color': sd.COLOR_RED
+    },
+    {
+        'name': 'orange',
+        'color': sd.COLOR_ORANGE
+    },
+    {
+        'name': 'yellow',
+        'color': sd.COLOR_YELLOW
+    },
+    {
+        'name': 'green',
+        'color': sd.COLOR_GREEN
+    },
+    {
+        'name': 'cyan',
+        'color': sd.COLOR_CYAN
+    },
+    {
+        'name': 'blue',
+        'color': sd.COLOR_BLUE
+    },
+    {
+        'name': 'purple',
+        'color': sd.COLOR_PURPLE
+    },
+)
 
-# TODO: код ниже упаковать в вечный цикл. До тех пор пока пользователь не ввел нормальный цвет - не отпускаем его.
-#  Сейчас он 100500 и прога упадет.
-number_color = int(input('Введите номер цвета: '))
+list_print(*all_color)
 
-if 0 <= number_color <= len(list_color) - 1:
-    # TODO: строка ниже - самое слабое, с точки зрения читабельности код, место в задаче.
-    #  Ее пришлось сделать потому что all_color - это словарь.
-    #  Сделайте из all_color кортеж, которых хранит словари. Каждый словарик - это инфа об одно цвете. У каждого словаря
-    #  2 ключа: имя цвета и сам цвет. Тогда цвет можно будет достать так:
-    #       number_color = 0
-    #       color_name = all_color[number_color]['name']
-    #       color = all_color[number_color]['color']
-    color = all_color[list_color[number_color]]
-else:
-    print('Неккоректно введен номер цвета!')
+while True:
+    number_color = int(input('Введите номер цвета: '))
+    if 0 <= number_color <= len(all_color) - 1:
+        select_color = all_color[number_color]['color']
+        break
+    else:
+        print('Неккоректно введен номер цвета!')
 
 point_0 = sd.get_point(150, 400)
-draw_triangle(point=point_0, angle=0, length=100)
+draw_triangle(point=point_0, angle=0, length=100, color=select_color)
 
 point_0 = sd.get_point(400, 400)
-draw_square(point=point_0, angle=40, length=100)
+draw_square(point=point_0, angle=40, length=100, color=select_color)
 
 point_0 = sd.get_point(400, 200)
-draw_pentagon(point=point_0, angle=50, length=100)
+draw_pentagon(point=point_0, angle=50, length=100, color=select_color)
 
 point_0 = sd.get_point(200, 150)
-draw_hexagon(point=point_0, angle=70, length=100)
+draw_hexagon(point=point_0, angle=70, length=100, color=select_color)
 
 sd.pause()

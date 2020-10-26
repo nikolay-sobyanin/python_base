@@ -51,16 +51,6 @@ def list_print(*args, key='name'):
         print(f'{i}  :   {arg[key]}')
 
 
-# all_color = {
-#     'red': sd.COLOR_RED,
-#     'orange': sd.COLOR_ORANGE,
-#     'yellow': sd.COLOR_YELLOW,
-#     'green': sd.COLOR_GREEN,
-#     'cyan': sd.COLOR_CYAN,
-#     'blue': sd.COLOR_BLUE,
-#     'purple': sd.COLOR_PURPLE,
-# }
-
 all_color = (
     {
         'name': 'red',

@@ -38,6 +38,13 @@ import simple_draw as sd
 def draw_branches(start_point, angle, length):
     if length < 5:
         return
+    # TODO: давайте немного усложним:
+    #  Если длина ветки большая (сами решите), то красим коричневым.
+    #  Если длина маленькая - зеленым.
+    #  Добавить уменьшение ширины (пропорционально длине).
+    #  .
+    #  Что получится по итогу:
+    #  Ветвистое дерево, у которого есть толстый ствол, ветки и мелкая листва.
     v1 = sd.get_vector(start_point=start_point, angle=angle, length=length)
     v1.draw(color=sd.COLOR_GREEN)
     v2 = sd.get_vector(start_point=start_point, angle=angle, length=length)

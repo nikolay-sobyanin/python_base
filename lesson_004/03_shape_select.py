@@ -73,17 +73,15 @@ all_figure = (
 list_print(*all_figure)
 point_0 = sd.get_point(WIDTH_CANVAS / 2, HEIGHT_CANVAS / 2)
 while True:
-    number_figure = int(input('Введите номер цвета: '))
-    # TODO:
-    #  1. если заменить правый "<=" на "<", то можно будет убрать "- 1";
-    #  2. давайте добавим проверку isdigit(), для того, чтобы защититься от ввода вида "привет123".
-    #     Пример:
-    #           print('123'.isdigit())          # True
-    #           print('asdasda'.isdigit())      # False
-    if 0 <= number_figure <= len(all_figure) - 1:
-        select_figure = all_figure[number_figure]['function']
-        select_figure(point=point_0, angle=10, length=100)
-        break
+    number_figure = input('Введите номер цвета: ')
+    if number_figure.isdigit():
+        number_figure = int(number_figure)
+        if 0 <= number_figure < len(all_figure):
+            select_figure = all_figure[number_figure]['function']
+            select_figure(point=point_0, angle=10, length=100)
+            break
+        else:
+            print('Неккоректно введен номер цвета!')
     else:
         print('Неккоректно введен номер цвета!')
 

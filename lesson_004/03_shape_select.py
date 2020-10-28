@@ -7,6 +7,7 @@ HEIGHT_CANVAS = 400
 
 sd.resolution = (WIDTH_CANVAS, HEIGHT_CANVAS)
 
+
 # Запросить у пользователя желаемую фигуру посредством выбора из существующих
 #   вывести список всех фигур с номерами и ждать ввода номера желаемой фигуры.
 # и нарисовать эту фигуру в центре экрана
@@ -74,42 +75,18 @@ list_print(*all_figure)
 point_0 = sd.get_point(WIDTH_CANVAS / 2, HEIGHT_CANVAS / 2)
 while True:
     number_figure = input('Введите номер цвета: ')
-    # TODO: тут у нас 2 вложенных if`а.
-    if number_figure.isdigit():
-        number_figure = int(number_figure)
-        if 0 <= number_figure < len(all_figure):
-            select_figure = all_figure[number_figure]['function']
-            select_figure(point=point_0, angle=10, length=100)
-            break
-        else:
-            print('Неккоректно введен номер цвета!')
+    if not number_figure.isdigit():
+        print('Неккоректно введен номер цвета!')
+        continue
+
+    number_figure = int(number_figure)
+    if 0 <= number_figure < len(all_figure):
+        select_figure = all_figure[number_figure]['function']
+        select_figure(point=point_0, angle=10, length=100)
+        break
     else:
         print('Неккоректно введен номер цвета!')
 
-
 sd.pause()
-
-# TODO: лучше избегать вложенности if`ов если это возможно. Пример:
-#          def do_something(x, y):
-#               if x:
-#                   if y:
-#                       print('done!')
-#                   else:
-#                       print('failed in Y')
-#               else:
-#                   print('failed in X')
-#  .
-#  Громоздко, не правда ли? Мы может упростить эту же функцию:
-#           def do_something(x, y):
-#               if not x:
-#                   print('failed in X')
-#                   return
-#               if not y:
-#                   print('failed in Y')
-#                   return
-#               print('done!')
-#  .
-#  А? Сразу исчезает два уровня вложенности, у каждого условия возможен выход по ошибке. Куда легче ориентироваться,
-#  внутри функции) В цикле вместо return будет стоять continue (переход к следующей итерацие).
 
 # зачет!

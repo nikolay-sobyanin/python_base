@@ -34,28 +34,32 @@ import simple_draw as sd
 # Пригодятся функции
 # sd.random_number()
 
+COLOR_BROWN = (150, 75, 0)
 
-def draw_branches(start_point, angle, length):
-    if length < 5:
+
+def draw_branches(start_point, angle, length, width=10):
+    color = COLOR_BROWN
+
+    if length < 3:
         return
-    # TODO: давайте немного усложним:
-    #  Если длина ветки большая (сами решите), то красим коричневым.
-    #  Если длина маленькая - зеленым.
-    #  Добавить уменьшение ширины (пропорционально длине).
-    #  .
-    #  Что получится по итогу:
-    #  Ветвистое дерево, у которого есть толстый ствол, ветки и мелкая листва.
-    v1 = sd.get_vector(start_point=start_point, angle=angle, length=length)
-    v1.draw(color=sd.COLOR_GREEN)
-    v2 = sd.get_vector(start_point=start_point, angle=angle, length=length)
-    v2.draw(color=sd.COLOR_GREEN)
+
+    if length < 10:
+        color = sd.COLOR_GREEN
+
+    v1 = sd.get_vector(start_point=start_point, angle=angle, length=length, width=width)
+    v1.draw(color=color)
+    v2 = sd.get_vector(start_point=start_point, angle=angle, length=length, width=width)
+    v2.draw(color=color)
+
     v1_next_point = v1.end_point
     v2_next_point = v2.end_point
     v1_next_angle = angle + 30 * sd.random_number(60, 140) / 100
     v2_next_angle = angle - 30 * sd.random_number(60, 140) / 100
     next_length = length * .75 * sd.random_number(80, 120) / 100
-    draw_branches(start_point=v1_next_point, angle=v1_next_angle, length=next_length)
-    draw_branches(start_point=v2_next_point, angle=v2_next_angle, length=next_length)
+    next_width = int(length * 0.1)
+
+    draw_branches(start_point=v1_next_point, angle=v1_next_angle, length=next_length, width=next_width)
+    draw_branches(start_point=v2_next_point, angle=v2_next_angle, length=next_length, width=next_width)
 
 
 root_point = sd.get_point(300, 30)

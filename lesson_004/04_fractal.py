@@ -40,7 +40,7 @@ COLOR_BROWN = (150, 75, 0)
 def draw_branches(start_point, angle, length, width=10):
     color = COLOR_BROWN
 
-    if length < 3:
+    if length < 1:
         return
 
     if length < 10:
@@ -63,9 +63,12 @@ def draw_branches(start_point, angle, length, width=10):
 
 
 root_point = sd.get_point(300, 30)
-draw_branches(start_point=root_point, angle=90, length=100)
 
+# TODO: Добавил для ускорения
+sd.start_drawing()
+draw_branches(start_point=root_point, angle=90, length=100, width=12)
+sd.finish_drawing()
 
 sd.pause()
 
-
+# зачет!

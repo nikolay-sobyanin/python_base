@@ -15,7 +15,10 @@ import simple_draw as sd
 # sd.random_number()
 # sd.user_want_exit()
 
-
+# TODO:
+#  1. функция ничего не добавляет. Только возвращает новую снежинку (snowflake). get_snowflake будет точнее;
+#  2. "new_snowflakes" можно убрать и сразу return {...};
+#  3. в for-циклах часто упоминается "snowflakes" (снежинки), но как правило имеется ввиду "snowflake" (снежинка).
 def add_snowflakes():
     new_snowflakes = {
         'x': sd.random_number(100, 1100),
@@ -68,3 +71,5 @@ sd.pause()
 # - сделать сугоб внизу экрана - если снежинка долетает до низа, оставлять её там,
 #   и добавлять новую снежинку
 # Результат решения см https://youtu.be/XBx0JtxHiLg
+
+# зачет!

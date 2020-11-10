@@ -15,17 +15,13 @@ import simple_draw as sd
 # sd.random_number()
 # sd.user_want_exit()
 
-# TODO:
-#  1. функция ничего не добавляет. Только возвращает новую снежинку (snowflake). get_snowflake будет точнее;
-#  2. "new_snowflakes" можно убрать и сразу return {...};
-#  3. в for-циклах часто упоминается "snowflakes" (снежинки), но как правило имеется ввиду "snowflake" (снежинка).
-def add_snowflakes():
-    new_snowflakes = {
+
+def get_snowflake():
+    return {
         'x': sd.random_number(100, 1100),
         'y': sd.random_number(400, 600),
         'length': sd.random_number(10, 25),
     }
-    return new_snowflakes
 
 
 sd.resolution = (1200, 600)
@@ -33,24 +29,24 @@ N = 40
 list_snowflakes = []
 
 for _ in range(0, N):
-    list_snowflakes.append(add_snowflakes())
+    list_snowflakes.append(get_snowflake())
 
 while not sd.user_want_exit():
     sd.start_drawing()
 
-    for snowflakes in list_snowflakes:
-        point = sd.get_point(snowflakes['x'], snowflakes['y'])
-        sd.snowflake(center=point, length=snowflakes['length'], color=sd.background_color)
+    for snowflake in list_snowflakes:
+        point = sd.get_point(snowflake['x'], snowflake['y'])
+        sd.snowflake(center=point, length=snowflake['length'], color=sd.background_color)
 
-    for snowflakes in list_snowflakes:
-        snowflakes['y'] -= 10
-        snowflakes['x'] -= sd.random_number(-10, 10)
+    for snowflake in list_snowflakes:
+        snowflake['y'] -= 10
+        snowflake['x'] -= sd.random_number(-10, 10)
 
-        new_point = sd.get_point(snowflakes['x'], snowflakes['y'])
-        sd.snowflake(center=new_point, length=snowflakes['length'], color=sd.COLOR_WHITE)
+        new_point = sd.get_point(snowflake['x'], snowflake['y'])
+        sd.snowflake(center=new_point, length=snowflake['length'], color=sd.COLOR_WHITE)
 
-        if snowflakes['y'] < 20:
-            snowflakes.update(add_snowflakes())
+        if snowflake['y'] < 20:
+            snowflake.update(get_snowflake())
 
     sd.finish_drawing()
     sd.sleep(0.1)

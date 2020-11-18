@@ -5,6 +5,7 @@
 # подсказка: для вывода элементов списка через запятую можно использовать функцию строки .join()
 # https://docs.python.org/3/library/stdtypes.html#str.join
 
+# TODO: только нужно импортировать folk`и из district
 import room_1
 import room_2
 

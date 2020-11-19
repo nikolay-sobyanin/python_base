@@ -9,21 +9,35 @@
 #  - сыра
 # В каждой функции выводить на консоль что-то вроде "А теперь добавим ..."
 
-# TODO: двойной
 # В этом модуле создать рецепт двойного чизбургера (https://goo.gl/zA3goZ)
 # с помощью фукций из my_burger и вывести на консоль.
 
-# TODO: свой собственный
 # Создать рецепт своего бургера, по вашему вкусу.
 # Если не хватает инградиентов - создать соответствующие функции в модуле my_burger
 
 import my_burger as mb
 
 print('Рецепт двойного чизбургера: ')
-mb.add_buns()
+mb.add_bun()
+mb.add_cutlets()
+mb.add_cheese()
 mb.add_cutlets()
 mb.add_cheese()
 mb.add_cucumbers()
 mb.add_tomato()
 mb.add_sauce()
 print('Двойной чизбургер готов!')
+
+print(' ')
+
+print('Рецепт бургера, который мне по вкусу: ')
+mb.add_bun_with_sesame()
+mb.add_cheese()
+mb.add_big_cutlets()
+mb.add_cheese()
+mb.add_bacon()
+mb.add_lettuce()
+mb.add_tomato()
+mb.add_onion()
+mb.add_sauce()
+print('Бургер готов!')

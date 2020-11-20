@@ -41,3 +41,5 @@ mb.add_tomato()
 mb.add_onion()
 mb.add_sauce()
 print('Бургер готов!')
+
+# зачет!

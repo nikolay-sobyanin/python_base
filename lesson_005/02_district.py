@@ -20,3 +20,4 @@ folks_in_the_area = ', '.join(cs_h1_r1 + cs_h1_r2 + cs_h2_r1 + cs_h2_r2 + ss_h1_
 
 print(f'На районе живут {folks_in_the_area}.')
 
+# зачет!

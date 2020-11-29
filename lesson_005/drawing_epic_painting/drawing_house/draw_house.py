@@ -32,7 +32,8 @@ def draw_house(point_x, point_y, length, height):
     center_smile_y = point_y + height / 2
     draw_smile(x=center_smile_x, y=center_smile_y)
 
-
+# TODO: вызов функций в основном файле - 04_painting.py
 draw_house(point_x=100, point_y=100, length=300, height=200)
 
+# TODO: этот вызов останавливает рисование. Его только в 04 файле вызываем, в сааааамом конце.
 sd.pause()

@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
-
-
 import simple_draw as sd
 
 
 def draw_wall(point_x, point_y, length, height):
 
+    # TODO: можно вынести из функции и поместить после импорта simple_draw
     BRICK_LENGTH = 50
     BRICK_HEIGHT = 25
 

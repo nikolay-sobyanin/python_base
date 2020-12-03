@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 import simple_draw as sd
 
+BRICK_LENGTH = 50
+BRICK_HEIGHT = 25
+
 
 def draw_wall(point_x, point_y, length, height):
-
-    # TODO: можно вынести из функции и поместить после импорта simple_draw
-    BRICK_LENGTH = 50
-    BRICK_HEIGHT = 25
-
     for row_number, y in enumerate(range(point_y, point_y + height, BRICK_HEIGHT)):
         step = 0 if row_number % 2 == 1 else BRICK_LENGTH // 2
         for x in range(point_x + step, point_x + length - BRICK_LENGTH + 1, BRICK_LENGTH):

@@ -19,22 +19,16 @@ for _ in range(0, N):
 
 
 def draw_snowfall():
-    while not sd.user_want_exit():
-        sd.start_drawing()
+    for snowflake in list_snowflakes:
+        point = sd.get_point(snowflake['x'], snowflake['y'])
+        sd.snowflake(center=point, length=snowflake['length'], color=sd.background_color)
 
-        for snowflake in list_snowflakes:
-            point = sd.get_point(snowflake['x'], snowflake['y'])
-            sd.snowflake(center=point, length=snowflake['length'], color=sd.background_color)
+    for snowflake in list_snowflakes:
+        snowflake['y'] -= 10
+        snowflake['x'] -= sd.random_number(-10, 10)
 
-        for snowflake in list_snowflakes:
-            snowflake['y'] -= 10
-            snowflake['x'] -= sd.random_number(-10, 10)
+        new_point = sd.get_point(snowflake['x'], snowflake['y'])
+        sd.snowflake(center=new_point, length=snowflake['length'], color=sd.COLOR_WHITE)
 
-            new_point = sd.get_point(snowflake['x'], snowflake['y'])
-            sd.snowflake(center=new_point, length=snowflake['length'], color=sd.COLOR_WHITE)
-
-            if snowflake['y'] < 150:
-                snowflake.update(get_snowflake())
-
-        sd.finish_drawing()
-        sd.sleep(0.1)
+        if snowflake['y'] < 150:
+            snowflake.update(get_snowflake())

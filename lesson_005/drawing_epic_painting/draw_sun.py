@@ -1,14 +1,18 @@
 import simple_draw as sd
 
 
-def draw_sun(center_x, center_y):
+def draw_sun(point_sun, ray_offset):
     N = 7
+    step = 5
+    offset = step * ray_offset
     delta = 360 / N
-
-    point_center = sd.get_point(center_x, center_y)
-    sd.circle(center_position=point_center, radius=50, color=sd.COLOR_YELLOW, width=0)
-
+    sd.circle(center_position=point_sun, radius=50, color=sd.COLOR_YELLOW, width=0)
     for i in range(0, N):
-        v = sd.get_vector(start_point=point_center, angle=i * delta, length=75)
-        v1 = sd.get_vector(start_point=v.end_point, angle=i * delta, length=50, width=8)
-        v1.draw(color=sd.COLOR_YELLOW)
+        v1_old = sd.get_vector(start_point=point_sun, angle=i * delta + (offset - step), length=75)
+        v2_old = sd.get_vector(start_point=v1_old.end_point, angle=i * delta + (offset - step), length=50, width=8)
+
+        v1_new = sd.get_vector(start_point=point_sun, angle=i * delta + offset, length=75)
+        v2_new = sd.get_vector(start_point=v1_new.end_point, angle=i * delta + offset, length=50, width=8)
+
+        v2_old.draw(color=sd.background_color)
+        v2_new.draw(color=sd.COLOR_YELLOW)

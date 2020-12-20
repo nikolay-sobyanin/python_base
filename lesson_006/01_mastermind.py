@@ -48,6 +48,7 @@ from mastermind_engine import get_number, print_number, check_number
 
 new_game = True
 
+# TODO: подумать и придумать как оставить 2 while-цикла. А лучше только 1.
 while new_game:
     print('----Новая игра----')
     get_number()

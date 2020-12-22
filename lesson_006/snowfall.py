@@ -35,17 +35,20 @@ def shifting_snowflakes():
 
 
 # x номера_достигших_низа_экрана() - выдает список номеров снежинок, которые вышли за границу экрана
-def new_snowflake():
-    for snowflake in list_snowflakes:
+def numbers_reached_bottom_screen():
+    list_numbers = []
+    for i, snowflake in enumerate(list_snowflakes):
         if snowflake['y'] < 20:
-            snowflake.update(get_snowflake())
+            list_numbers.append(i)
+    return list_numbers
+
 
 # x удалить_снежинки(номера) - удаляет снежинки с номерами из списка
-# TODO: Добавить функцию "удалить_снежинки(номера)"
+def del_snowflakes(*numbers):
+    for i in sorted(numbers, reverse=True):
+        list_snowflakes.pop(i)
 
 
-
-# TODO: про принцип ответственности.
 #  Прочувствуйте название каждой функции, которая указана в описании задачи:
 #  создать_снежинки(N) - создает N снежинок. Только создает. Не красит и не удаляет и не перемещает.
 #  нарисовать_снежинки_цветом(color) - отрисовывает все снежинки цветом color. Только красит и ничего больше.

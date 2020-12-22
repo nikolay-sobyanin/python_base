@@ -48,49 +48,45 @@ from mastermind_engine import get_number, print_number, check_number
 
 new_game = True
 
-# TODO: подумать и придумать как оставить 2 while-цикла. А лучше только 1.
-while new_game:
-    print('----Новая игра----')
-    get_number()
-    print_number()
-    n = 0
-    while True:
-        while True:
-            enter_number = input('Введите число: ')
-            if not enter_number.isdigit():
-                print('Неккоректно введено число! Имеются недопустимые символы.')
-                continue
-            if len(enter_number) != 4:
-                print('Неккоректно введено число! Длина числа должна быть равна 4 символам.')
-                continue
-            if int(enter_number[0]) == 0:
-                print('Неккоректно введено число! Число не должно начинатся на 0.')
-                continue
-            number_repeat = False
-            for i in range(0, len(enter_number) - 1):
-                for j in range(i + 1, len(enter_number)):
-                    if enter_number[i] == enter_number[j]:
-                        number_repeat = True
-            if number_repeat:
-                print('Неккоректно введено число! Имеются повторяющиеся цифры в числе.')
-                continue
-            else:
-                break
+while True:
+    if new_game:
+        print('----Новая игра----')
+        get_number()
+        print(print_number())
+        n = 0
+        new_game = False
 
-        bulls = check_number(enter_number=enter_number)['bulls']
-        cows = check_number(enter_number=enter_number)['cows']
-        print(f'быки - {bulls}, коровы - {cows}')
-        n += 1
-        if bulls == 4:
-            print(f'Игра окончена. Количество ходов - {n}')
+    enter_number = input('Введите число: ')
+    if not enter_number.isdigit():
+        print('Неккоректно введено число! Имеются недопустимые символы.')
+        continue
+    if len(enter_number) != 4:
+        print('Неккоректно введено число! Длина числа должна быть равна 4 символам.')
+        continue
+    if int(enter_number[0]) == 0:
+        print('Неккоректно введено число! Число не должно начинатся на 0.')
+        continue
+    number_repeat = False
+    for i in range(0, len(enter_number) - 1):
+        for j in range(i + 1, len(enter_number)):
+            if enter_number[i] == enter_number[j]:
+                number_repeat = True
+    if number_repeat:
+        print('Неккоректно введено число! Имеются повторяющиеся цифры в числе.')
+        continue
+
+    bulls = check_number(enter_number=enter_number)['bulls']
+    cows = check_number(enter_number=enter_number)['cows']
+    print(f'быки - {bulls}, коровы - {cows}')
+    n += 1
+    if bulls == 4:
+        print(f'Игра окончена. Количество ходов - {n}')
+        next_game = input('Хотите еще партию? ')
+        if next_game == 'да' or next_game == 'Да':
+            new_game = True
+            print()
+            print()
+        else:
             break
-
-    next_game = input('Хотите еще партию? ')
-    if next_game == 'да' or next_game == 'Да':
-        next_game = True
-        print()
-        print()
-    else:
-        next_game = False
 
 print('Спасибо за игру!')

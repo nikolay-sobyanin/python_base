@@ -18,24 +18,13 @@ import snowfall
 sd.resolution = (1200, 600)
 
 snowfall.create_snowflakes(N=100)
-while True:
+while not sd.user_want_exit():
     sd.start_drawing()
     snowfall.draw_snowflakes(color=sd.background_color)
     snowfall.shifting_snowflakes()
     snowfall.draw_snowflakes(color=sd.COLOR_WHITE)
-    snowfall.new_snowflake()
+    snowfall.del_snowflakes(*snowfall.numbers_reached_bottom_screen())
     sd.finish_drawing()
     sd.sleep(0.1)
-    # TODO: sd.user_want_exit()
-    #  Это функция, которая возвращает True, если пользователь захотел выйти. До тех
-    #  пор пока он не решил выйти, функция всегда возвращает False.
-    #  .
-    #  В while, вместо TRUE можно подставить вызов этой функции. И цикл будет длиться до тех пор, пока пользователь не
-    #  решит выйти. Только учтите, должно читать как:
-    #   "цикл пока пользователь НЕ хочет выйти"
-    #  Сейчас читается как:
-    #   "если пользовательно хочет выйти"
-    if sd.user_want_exit():
-        break
 
 sd.pause()

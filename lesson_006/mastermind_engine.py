@@ -1,64 +1,28 @@
 # -*- coding: utf-8 -*-
 
-from random import randint
+from random import sample
+from operator import itemgetter
 
-# TODO: Что такое "движок игры"?
-#  Это ядро из методов, которые образуют правила игры. Это можно сказать суть игры.
-#  Например играть в дурака можно в живую, можно онлайн. Интерфейс взаимодействия будет разный: мышка или держим карты
-#  в руках. Но правила игры буду неизменны.
-#  .
-#  В данном случае, у игры может быть графический или консольный интерфейс, но у обоих версий (графической и консольной)
-#  должен быть единый движок (буквально один и тот же файл с одними и теми же методами). Поэтому все моменты
-#  взаимодействия с пользователем - выносим в файл 01_mastermind.py. В движке не должно быть ни одного print(),
-#  ни одного input().
-
-
-
-_generated_number = {}
-_sorted_keys = []
-
-# TODO: Константа NUMB_OF_DIGITS.
-#  Добавьте глобальную константу "ЧИСЛО ЦИФР В ЧИСЛЕ", которая будет равна 4. Используйте эту константу по коду,
-#  чтобы иметь возможность одним движением изменить настройки игры (сейчас у нас в интерфейсе (файл 01_mastermind.py),
-#  жестко задана 4ка и здесь по коду раскидано 4. Это затрудняет нам возможность быстро модифицировать код, если потребуется).
+_generated_number = []
+NUMB_OF_DIGITS = 4
+NUMBERS = '0123456789'
 
 
 #   загадать_число()
 def get_number():
-    global _generated_number, _sorted_keys
-    # TODO:
+    global _generated_number
+    _generated_number = sample(NUMBERS, NUMB_OF_DIGITS)
+    if _generated_number[0] == '0':
+        _generated_number.append(sample(set(NUMBERS) - set(_generated_number), 1)[0])
+        _generated_number.pop(0)
 
-    for i in range(1, 5):
-        if i == 1:
-            _generated_number[i] = randint(1, 9)
-            continue
-        new_number = 0
-        number_repeat = True
-        while number_repeat:
-            new_number = randint(0, 9)
-            number_repeat = False
-            for j in _generated_number:
-                if _generated_number[j] == new_number:
-                    number_repeat = True
-        _generated_number[i] = new_number
-    _sorted_keys = sorted(_generated_number.keys())
 
-# TODO: Если применить sample(), то получим компактную версию. Пример работы sample()
-#       random.sample(list(range(100500)), 7)		# вернет список из 7 рандомных чисел из 100500 чисел
-
-# TODO: а можно сделать в 4 строки, если учесть следующее:
-#  sample может работать со строками, и выбирать из них рандонмые символы.
-#  Что пригодится: pop; append; '0123456789'
-#  .
-#  Подсказка: пусть sample сразу генерирует число из 4 чисел. Потом надо разобраться как быть, если первое число - ноль.
-
-# TODO: Это не функцию движка.
+#   распечатать_число()
 def print_number():
-    number = ''
-
-    for key in _sorted_keys:
-        number += str(_generated_number[key])
-    print(number)
+    number_print = ''
+    for number in _generated_number:
+        number_print += number
+    return number_print
 
 
 #   проверить_число(NN) - возвращает словарь {'bulls': N, 'cows': N}
@@ -66,7 +30,17 @@ def check_number(enter_number):
     dict_enter_number = {}
     bulls_and_cows = {'bulls': 0, 'cows': 0}
 
-    # TODO: Это неоправданное усложнение кода.
+    for i, number in enumerate(enter_number):
+        dict_enter_number[number] = i    # ключ - цифра, значение - позиция цифры. Далее сортировка по значениям.
+
+    for element in sorted(dict_enter_number.items(), key=itemgetter(1)):
+        if element[0] == _generated_number[element[1]]:
+            bulls_and_cows['bulls'] += 1
+        elif element[0] in _generated_number:
+            bulls_and_cows['cows'] += 1
+
+    return bulls_and_cows
+
     #  Только с поправкой на то, что вы написали, что это специально для закрепления знаний, мы оставим.
     #  Но превращать список в словарь не стоит.
     #  А хранить отсортированные ключи словаря - это вообще нонсанс.
@@ -101,17 +75,3 @@ def check_number(enter_number):
     #  Сортировать словарь - непростая задача. Совсем. Есть более удобный способ, но он еще более сложный,
     #  использует словарные включения. Поэтому мы пока остановимся на этом способе.
 
-    for i, number in enumerate(enter_number):
-        dict_enter_number[_sorted_keys[i]] = int(number)
-
-    for i in _sorted_keys:
-        if dict_enter_number[i] == _generated_number[i]:
-            bulls_and_cows['bulls'] += 1
-        # TODO: используйте elif, проверить входит ли буква в число. Тогда 5 строк ниже можно превратить в 2
-        for j in _generated_number:
-            if dict_enter_number[i] == _generated_number[j]:
-                bulls_and_cows['cows'] += 1
-    if bulls_and_cows['bulls'] != 0:
-        bulls_and_cows['cows'] -= bulls_and_cows['bulls']
-
-    return bulls_and_cows

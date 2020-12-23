@@ -13,12 +13,15 @@ def get_number():
     global _generated_number
     _generated_number = sample(NUMBERS, NUMB_OF_DIGITS)
     if _generated_number[0] == '0':
+        # TODO: можно так же 0 переместить в конец)
+        #  Но справедливости ради, ваш вариант с точки зрения теор.вера - лучше.
         _generated_number.append(sample(set(NUMBERS) - set(_generated_number), 1)[0])
         _generated_number.pop(0)
 
 
 #   распечатать_число()
 def print_number():
+    # TODO: join в студию!) Сделать в 1 строку.
     number_print = ''
     for number in _generated_number:
         number_print += number

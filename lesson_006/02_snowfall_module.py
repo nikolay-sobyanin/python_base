@@ -24,7 +24,16 @@ while not sd.user_want_exit():
     snowfall.shifting_snowflakes()
     snowfall.draw_snowflakes(color=sd.COLOR_WHITE)
     snowfall.del_snowflakes(*snowfall.numbers_reached_bottom_screen())
+    # TODO: дополните код. Чтобы вместо упавших снежинок создавались новые.
+    #  В остальном все ок.
+    #  Примечание: только не дублируйте вызов. Многократный вызов функции, вместо сохранения результата ее работы в
+    #  переменную - понижает скорость выполнения.
+    #  .
+    #  Т.е. условно, если нам надо посчитать "2 **100" 20 раз, то считаем 1 раз, а 19 раза используем сохраненный
+    #  результат.
     sd.finish_drawing()
     sd.sleep(0.1)
 
 sd.pause()
+
+# почти

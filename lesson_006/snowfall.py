@@ -34,7 +34,7 @@ def shifting_snowflakes():
         snowflake['x'] -= sd.random_number(-10, 10)
 
 
-# x номера_достигших_низа_экрана() - выдает список номеров снежинок, которые вышли за границу экрана
+# ✅ номера_достигших_низа_экрана() - выдает список номеров снежинок, которые вышли за границу экрана
 def numbers_reached_bottom_screen():
     list_numbers = []
     for i, snowflake in enumerate(list_snowflakes):
@@ -43,8 +43,9 @@ def numbers_reached_bottom_screen():
     return list_numbers
 
 
-# x удалить_снежинки(номера) - удаляет снежинки с номерами из списка
-def del_snowflakes(*numbers):
+# ✅ удалить_снежинки(номера) - удаляет снежинки с номерами из списка
+def del_snowflakes(*numbers):   # TODO: единственное, что здесь не обязательно распковку использовать.
+                                #  можно было и просто список передать.
     for i in sorted(numbers, reverse=True):
         list_snowflakes.pop(i)
 

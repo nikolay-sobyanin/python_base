@@ -81,7 +81,7 @@ while True:
     n += 1
     if bulls == 4:
         print(f'Игра окончена. Количество ходов - {n}')
-        next_game = input('Хотите еще партию? ')
+        next_game = input('Хотите еще партию? ')        # TODO: используйте .lower(), чтобы упростить if ниже
         if next_game == 'да' or next_game == 'Да':
             new_game = True
             print()
@@ -90,3 +90,5 @@ while True:
             break
 
 print('Спасибо за игру!')
+
+# почти

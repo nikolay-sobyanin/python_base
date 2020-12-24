@@ -44,8 +44,7 @@ def numbers_reached_bottom_screen():
 
 
 # ✅ удалить_снежинки(номера) - удаляет снежинки с номерами из списка
-def del_snowflakes(*numbers):   # TODO: единственное, что здесь не обязательно распковку использовать.
-                                #  можно было и просто список передать.
+def del_snowflakes(numbers):
     for i in sorted(numbers, reverse=True):
         list_snowflakes.pop(i)
 

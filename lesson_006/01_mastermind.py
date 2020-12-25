@@ -83,8 +83,7 @@ while True:
         print(f'Игра окончена. Количество ходов - {n}')
         next_game = input('Хотите еще партию? ')
 
-        # TODO: посмотрите на эту строку и спросите себя "туда ли я применил lower?"
-        if next_game in ['Да', 'Да'.lower(), 'Yes', 'Yes'.lower()]:
+        if next_game.lower() in ['да', 'yes']:
             new_game = True
             print()
             print()

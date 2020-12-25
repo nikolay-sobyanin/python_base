@@ -31,4 +31,4 @@ while not sd.user_want_exit():
 
 sd.pause()
 
-# почти
+# зачет!

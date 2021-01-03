@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from random import randint
+from random import randint, choice
 from termcolor import cprint
 
 # Доработать практическую часть урока lesson_007/python_snippets/08_practice.py
@@ -56,9 +56,7 @@ class Man:
         self.house.money += 150
         self.fullness -= 10
 
-    # TODO: давайте сделаем все буквы в названии метода строчными, чтобы соответствовать стилю PEP8.
-    #  (да-да, знаю, метод был до нас).
-    def watch_MTV(self):
+    def watch_tv(self):
         cprint(f'{self.name} смотрел MTV целый день', color='green')
         self.fullness -= 10
 
@@ -85,18 +83,12 @@ class Man:
         else:
             cprint(f'{self.name} деньги кончились!', color='red')
 
-    # TODO: пусть если грязи меньше 100, но она есть, мы будем убирать сколько есть (уровень сытости отнимается
-    #  на столько же, на 20).
-    #  .
-    #  Выгодно будет использовать такой фокус:
-    #   cur_lvl = min(100, текущий_уровень_грязи)
-    #  .
-    #  И потом мы убираем cur_lvl грязи в доме (либо 100, если грязи много, либо всю грязь, если ее меньше 100).
     def clean_house(self):
-        if self.house.mess >= 100:
+        mess_lvl = min(100, self.house.mess)
+        if mess_lvl:
             cprint(f'{self.name} убрал дом.', color='magenta')
             self.fullness -= 20
-            self.house.mess -= 100
+            self.house.mess -= mess_lvl
         else:
             cprint(f'Дома чисто!', color='red')
 
@@ -104,8 +96,7 @@ class Man:
         if self.fullness <= 0:
             cprint(f'{self.name} умер...', color='red')
             return
-        dice = randint(1, 6)
-        if self.fullness <= 20:
+        elif self.fullness <= 20:
             self.eat()
         elif self.house.food <= 10:
             self.shopping()
@@ -113,14 +104,10 @@ class Man:
             self.work()
         elif self.house.cat_food <= 10:
             self.buy_cat_food()
-        elif self.house.mess >= 100:
+        elif self.house.mess:
             self.clean_house()
-        elif dice == 1:
-            self.work()
-        elif dice == 2:
-            self.eat()
         else:
-            self.watch_MTV()
+            choice([self.work, self.watch_tv])()
 
 
 class Cat:
@@ -154,24 +141,10 @@ class Cat:
         if self.fullness <= 0:
             cprint(f'{self.name} умер...', color='red')
             return
-        dice = randint(1, 2)
-        if self.fullness <= 20:
+        elif self.fullness <= 20:
             self.eat()
-        elif dice == 1:
-            self.tear_wallpaper()
         else:
-            self.sleep()
-
-        # TODO: вот тут мы можем упростить. В библиотеке random есть функция choice. Она позволяет выбрать 1 рандомный
-        #  элемент из списка. Пример:
-        #     numb = choice([1,2,3,4,5,6,7,8])     # выберет рандомное число от 1 до 8
-        #  .
-        #  Давайте используем это, чтобы ужать следующие 6 строк в одну. Сделайте список ф-ций "работать", "есть",
-        #  "смотреть тв", и с помощью choice выберите 1 и вызовите. Мы делали подобную реализацию в 4ом модуле в
-        #  задаче 03_shape_select.py (там был список ф-ций)
-        #  .
-        #  Обратите внимание: это будет список из ф-ций, а не список из результатов ВЫЗОВОВ функций.
-        #  ОЧЕНЬ ВАЖНО: Функция != вызов функции.
+            choice([self.sleep, self.tear_wallpaper])()
 
 
 class House:
@@ -189,15 +162,30 @@ class House:
 my_sweet_home = House()
 nick = Man(name='Nick')
 nick.go_to_house(house=my_sweet_home)
-cat = nick.pick_up_cat(name_cat='Барсик')
+
+while True:
+    quantity_cats = input(f'Сколько котов возьмет в дом {nick.name}? ')
+    if not quantity_cats.isdigit():
+        print('Неккоректно введено число! Имеются недопустимые символы.')
+        continue
+    else:
+        quantity_cats = int(quantity_cats)
+        break
+
+cat_list = []
+for cat in range(quantity_cats):
+    name_cat = input('Имя кота - ')
+    cat_list.append(nick.pick_up_cat(name_cat=name_cat))
 
 for day in range(1, 366):
     print('================ день {} =================='.format(day))
     nick.act()
-    cat.act()
+    for cat in cat_list:
+        cat.act()
     print('--- в конце дня ---')
     print(nick)
-    print(cat)
+    for cat in cat_list:
+        print(cat)
     print(my_sweet_home)
     print()
 

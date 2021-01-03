@@ -30,22 +30,11 @@ class Water:
         return self.name
 
     def __add__(self, other):
-        # TODO: создавать объекты, чтобы сравнить с их именами - ну такое.
-        # TODO: Используйте isinstance(), чтобы определить класс элемента.
-        #  .
-        #         class A (list):
-        #            pass
-        #  .
-        #         a = A()
-        #         isinstance(a,A)             # True
-        #         isinstance(a,list)          # True
-        #         isinstance(a,dict)          # False
-        #  .
-        if other.name == Air().name:
+        if isinstance(other, Air):
             return Storm()
-        elif other.name == Fire().name:
+        elif isinstance(other, Fire):
             return Vapor()
-        elif other.name == Ground().name:
+        elif isinstance(other, Ground):
             return Mud()
         else:
             return None
@@ -60,11 +49,11 @@ class Air:
         return self.name
 
     def __add__(self, other):
-        if other.name == Fire().name:
+        if isinstance(other, Fire):
             return Lightning()
-        elif other.name == Ground().name:
+        elif isinstance(other, Ground):
             return Dust()
-        elif other.name == Water().name:
+        elif isinstance(other, Water):
             return Storm()
         else:
             return None
@@ -79,11 +68,11 @@ class Fire:
         return self.name
 
     def __add__(self, other):
-        if other.name == Ground().name:
+        if isinstance(other, Ground):
             return Lava()
-        elif other.name == Air().name:
+        elif isinstance(other, Air):
             return Lightning()
-        elif other.name == Water().name:
+        elif isinstance(other, Water):
             return Vapor()
         else:
             return None
@@ -96,6 +85,16 @@ class Ground:
 
     def __str__(self):
         return self.name
+
+    def __add__(self, other):
+        if isinstance(other, Fire):
+            return Lava()
+        elif isinstance(other, Air):
+            return Dust()
+        elif isinstance(other, Water):
+            return Mud()
+        else:
+            return None
 
 
 class Storm:
@@ -152,38 +151,11 @@ class Lava:
         return self.name
 
 
+element_list = [Water(), Air(), Fire(), Ground()]
 
-# TODO: Добавьте цикл.
-#  Создайте список из всех элементов и пройдитесь по нему в 2х циклах, т.о. мы сможем получить разнообразные комбинации
-#  всех элементов. Сделайте цикл так, чтобы пар-дублей (вода-огонь, огонь-вода) не было. Для этого пригодится
-#  enumerate()
-
-
-# TODO: сделайте так, чтобы не было повторных пересечений. Например:
-#       Вода + Огонь = Пар
-#       Огонь + Вода = Пар (эта пара лишняя, т.к. от перестановки мест слагаемых сумма не меняется)
-#  .
-#  Как это лучше сделать?
-#  Дам 2 наводки:
-#   1. используйте enumerate() для 1го цикла;
-#   2. Для второго цикл используйте не весь element_list, а только его срез начиная какого элемента.
-#  .
-#  Пример:
-#  Пусть у нас есть список [1,2,3,4], сейчас мы имеем 16 пар: 1-1,1-2,1-3,...2-1,...,3-1, ...;
-#  А хотим иметь только уникальные пары:
-#  1-1, 1-2, 1-3, 1-4
-#       2-2, 2-3, 2-4
-#            3-3, 3-4
-#                 4-4
-#  .
-print(Water(), '+', Air(), '=', Water() + Air())
-print(Water(), '+', Fire(), '=', Water() + Fire())
-print(Water(), '+', Ground(), '=', Water() + Ground())
-print(Air(), '+', Fire(), '=', Air() + Fire())
-print(Air(), '+', Ground(), '=', Air() + Ground())
-print(Fire(), '+', Ground(), '=', Fire() + Ground())
-
-print(Air(), '+', Water(), '=', Air() + Water())
+for i, element_1 in enumerate(element_list):
+    for element_2 in element_list[i:]:
+        print(element_1, '+', element_2, '=', element_1 + element_2)
 
 # Усложненное задание (делать по желанию)
 # Добавить еще элемент в игру.

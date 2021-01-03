@@ -29,6 +29,9 @@ class Snowflake:
         sd.snowflake(center=point, length=self.length, color=sd.COLOR_WHITE)
 
     def can_fall(self):
+        # TODO: избавьтесь от if/else. Пример:
+        #  def is_even(x):
+        #     return x % 2 == 0
         if self.y < 20:
             return False
         else:
@@ -44,6 +47,9 @@ def get_flakes(count=40):
     return list_flakes
 
 
+# TODO: функция "вернуть упавшие снежинки", а сама удаляет их из списока.
+#  Если pop выполняется внутри цикла по списку, из которого pop`аем, то часть элементов будет пропущена.
+#  Т.е. текущий вариант еще и не точно срабатывает. Разделите на 2 функции, на подобии 02 задачи 06 модуля.
 def get_fallen_flakes():
     count = 0
     for i, snowflake in enumerate(list_flakes):
@@ -54,6 +60,7 @@ def get_fallen_flakes():
 
 
 def append_flakes(count):
+    # TODO: range(0, count) == range(count)
     for _ in range(0, count):
         list_flakes.append(Snowflake())
 

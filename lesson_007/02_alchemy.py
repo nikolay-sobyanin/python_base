@@ -154,11 +154,7 @@ class Lava:
 element_list = [Water(), Air(), Fire(), Ground()]
 
 for i, element_1 in enumerate(element_list):
-    # TODO: сейчас есть строки вида "Земля + Земля = None".
-    #  Тут 2 выхода:
-    #  1. сделать у земли доп.условие, что земля с землей дает землю (логично?);
-    #  2. сделать срез правее на 1, чтобы пропускался элемент равный текущему. (т.е. отступ поправить).
-    for element_2 in element_list[i:]:
+    for element_2 in element_list[i + 1:]:
         print(element_1, '+', element_2, '=', element_1 + element_2)
 
 # Усложненное задание (делать по желанию)

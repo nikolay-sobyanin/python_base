@@ -60,6 +60,7 @@ class House:
 class Human:
 
     def __init__(self, name):
+        self.random_act_list = []
         self.name = name
         self.fullness = 30
         self.happiness = 100
@@ -82,6 +83,10 @@ class Human:
         else:
             cprint(f'{self.name} нет еды!', color='red')
 
+    def sleep(self):
+        cprint(f'{self.name} поспал.', color='yellow')
+        self.fullness -= 10
+
     def is_alive(self):
         if self.fullness <= 0 or self.happiness < 10:
             cprint(f'{self.name} умер!', color='red')
@@ -89,15 +94,18 @@ class Human:
         else:
             return True
 
-    def act(self):
+    def act(self, random_choice_act=True):
         if self.home.level_mess >= 90:
             self.happiness -= 10
         else:
             self.happiness -= 5
 
+        self.random_act_list = [self.eat, self.sleep]
         if self.fullness <= 10:
             self.eat()
             return True
+        elif random_choice_act:
+            choice(self.random_act_list)()
         else:
             return False
 
@@ -119,49 +127,20 @@ class Husband(Human):
         self.happiness += 20
         self.fullness -= 10
 
-    def act(self):
-        # TODO: вооооо, началось))
-        #  см. TOD0 ниже.
-
-        # Принцип понятен, но как правильно реализовать его здесь не совсем понятно. Должно выполняться только одно
-        # действие. Есть последовательность условий для выполнения того или иного действия. Как то же надо переносить
-        # информацию о том выполнилось ли действие в родительском классе в дочерний класс.
-        # Есть идея создать два списка в одном условия, а во втором методы. И если условие выполняется, то вызывать
-        # метод соответстующий и заканчивать цикл, а если ни одно условие не выполняется то тогда рандомный выбор.
-        # Тогда можно будет в подклассах просто  добавлять в списки условия и методы другие.
-        # Я не стал реализовывать, потому что это может быть overthinking и можно запутаться при добавление в список
-        # элементов.
-
-        # TODO: ну идея неплохая. Тогда только 3 "столбица:
-        #  1. условие;
-        #  2. метод;
-        #  3. его параметры;
-        #  .
-        #  Сработало условие? вызываем метод и подставляем параметры. Пример:
-        def my_print(x, y, z, b):
-            print(x, y, z, b)
-
-        # параметры
-        params = [1, 'asdasdasd', None, False]
-        # проверка условия
-        if choice([1, 0]):
-            # вызов метода с распаковкой его параметров внутрь. Т.е. 1 подставится вместо "x", ... False вместо "b".
-            my_print(*params)
-
-
-        # TODO: Ну или вариант не overthinking. В каждом перегруженном act`е соблюдать сигнатуры.
-        #  Например в act`е Human есть return`ы с False и True. Вот и в этот, текущий метод, тоже стоит добавить
-        #  return`ы. Вдруг мы решим создать "МужКаскадер", и решим дополнить его act`ы.
-        #  .
-        #  А так идея нормальная: вернули False - значит можно что-то делать, у родителя ничего не выполнилось.
-        #  А вернули True - значит родительский act уже что-то сделал, и нам ничего делать нельзя и тоже надо вернуть False.
-        if not super().act():
+    def act(self, random_choice_act=True):
+        if not super().act(random_choice_act=False):
+            self.random_act_list += [self.gaming, self.work]
             if self.happiness <= 25:
                 self.gaming()
+                return True
             elif self.home.money <= 300:
                 self.work()
+                return True
+            elif random_choice_act:
+                choice(self.random_act_list)()
+                return True
             else:
-                choice([self.eat, self.gaming, self.work])()
+                return False
 
 
 class Wife(Human):
@@ -198,16 +177,23 @@ class Wife(Human):
         else:
             cprint(f'Дома чисто!', color='red')
 
-    def act(self):
-        if not super().act():
+    def act(self, random_choice_act=True):
+        if not super().act(random_choice_act=False):
+            self.random_act_list += [self.shopping, self.buy_fur_coat]
             if self.home.food <= 60:
                 self.shopping()
+                return True
             elif self.happiness <= 25:
                 self.buy_fur_coat()
+                return True
             elif self.home.level_mess >= 110:
                 self.clean_house()
+                return True
+            elif random_choice_act:
+                choice(self.random_act_list)()
+                return True
             else:
-                choice([self.eat, self.shopping, self.buy_fur_coat])()
+                return False
 
 
 home = House()
@@ -236,7 +222,6 @@ cprint(f'За год куплено шуб: {masha.total_coat}.', color='magenta
 
 #  Наша задача не просто сделать классы Муж и Жена, а сделать эти классы так, чтобы в случае чего от них можно было
 #  наследоваться, а не копировать код из них создавая подклассы МужКаскадер или ДепрессивнаяЖена.
-#  .
 #  Помните мы изучали в 6ом модуле "принцип разделения ответственности"? Есть и другие принципы, аббревиатура: S.O.L.I.D.
 #  S - single responsibility (единство ответственности)
 #  O - open|close (принцип открытости/закрытости)
@@ -270,3 +255,18 @@ cprint(f'За год куплено шуб: {masha.total_coat}.', color='magenta
 #  И это будет очень муторно. Поэтому мы лучше сделаем is_alive, который будет конкретно на этом специализироваться,
 #  а act вообще будет без return.
 
+# # ну идея неплохая. Тогда только 3 "столбица:
+#         #  1. условие;
+#         #  2. метод;
+#         #  3. его параметры;
+#         #  .
+#         #  Сработало условие? вызываем метод и подставляем параметры. Пример:
+#         def my_print(x, y, z, b):
+#             print(x, y, z, b)
+#
+#         # параметры
+#         params = [1, 'asdasdasd', None, False]
+#         # проверка условия
+#         if choice([1, 0]):
+#             # вызов метода с распаковкой его параметров внутрь. Т.е. 1 подставится вместо "x", ... False вместо "b".
+#             my_print(*params)

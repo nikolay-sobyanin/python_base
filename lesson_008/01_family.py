@@ -103,11 +103,15 @@ class Human:
         self.random_act_list = [self.eat, self.sleep]
         if self.fullness <= 10:
             self.eat()
+            # TODO: тут return
             return True
         elif random_choice_act:
             choice(self.random_act_list)()
         else:
+            # TODO: тут return
             return False
+
+        # TODO: а что вернет elif посередине?
 
 
 class Husband(Human):
@@ -141,6 +145,13 @@ class Husband(Human):
                 return True
             else:
                 return False
+
+            # TODO: лучше 1 раз тут написать return True
+
+        # TODO: тут тоже что-то придется написать.
+
+        # TODO: вообщем идея с "self.random_act_list" нам усложняет жизнь. Я бы act не стал делать у родителей.
+        #  Начинает геморой с этими return`ами. В общем, из-за одного eat у Human нам приходится штамповать return И if
 
 
 class Wife(Human):
@@ -194,6 +205,10 @@ class Wife(Human):
                 return True
             else:
                 return False
+
+            # TODO вынести return.
+
+        # TODO: добавить сюда return. 
 
 
 home = House()

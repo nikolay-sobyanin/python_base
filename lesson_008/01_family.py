@@ -83,10 +83,6 @@ class Human:
         else:
             cprint(f'{self.name} нет еды!', color='red')
 
-    def sleep(self):
-        cprint(f'{self.name} поспал.', color='yellow')
-        self.fullness -= 10
-
     def is_alive(self):
         if self.fullness <= 0 or self.happiness < 10:
             cprint(f'{self.name} умер!', color='red')
@@ -94,24 +90,11 @@ class Human:
         else:
             return True
 
-    def act(self, random_choice_act=True):
+    def act(self):
         if self.home.level_mess >= 90:
             self.happiness -= 10
         else:
             self.happiness -= 5
-
-        self.random_act_list = [self.eat, self.sleep]
-        if self.fullness <= 10:
-            self.eat()
-            # TODO: тут return
-            return True
-        elif random_choice_act:
-            choice(self.random_act_list)()
-        else:
-            # TODO: тут return
-            return False
-
-        # TODO: а что вернет elif посередине?
 
 
 class Husband(Human):
@@ -131,27 +114,16 @@ class Husband(Human):
         self.happiness += 20
         self.fullness -= 10
 
-    def act(self, random_choice_act=True):
-        if not super().act(random_choice_act=False):
-            self.random_act_list += [self.gaming, self.work]
-            if self.happiness <= 25:
-                self.gaming()
-                return True
-            elif self.home.money <= 300:
-                self.work()
-                return True
-            elif random_choice_act:
-                choice(self.random_act_list)()
-                return True
-            else:
-                return False
-
-            # TODO: лучше 1 раз тут написать return True
-
-        # TODO: тут тоже что-то придется написать.
-
-        # TODO: вообщем идея с "self.random_act_list" нам усложняет жизнь. Я бы act не стал делать у родителей.
-        #  Начинает геморой с этими return`ами. В общем, из-за одного eat у Human нам приходится штамповать return И if
+    def act(self):
+        super().act()
+        if self.fullness <= 10:
+            self.eat()
+        elif self.happiness <= 25:
+            self.gaming()
+        elif self.home.money <= 400:
+            self.work()
+        else:
+            choice([self.eat, self.work, self.gaming])()
 
 
 class Wife(Human):
@@ -188,27 +160,18 @@ class Wife(Human):
         else:
             cprint(f'Дома чисто!', color='red')
 
-    def act(self, random_choice_act=True):
-        if not super().act(random_choice_act=False):
-            self.random_act_list += [self.shopping, self.buy_fur_coat]
-            if self.home.food <= 60:
-                self.shopping()
-                return True
-            elif self.happiness <= 25:
-                self.buy_fur_coat()
-                return True
-            elif self.home.level_mess >= 110:
-                self.clean_house()
-                return True
-            elif random_choice_act:
-                choice(self.random_act_list)()
-                return True
-            else:
-                return False
-
-            # TODO вынести return.
-
-        # TODO: добавить сюда return. 
+    def act(self):
+        super().act()
+        if self.fullness <= 10:
+            self.eat()
+        elif self.home.food <= 60:
+            self.shopping()
+        elif self.happiness <= 25:
+            self.buy_fur_coat()
+        elif self.home.level_mess >= 110:
+            self.clean_house()
+        else:
+            choice([self.eat, self.shopping, self.buy_fur_coat])()
 
 
 home = House()
@@ -217,7 +180,7 @@ masha = Wife(name='Маша')
 serge.settle_in_house(house=home)
 masha.settle_in_house(house=home)
 
-for day in range(365):
+for day in range(366):
     print()
     cprint(f'================== День {day} ==================', color='white')
     if not serge.is_alive() or not masha.is_alive():

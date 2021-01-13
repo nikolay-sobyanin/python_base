@@ -49,6 +49,7 @@ class House:
         self.money = 100
         self.food = 50
         self.level_mess = 0
+        self.cat_food = 0
 
     def __str__(self):
         return f'В доме денег {self.money}, еды {self.food}, уровень грязи {self.level_mess}.'
@@ -60,7 +61,6 @@ class House:
 class Human:
 
     def __init__(self, name):
-        self.random_act_list = []
         self.name = name
         self.fullness = 30
         self.happiness = 100
@@ -90,6 +90,12 @@ class Human:
         else:
             return True
 
+    def pick_up_cat(self, name_cat):
+        new_cat = Cat(name=name_cat)
+        new_cat.home = self.home
+        cprint(f'{self.name} подобрал кота {new_cat.name}', color='cyan')
+        return new_cat
+
     def act(self):
         if self.home.level_mess >= 90:
             self.happiness -= 10
@@ -114,6 +120,11 @@ class Husband(Human):
         self.happiness += 20
         self.fullness -= 10
 
+    def caress_cat(self):
+        cprint(f'{self.name} гладила кота.', color='yellow')
+        self.happiness += 5
+        self.fullness -= 10
+
     def act(self):
         super().act()
         if self.fullness <= 10:
@@ -123,7 +134,7 @@ class Husband(Human):
         elif self.home.money <= 400:
             self.work()
         else:
-            choice([self.eat, self.work, self.gaming])()
+            choice([self.eat, self.work, self.gaming, self.caress_cat])()
 
 
 class Wife(Human):
@@ -160,6 +171,19 @@ class Wife(Human):
         else:
             cprint(f'Дома чисто!', color='red')
 
+    def buy_cat_food(self):
+        if self.home.money >= 20:
+            cprint(f'{self.name} сходила в магазин за едой для кота.', color='yellow')
+            self.home.money -= 20
+            self.home.cat_food += 20
+        else:
+            cprint(f'Денег на еду коту нет!', color='red')
+
+    def caress_cat(self):
+        cprint(f'{self.name} гладила кота.', color='yellow')
+        self.happiness += 5
+        self.fullness -= 10
+
     def act(self):
         super().act()
         if self.fullness <= 10:
@@ -168,10 +192,55 @@ class Wife(Human):
             self.shopping()
         elif self.happiness <= 25:
             self.buy_fur_coat()
+        elif self.home.cat_food <= 20:
+            self.buy_cat_food()
         elif self.home.level_mess >= 110:
             self.clean_house()
         else:
-            choice([self.eat, self.shopping, self.buy_fur_coat])()
+            choice([self.eat, self.shopping, self.buy_fur_coat, self.caress_cat])()
+
+
+class Cat:
+
+    def __init__(self, name):
+        self.name = name
+        self.fullness = 30
+        self.home = None
+        self.total_cat_eat = 0
+
+    def __str__(self):
+        return f'Я кот {self.name}. Сытость {self.fullness} ед.'
+
+    def is_alive(self):
+        if self.fullness <= 0:
+            cprint(f'Кот {self.name} умер!', color='red')
+            return False
+        else:
+            return True
+
+    def eat(self):
+        if self.home.cat_food >= 10:
+            cprint(f'Кот {self.name} поел.', color='yellow')
+            self.fullness += 20
+            self.home.cat_food -= 10
+            self.total_cat_eat += 10
+        else:
+            cprint(f'Для кота {self.name} нет еды!', color='red')
+
+    def sleep(self):
+        cprint(f'{self.name} поспал.', color='yellow')
+        self.fullness -= 10
+
+    def soil(self):
+        cprint(f'{self.name} дерет обои.', color='yellow')
+        self.home.level_mess += 5
+        self.fullness -= 10
+
+    def act(self):
+        if self.fullness <= 20:
+            self.eat()
+        else:
+            choice([self.sleep, self.soil])()
 
 
 home = House()
@@ -179,24 +248,29 @@ serge = Husband(name='Сережа')
 masha = Wife(name='Маша')
 serge.settle_in_house(house=home)
 masha.settle_in_house(house=home)
+cat = serge.pick_up_cat(name_cat='Барсик')
+
 
 for day in range(366):
     print()
     cprint(f'================== День {day} ==================', color='white')
-    if not serge.is_alive() or not masha.is_alive():
+    if not (serge.is_alive() or masha.is_alive() or cat.is_alive()):
         break
     serge.act()
     masha.act()
+    cat.act()
     home.pollute_house()
     cprint('----------------- Показатели -----------------', color='blue')
     cprint(serge, color='cyan')
     cprint(masha, color='cyan')
+    cprint(cat, color='cyan')
     cprint(home, color='cyan')
 
 print()
 cprint(f'За год заработано денег: {serge.total_money}.', color='magenta')
 cprint(f'За год съедено еды: {serge.total_eat + masha.total_eat}.', color='magenta')
 cprint(f'За год куплено шуб: {masha.total_coat}.', color='magenta')
+cprint(f'За год кот съел еды: {cat.total_cat_eat}.', color='magenta')
 
 #  Наша задача не просто сделать классы Муж и Жена, а сделать эти классы так, чтобы в случае чего от них можно было
 #  наследоваться, а не копировать код из них создавая подклассы МужКаскадер или ДепрессивнаяЖена.

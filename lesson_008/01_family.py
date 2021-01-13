@@ -60,7 +60,6 @@ class House:
 class Human:
 
     def __init__(self, name):
-        self.random_act_list = []
         self.name = name
         self.fullness = 30
         self.happiness = 100
@@ -174,28 +173,61 @@ class Wife(Human):
             choice([self.eat, self.shopping, self.buy_fur_coat])()
 
 
+class Child(Human):
+
+    def __init__(self, name):
+        super().__init__(name=name)
+        self.total_coat = 0
+
+    def __str__(self):
+        return super().__str__()
+
+    def eat(self):
+        if self.home.food >= 10:
+            cprint(f'{self.name} поел.', color='yellow')
+            self.fullness += 10
+            self.home.food -= 10
+            self.total_eat += 10
+        else:
+            cprint(f'{self.name} нет еды!', color='red')
+
+    def sleep(self):
+        cprint(f'{self.name} поспал.', color='yellow')
+        self.fullness -= 10
+
+    def act(self):
+        if self.fullness <= 10:
+            self.eat()
+        else:
+            choice([self.eat, self.sleep])()
+
+
 home = House()
 serge = Husband(name='Сережа')
 masha = Wife(name='Маша')
+petya = Child(name='Петя')
 serge.settle_in_house(house=home)
 masha.settle_in_house(house=home)
+petya.settle_in_house(house=home)
 
 for day in range(366):
     print()
     cprint(f'================== День {day} ==================', color='white')
-    if not serge.is_alive() or not masha.is_alive():
+    if not (serge.is_alive() or masha.is_alive() or petya.is_alive()):
         break
     serge.act()
     masha.act()
+    petya.act()
     home.pollute_house()
     cprint('----------------- Показатели -----------------', color='blue')
     cprint(serge, color='cyan')
     cprint(masha, color='cyan')
+    cprint(petya, color='cyan')
     cprint(home, color='cyan')
 
 print()
 cprint(f'За год заработано денег: {serge.total_money}.', color='magenta')
-cprint(f'За год съедено еды: {serge.total_eat + masha.total_eat}.', color='magenta')
+cprint(f'За год съедено еды: {serge.total_eat + masha.total_eat + petya.total_eat}.', color='magenta')
 cprint(f'За год куплено шуб: {masha.total_coat}.', color='magenta')
 
 #  Наша задача не просто сделать классы Муж и Жена, а сделать эти классы так, чтобы в случае чего от них можно было

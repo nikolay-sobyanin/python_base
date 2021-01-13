@@ -59,8 +59,9 @@ class House:
 
 class Human:
 
-    def __init__(self, name):
+    def __init__(self, name, voracity):
         self.name = name
+        self.voracity = voracity
         self.fullness = 30
         self.happiness = 100
         self.home = None
@@ -74,11 +75,11 @@ class Human:
         cprint(f'{self.name} вьехал в дом', color='green')
 
     def eat(self):
-        if self.home.food >= 30:
+        if self.home.food >= self.voracity:
             cprint(f'{self.name} поел.', color='yellow')
-            self.fullness += 30
-            self.home.food -= 30
-            self.total_eat += 30
+            self.fullness += self.voracity
+            self.home.food -= self.voracity
+            self.total_eat += self.voracity
         else:
             cprint(f'{self.name} нет еды!', color='red')
 
@@ -99,7 +100,7 @@ class Human:
 class Husband(Human):
 
     def __init__(self, name):
-        super().__init__(name=name)
+        super().__init__(name=name, voracity=30)
         self.total_money = 0
 
     def work(self):
@@ -128,7 +129,7 @@ class Husband(Human):
 class Wife(Human):
 
     def __init__(self, name):
-        super().__init__(name=name)
+        super().__init__(name=name, voracity=30)
         self.total_coat = 0
 
     def shopping(self):
@@ -176,21 +177,8 @@ class Wife(Human):
 class Child(Human):
 
     def __init__(self, name):
-        super().__init__(name=name)
+        super().__init__(name=name, voracity=10)
         self.total_coat = 0
-
-    # TODO: закомментировал метод. Почему все равно работает?
-    # def __str__(self):
-    #     return super().__str__()
-
-    def eat(self):
-        if self.home.food >= 10:
-            cprint(f'{self.name} поел.', color='yellow')
-            self.fullness += 10
-            self.home.food -= 10
-            self.total_eat += 10
-        else:
-            cprint(f'{self.name} нет еды!', color='red')
 
     def sleep(self):
         cprint(f'{self.name} поспал.', color='yellow')
@@ -202,18 +190,6 @@ class Child(Human):
         else:
             choice([self.eat, self.sleep])()
 
-# TODO: Общий класс с Child.
-#  Надо изменить Родительский класс таким образом, чтобы его конструктор принимал параметр "прожорливость", т.о. мы будем
-#  иметь возможность установить максимальной размер съедаемой за раз порции. Внутри же конструкторов Муж/Жена/Ребенок
-#  когда мы будем вызывать super() класса-Родителя, у нас будет жестко, числом, задаваться параметр "прожорливости".
-#  .
-#  Т.о. конструктор: РодительскиКласс(..., прожоливость). А классы-наследники такого параметра не имеют.
-#  .
-#  В итоге, метод eat() будет только у Родительского класса. Этот метод будет использовать поле "прожорливость" у каждого объекта,
-#  Все классы-наследники будут устаналивать это поле, когда будут вызывать конструктор Human в своем собственному конструкторе.
-#  Обратите внимание, сделать Child(, прожорливость=100500) будет нельзя, т.к. Child не будет иметь параметра "прожорливость",
-#  он будет его жестко задавать в собственном конструкторе:
-#       super().__init__(..., прожоливость=10).
 
 home = House()
 serge = Husband(name='Сережа')
@@ -226,9 +202,7 @@ petya.settle_in_house(house=home)
 for day in range(366):
     print()
     cprint(f'================== День {day} ==================', color='white')
-
-    # TODO: прерывать если хотя бы один умер
-    if not (serge.is_alive() or masha.is_alive() or petya.is_alive()):
+    if not serge.is_alive() or not masha.is_alive() or not petya.is_alive():
         break
     serge.act()
     masha.act()

@@ -42,30 +42,62 @@ from random import choice
 #
 # Подвести итоги жизни за год: сколько было заработано денег, сколько сьедено еды, сколько куплено шуб.
 
+CAT_FOOD = 'cat_food'
+HUMAN_FOOD = 'human_food'
+
 
 class House:
 
     def __init__(self):
         self.money = 100
-        self.food = 50
         self.level_mess = 0
-        self.cat_food = 0
+        self.fridge = {
+            CAT_FOOD: 30,
+            HUMAN_FOOD: 60
+        }
 
     def __str__(self):
-        return f'В доме денег {self.money}, еды {self.food}, уровень грязи {self.level_mess}.'
+        return f'В доме денег {self.money}, еды {self.fridge[HUMAN_FOOD]}, еды кота для {self.fridge[CAT_FOOD]}, ' \
+               f'уровень грязи {self.level_mess}.'
 
     def pollute_house(self):
         self.level_mess += 5
 
 
-class Human:
+class General:
+
+    def __init__(self, name, kind_food, voracity):
+        self.name = name
+        self.kind_food = kind_food
+        self.voracity = voracity
+        self.home = None
+        self.fullness = 0
+        self.total_eat = 0
+
+    def is_alive(self):
+        if self.fullness <= 0:
+            cprint(f'{self.name} умер!', color='red')
+            return False
+        else:
+            return True
+
+    def eat(self):
+        if self.home.fridge[self.kind_food] >= self.voracity:
+            cprint(f'{self.name} поел.', color='yellow')
+            self.fullness += self.voracity
+            self.home.fridge[self.kind_food] -= self.voracity
+            self.total_eat += self.voracity
+        else:
+            cprint(f'{self.name} нет еды!', color='red')
+            self.fullness -= self.voracity * 0.5   # Еды нет, поэтому в режиме сбережения энергии
+
+
+class Human(General):
 
     def __init__(self, name):
-        self.name = name
+        super().__init__(name=name, kind_food=HUMAN_FOOD, voracity=30)
         self.fullness = 30
         self.happiness = 100
-        self.home = None
-        self.total_eat = 0
 
     def __str__(self):
         return f'Я {self.name}. Сытость {self.fullness} ед., счастья {self.happiness} ед.'
@@ -74,21 +106,15 @@ class Human:
         self.home = house
         cprint(f'{self.name} вьехал в дом', color='green')
 
-    def eat(self):
-        if self.home.food >= 30:
-            cprint(f'{self.name} поел.', color='yellow')
-            self.fullness += 30
-            self.home.food -= 30
-            self.total_eat += 30
-        else:
-            cprint(f'{self.name} нет еды!', color='red')
-
     def is_alive(self):
-        if self.fullness <= 0 or self.happiness < 10:
-            cprint(f'{self.name} умер!', color='red')
-            return False
+        if super().is_alive():
+            if self.happiness < 10:
+                cprint(f'{self.name} умер!', color='red')
+                return False
+            else:
+                return True
         else:
-            return True
+            return False
 
     def pick_up_cat(self, name_cat):
         new_cat = Cat(name=name_cat)
@@ -146,7 +172,7 @@ class Wife(Human):
     def shopping(self):
         if self.home.money >= 60:
             cprint(f'{self.name} сходила в магазин за едой.', color='yellow')
-            self.home.food += 60
+            self.home.fridge[HUMAN_FOOD] += 60
             self.home.money -= 60
             self.fullness -= 10
         else:
@@ -175,7 +201,7 @@ class Wife(Human):
         if self.home.money >= 20:
             cprint(f'{self.name} сходила в магазин за едой для кота.', color='yellow')
             self.home.money -= 20
-            self.home.cat_food += 20
+            self.home.fridge[CAT_FOOD] += 20
         else:
             cprint(f'Денег на еду коту нет!', color='red')
 
@@ -188,11 +214,11 @@ class Wife(Human):
         super().act()
         if self.fullness <= 10:
             self.eat()
-        elif self.home.food <= 60:
+        elif self.home.fridge[HUMAN_FOOD] <= 60:
             self.shopping()
         elif self.happiness <= 25:
             self.buy_fur_coat()
-        elif self.home.cat_food <= 20:
+        elif self.home.fridge[CAT_FOOD] <= 20:
             self.buy_cat_food()
         elif self.home.level_mess >= 110:
             self.clean_house()
@@ -200,53 +226,14 @@ class Wife(Human):
             choice([self.eat, self.shopping, self.buy_fur_coat, self.caress_cat])()
 
 
-# TODO: Общий класс с Cat.
-#  Вообще с котом вы способны на большее. Посмотрите сколько методов пришлось для Кота скопировать. Почему? Потому что
-#  у него не общего класс с Мужем, Женой и Ребенком. Почему? Потому у них общий родитель - Human, а кот это не человек.
-#  Как быть? Сделать еще один класс. Как вы думаете что между ними общего, если на секундочку
-#  забыть, что они живут в одном доме. Что общего между кошкой, собакой, Человеком?
-#  Какие методы можно было вынести в этот класс? (их немного, но вынести можно)
-#  .
-#  Примечание: чтобы проделать такой фокус, в классе Дом лучше вместо полей "кошачья еда" и "человеческая еда"
-#  ввести поле "холодильник", которое может быть словарем с 2 ключами: "кошачья еда" и ...;
-#  Так же лучше создать глобальные, вне классов, константы CAT_FOOD = 'cat_food' и ... Что будут играть роль ключей в этом
-#  холодильнике. При создании объекта Cat конструктор класса будет вызывать конструктор Общего класса, который будет
-#  принимать на вход "тип пищи", который кушает создаваемый объект.
-#  .
-#  А в методе eat() просто будет по умолчанию брать "тип пищи" из холодильника и отниматься от нужной пищи.
-#  .
-#  Примечание: помните, что в общем классе мы можем реализовать метод, допустим, is_alive(), который будет проверять
-#  только уровень еды (т.к. для кошки уровень счастья не нужен). В классе кошики перегружать is_alive тогда не нужно,
-#  его достаточно. А в классе Человек, мы можем использовать is_alive родителя и дополнить его проверкой на уровень
-#  счастья.
-#  Т.е. сейчас наша главная задача при проектировании классов: сделать так, чтобы все общие части попали в классы-родителей.
-#  а классы-наследники будут наследовать общий код.
-class Cat:
+class Cat(General):
 
     def __init__(self, name):
-        self.name = name
+        super().__init__(name=name, kind_food=CAT_FOOD, voracity=10)
         self.fullness = 30
-        self.home = None
-        self.total_cat_eat = 0
 
     def __str__(self):
         return f'Я кот {self.name}. Сытость {self.fullness} ед.'
-
-    def is_alive(self):
-        if self.fullness <= 0:
-            cprint(f'Кот {self.name} умер!', color='red')
-            return False
-        else:
-            return True
-
-    def eat(self):
-        if self.home.cat_food >= 10:
-            cprint(f'Кот {self.name} поел.', color='yellow')
-            self.fullness += 20
-            self.home.cat_food -= 10
-            self.total_cat_eat += 10
-        else:
-            cprint(f'Для кота {self.name} нет еды!', color='red')
 
     def sleep(self):
         cprint(f'{self.name} поспал.', color='yellow')
@@ -275,7 +262,7 @@ cat = serge.pick_up_cat(name_cat='Барсик')
 for day in range(366):
     print()
     cprint(f'================== День {day} ==================', color='white')
-    if not (serge.is_alive() or masha.is_alive() or cat.is_alive()):
+    if not serge.is_alive() or not masha.is_alive() or not cat.is_alive():
         break
     serge.act()
     masha.act()
@@ -291,7 +278,7 @@ print()
 cprint(f'За год заработано денег: {serge.total_money}.', color='magenta')
 cprint(f'За год съедено еды: {serge.total_eat + masha.total_eat}.', color='magenta')
 cprint(f'За год куплено шуб: {masha.total_coat}.', color='magenta')
-cprint(f'За год кот съел еды: {cat.total_cat_eat}.', color='magenta')
+cprint(f'За год кот съел еды: {cat.total_eat}.', color='magenta')
 
 #  Наша задача не просто сделать классы Муж и Жена, а сделать эти классы так, чтобы в случае чего от них можно было
 #  наследоваться, а не копировать код из них создавая подклассы МужКаскадер или ДепрессивнаяЖена.

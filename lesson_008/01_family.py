@@ -180,6 +180,12 @@ class Child(Human):
         super().__init__(name=name, voracity=10)
         self.total_coat = 0
 
+    # TODO: закомментировал метод. Почему все равно работает?
+    # def __str__(self):
+    #     return super().__str__()
+
+    # TODO: есть понимание "почему" работает и __str__ удалили?
+
     def sleep(self):
         cprint(f'{self.name} поспал.', color='yellow')
         self.fullness -= 10

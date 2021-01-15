@@ -91,6 +91,8 @@ class General:
             cprint(f'{self.name} нет еды!', color='red')
             self.fullness -= self.voracity * 0.5   # Еды нет, поэтому в режиме сбережения энергии
 
+            # TODO: ну, неплохо) логично.
+
 
 class Human(General):
 
@@ -107,6 +109,7 @@ class Human(General):
         cprint(f'{self.name} вьехал в дом', color='green')
 
     def is_alive(self):
+        # TODO: подумать как упростить. elif в студию!
         if super().is_alive():
             if self.happiness < 10:
                 cprint(f'{self.name} умер!', color='red')

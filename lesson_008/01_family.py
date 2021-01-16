@@ -76,7 +76,7 @@ class General:
 
     def is_alive(self):
         if self.fullness <= 0:
-            cprint(f'{self.name} умер!', color='red')
+            cprint(f'{self.name} умер из-за голода!', color='red')
             return False
         else:
             return True
@@ -91,13 +91,11 @@ class General:
             cprint(f'{self.name} нет еды!', color='red')
             self.fullness -= self.voracity * 0.5   # Еды нет, поэтому в режиме сбережения энергии
 
-            # TODO: ну, неплохо) логично.
-
 
 class Human(General):
 
-    def __init__(self, name):
-        super().__init__(name=name, kind_food=HUMAN_FOOD, voracity=30)
+    def __init__(self, name, voracity):
+        super().__init__(name=name, kind_food=HUMAN_FOOD, voracity=voracity)
         self.fullness = 30
         self.happiness = 100
 
@@ -109,15 +107,13 @@ class Human(General):
         cprint(f'{self.name} вьехал в дом', color='green')
 
     def is_alive(self):
-        # TODO: подумать как упростить. elif в студию!
-        if super().is_alive():
-            if self.happiness < 10:
-                cprint(f'{self.name} умер!', color='red')
-                return False
-            else:
-                return True
-        else:
+        if not super().is_alive():
             return False
+        elif self.happiness < 10:
+            cprint(f'{self.name} умер из-за депрессии!', color='red')
+            return False
+        else:
+            return True
 
     def pick_up_cat(self, name_cat):
         new_cat = Cat(name=name_cat)
@@ -135,7 +131,7 @@ class Human(General):
 class Husband(Human):
 
     def __init__(self, name):
-        super().__init__(name=name)
+        super().__init__(name=name, voracity=30)
         self.total_money = 0
 
     def work(self):
@@ -160,7 +156,7 @@ class Husband(Human):
             self.eat()
         elif self.happiness <= 25:
             self.gaming()
-        elif self.home.money <= 400:
+        elif self.home.money <= 600:
             self.work()
         else:
             choice([self.eat, self.work, self.gaming, self.caress_cat])()
@@ -169,7 +165,7 @@ class Husband(Human):
 class Wife(Human):
 
     def __init__(self, name):
-        super().__init__(name=name)
+        super().__init__(name=name, voracity=30)
         self.total_coat = 0
 
     def shopping(self):
@@ -260,12 +256,6 @@ class Child(Human):
         super().__init__(name=name, voracity=10)
         self.total_coat = 0
 
-    # TODO: закомментировал метод. Почему все равно работает?
-    # def __str__(self):
-    #     return super().__str__()
-
-    # TODO: есть понимание "почему" работает и __str__ удалили?
-
     def sleep(self):
         cprint(f'{self.name} поспал.', color='yellow')
         self.fullness -= 10
@@ -283,15 +273,13 @@ masha = Wife(name='Маша')
 petya = Child(name='Петя')
 serge.settle_in_house(house=home)
 masha.settle_in_house(house=home)
-cat = serge.pick_up_cat(name_cat='Барсик')
-
 petya.settle_in_house(house=home)
+cat = serge.pick_up_cat(name_cat='Барсик')
 
 for day in range(366):
     print()
     cprint(f'================== День {day} ==================', color='white')
-    if not serge.is_alive() or not masha.is_alive() or not cat.is_alive():
-    if not serge.is_alive() or not masha.is_alive() or not petya.is_alive():
+    if not serge.is_alive() or not masha.is_alive() or not cat.is_alive() or not petya.is_alive():
         break
     serge.act()
     masha.act()

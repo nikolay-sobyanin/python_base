@@ -42,30 +42,64 @@ from random import choice
 #
 # Подвести итоги жизни за год: сколько было заработано денег, сколько сьедено еды, сколько куплено шуб.
 
+CAT_FOOD = 'cat_food'
+HUMAN_FOOD = 'human_food'
+
 
 class House:
 
     def __init__(self):
         self.money = 100
-        self.food = 50
         self.level_mess = 0
+        self.fridge = {
+            CAT_FOOD: 30,
+            HUMAN_FOOD: 60
+        }
 
     def __str__(self):
-        return f'В доме денег {self.money}, еды {self.food}, уровень грязи {self.level_mess}.'
+        return f'В доме денег {self.money}, еды {self.fridge[HUMAN_FOOD]}, еды кота для {self.fridge[CAT_FOOD]}, ' \
+               f'уровень грязи {self.level_mess}.'
 
     def pollute_house(self):
         self.level_mess += 5
 
 
-class Human:
+class General:
 
-    def __init__(self, name, voracity):
+    def __init__(self, name, kind_food, voracity):
         self.name = name
+        self.kind_food = kind_food
         self.voracity = voracity
+        self.home = None
+        self.fullness = 0
+        self.total_eat = 0
+
+    def is_alive(self):
+        if self.fullness <= 0:
+            cprint(f'{self.name} умер!', color='red')
+            return False
+        else:
+            return True
+
+    def eat(self):
+        if self.home.fridge[self.kind_food] >= self.voracity:
+            cprint(f'{self.name} поел.', color='yellow')
+            self.fullness += self.voracity
+            self.home.fridge[self.kind_food] -= self.voracity
+            self.total_eat += self.voracity
+        else:
+            cprint(f'{self.name} нет еды!', color='red')
+            self.fullness -= self.voracity * 0.5   # Еды нет, поэтому в режиме сбережения энергии
+
+            # TODO: ну, неплохо) логично.
+
+
+class Human(General):
+
+    def __init__(self, name):
+        super().__init__(name=name, kind_food=HUMAN_FOOD, voracity=30)
         self.fullness = 30
         self.happiness = 100
-        self.home = None
-        self.total_eat = 0
 
     def __str__(self):
         return f'Я {self.name}. Сытость {self.fullness} ед., счастья {self.happiness} ед.'
@@ -74,21 +108,22 @@ class Human:
         self.home = house
         cprint(f'{self.name} вьехал в дом', color='green')
 
-    def eat(self):
-        if self.home.food >= self.voracity:
-            cprint(f'{self.name} поел.', color='yellow')
-            self.fullness += self.voracity
-            self.home.food -= self.voracity
-            self.total_eat += self.voracity
-        else:
-            cprint(f'{self.name} нет еды!', color='red')
-
     def is_alive(self):
-        if self.fullness <= 0 or self.happiness < 10:
-            cprint(f'{self.name} умер!', color='red')
-            return False
+        # TODO: подумать как упростить. elif в студию!
+        if super().is_alive():
+            if self.happiness < 10:
+                cprint(f'{self.name} умер!', color='red')
+                return False
+            else:
+                return True
         else:
-            return True
+            return False
+
+    def pick_up_cat(self, name_cat):
+        new_cat = Cat(name=name_cat)
+        new_cat.home = self.home
+        cprint(f'{self.name} подобрал кота {new_cat.name}', color='cyan')
+        return new_cat
 
     def act(self):
         if self.home.level_mess >= 90:
@@ -100,7 +135,7 @@ class Human:
 class Husband(Human):
 
     def __init__(self, name):
-        super().__init__(name=name, voracity=30)
+        super().__init__(name=name)
         self.total_money = 0
 
     def work(self):
@@ -114,6 +149,11 @@ class Husband(Human):
         self.happiness += 20
         self.fullness -= 10
 
+    def caress_cat(self):
+        cprint(f'{self.name} гладила кота.', color='yellow')
+        self.happiness += 5
+        self.fullness -= 10
+
     def act(self):
         super().act()
         if self.fullness <= 10:
@@ -123,19 +163,19 @@ class Husband(Human):
         elif self.home.money <= 400:
             self.work()
         else:
-            choice([self.eat, self.work, self.gaming])()
+            choice([self.eat, self.work, self.gaming, self.caress_cat])()
 
 
 class Wife(Human):
 
     def __init__(self, name):
-        super().__init__(name=name, voracity=30)
+        super().__init__(name=name)
         self.total_coat = 0
 
     def shopping(self):
         if self.home.money >= 60:
             cprint(f'{self.name} сходила в магазин за едой.', color='yellow')
-            self.home.food += 60
+            self.home.fridge[HUMAN_FOOD] += 60
             self.home.money -= 60
             self.fullness -= 10
         else:
@@ -160,18 +200,58 @@ class Wife(Human):
         else:
             cprint(f'Дома чисто!', color='red')
 
+    def buy_cat_food(self):
+        if self.home.money >= 20:
+            cprint(f'{self.name} сходила в магазин за едой для кота.', color='yellow')
+            self.home.money -= 20
+            self.home.fridge[CAT_FOOD] += 20
+        else:
+            cprint(f'Денег на еду коту нет!', color='red')
+
+    def caress_cat(self):
+        cprint(f'{self.name} гладила кота.', color='yellow')
+        self.happiness += 5
+        self.fullness -= 10
+
     def act(self):
         super().act()
         if self.fullness <= 10:
             self.eat()
-        elif self.home.food <= 60:
+        elif self.home.fridge[HUMAN_FOOD] <= 60:
             self.shopping()
         elif self.happiness <= 25:
             self.buy_fur_coat()
+        elif self.home.fridge[CAT_FOOD] <= 20:
+            self.buy_cat_food()
         elif self.home.level_mess >= 110:
             self.clean_house()
         else:
-            choice([self.eat, self.shopping, self.buy_fur_coat])()
+            choice([self.eat, self.shopping, self.buy_fur_coat, self.caress_cat])()
+
+
+class Cat(General):
+
+    def __init__(self, name):
+        super().__init__(name=name, kind_food=CAT_FOOD, voracity=10)
+        self.fullness = 30
+
+    def __str__(self):
+        return f'Я кот {self.name}. Сытость {self.fullness} ед.'
+
+    def sleep(self):
+        cprint(f'{self.name} поспал.', color='yellow')
+        self.fullness -= 10
+
+    def soil(self):
+        cprint(f'{self.name} дерет обои.', color='yellow')
+        self.home.level_mess += 5
+        self.fullness -= 10
+
+    def act(self):
+        if self.fullness <= 20:
+            self.eat()
+        else:
+            choice([self.sleep, self.soil])()
 
 
 class Child(Human):
@@ -203,27 +283,33 @@ masha = Wife(name='Маша')
 petya = Child(name='Петя')
 serge.settle_in_house(house=home)
 masha.settle_in_house(house=home)
+cat = serge.pick_up_cat(name_cat='Барсик')
+
 petya.settle_in_house(house=home)
 
 for day in range(366):
     print()
     cprint(f'================== День {day} ==================', color='white')
+    if not serge.is_alive() or not masha.is_alive() or not cat.is_alive():
     if not serge.is_alive() or not masha.is_alive() or not petya.is_alive():
         break
     serge.act()
     masha.act()
     petya.act()
+    cat.act()
     home.pollute_house()
     cprint('----------------- Показатели -----------------', color='blue')
     cprint(serge, color='cyan')
     cprint(masha, color='cyan')
     cprint(petya, color='cyan')
+    cprint(cat, color='cyan')
     cprint(home, color='cyan')
 
 print()
 cprint(f'За год заработано денег: {serge.total_money}.', color='magenta')
 cprint(f'За год съедено еды: {serge.total_eat + masha.total_eat + petya.total_eat}.', color='magenta')
 cprint(f'За год куплено шуб: {masha.total_coat}.', color='magenta')
+cprint(f'За год кот съел еды: {cat.total_eat}.', color='magenta')
 
 #  Наша задача не просто сделать классы Муж и Жена, а сделать эти классы так, чтобы в случае чего от них можно было
 #  наследоваться, а не копировать код из них создавая подклассы МужКаскадер или ДепрессивнаяЖена.

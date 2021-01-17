@@ -224,7 +224,11 @@ class Wife(Human):
         else:
             choice([self.eat, self.shopping, self.buy_fur_coat, self.caress_cat])()
 
-
+# TODO: не хватает еще одного параметра - коэффициент насыщения.
+#  Кот съедает 10 единиц, а насыщается на 20.
+#  Человек съедает 10 единиц и насыщается на 10.
+#  .
+#  Параллельно с типом еды пробросьте "коэф.насыщения", которые в итоге должен использовать в eat().
 class Cat(General):
 
     def __init__(self, name):
@@ -279,6 +283,11 @@ cat = serge.pick_up_cat(name_cat='Барсик')
 for day in range(366):
     print()
     cprint(f'================== День {day} ==================', color='white')
+
+    # TODO: давайте запустим цикл по кортежу из всех участников. И для каждого будем вызывать 3 вещи: act(),
+    #  is_alive и cprint(). При этом будет удобно ввести флаг f_success = True. А после каждого act() выполнять
+    #  "f_success &= ...".
+    #  Тогда мы сможем использовать флаг f_success чтобы прервать основной цикл, если кто-то же умрет.
     if not serge.is_alive() or not masha.is_alive() or not cat.is_alive() or not petya.is_alive():
         break
     serge.act()

@@ -66,10 +66,11 @@ class House:
 
 class General:
 
-    def __init__(self, name, kind_food, voracity):
+    def __init__(self, name, kind_food, voracity, coef_fullness):
         self.name = name
         self.kind_food = kind_food
         self.voracity = voracity
+        self.coef_fullness = coef_fullness
         self.home = None
         self.fullness = 0
         self.total_eat = 0
@@ -84,18 +85,18 @@ class General:
     def eat(self):
         if self.home.fridge[self.kind_food] >= self.voracity:
             cprint(f'{self.name} поел.', color='yellow')
-            self.fullness += self.voracity
+            self.fullness += self.voracity * self.coef_fullness
             self.home.fridge[self.kind_food] -= self.voracity
             self.total_eat += self.voracity
         else:
             cprint(f'{self.name} нет еды!', color='red')
-            self.fullness -= self.voracity * 0.5   # Еды нет, поэтому в режиме сбережения энергии
+            self.fullness -= self.voracity * self.coef_fullness * 0.5   # Еды нет, поэтому в режиме сбережения энергии
 
 
 class Human(General):
 
     def __init__(self, name, voracity):
-        super().__init__(name=name, kind_food=HUMAN_FOOD, voracity=voracity)
+        super().__init__(name=name, kind_food=HUMAN_FOOD, voracity=voracity, coef_fullness=1)
         self.fullness = 30
         self.happiness = 100
 
@@ -156,7 +157,7 @@ class Husband(Human):
             self.eat()
         elif self.happiness <= 25:
             self.gaming()
-        elif self.home.money <= 600:
+        elif self.home.money <= 500:
             self.work()
         else:
             choice([self.eat, self.work, self.gaming, self.caress_cat])()
@@ -224,15 +225,11 @@ class Wife(Human):
         else:
             choice([self.eat, self.shopping, self.buy_fur_coat, self.caress_cat])()
 
-# TODO: не хватает еще одного параметра - коэффициент насыщения.
-#  Кот съедает 10 единиц, а насыщается на 20.
-#  Человек съедает 10 единиц и насыщается на 10.
-#  .
-#  Параллельно с типом еды пробросьте "коэф.насыщения", которые в итоге должен использовать в eat().
+
 class Cat(General):
 
     def __init__(self, name):
-        super().__init__(name=name, kind_food=CAT_FOOD, voracity=10)
+        super().__init__(name=name, kind_food=CAT_FOOD, voracity=10, coef_fullness=2)
         self.fullness = 30
 
     def __str__(self):
@@ -281,28 +278,20 @@ petya.settle_in_house(house=home)
 cat = serge.pick_up_cat(name_cat='Барсик')
 
 for day in range(366):
-    print()
+    print(end='\n\n')
     cprint(f'================== День {day} ==================', color='white')
-
-    # TODO: давайте запустим цикл по кортежу из всех участников. И для каждого будем вызывать 3 вещи: act(),
-    #  is_alive и cprint(). При этом будет удобно ввести флаг f_success = True. А после каждого act() выполнять
-    #  "f_success &= ...".
-    #  Тогда мы сможем использовать флаг f_success чтобы прервать основной цикл, если кто-то же умрет.
-    if not serge.is_alive() or not masha.is_alive() or not cat.is_alive() or not petya.is_alive():
-        break
-    serge.act()
-    masha.act()
-    petya.act()
-    cat.act()
+    f_success = True
+    for home_resident in (serge, masha, petya, cat):
+        home_resident.act()
+        f_success &= home_resident.is_alive()
+        cprint(home_resident, color='cyan')
+        cprint('-------------------------------------------', color='blue')
     home.pollute_house()
-    cprint('----------------- Показатели -----------------', color='blue')
-    cprint(serge, color='cyan')
-    cprint(masha, color='cyan')
-    cprint(petya, color='cyan')
-    cprint(cat, color='cyan')
     cprint(home, color='cyan')
+    if not f_success:
+        break
 
-print()
+print(end='\n\n')
 cprint(f'За год заработано денег: {serge.total_money}.', color='magenta')
 cprint(f'За год съедено еды: {serge.total_eat + masha.total_eat + petya.total_eat}.', color='magenta')
 cprint(f'За год куплено шуб: {masha.total_coat}.', color='magenta')

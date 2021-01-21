@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from termcolor import cprint
-from random import choice
-
+from random import choice, sample
 
 ######################################################## Часть первая
 #
@@ -52,8 +51,8 @@ class House:
         self.money = 100
         self.level_mess = 0
         self.fridge = {
-            CAT_FOOD: 30,
-            HUMAN_FOOD: 60
+            CAT_FOOD: 100,
+            HUMAN_FOOD: 100
         }
 
     def __str__(self):
@@ -77,20 +76,20 @@ class General:
 
     def is_alive(self):
         if self.fullness <= 0:
-            cprint(f'{self.name} умер из-за голода!', color='red')
+            # cprint(f'{self.name} умер из-за голода!', color='red')
             return False
         else:
             return True
 
     def eat(self):
         if self.home.fridge[self.kind_food] >= self.voracity:
-            cprint(f'{self.name} поел.', color='yellow')
+            # cprint(f'{self.name} поел.', color='yellow')
             self.fullness += self.voracity * self.coef_fullness
             self.home.fridge[self.kind_food] -= self.voracity
             self.total_eat += self.voracity
         else:
-            cprint(f'{self.name} нет еды!', color='red')
-            self.fullness -= self.voracity * self.coef_fullness * 0.5   # Еды нет, поэтому в режиме сбережения энергии
+            # cprint(f'{self.name} нет еды!', color='red')
+            self.fullness -= self.voracity * self.coef_fullness * 0.5  # Еды нет, поэтому в режиме сбережения энергии
 
 
 class Human(General):
@@ -105,13 +104,13 @@ class Human(General):
 
     def settle_in_house(self, house):
         self.home = house
-        cprint(f'{self.name} вьехал в дом', color='green')
+        # cprint(f'{self.name} вьехал в дом', color='green')
 
     def is_alive(self):
         if not super().is_alive():
             return False
         elif self.happiness < 10:
-            cprint(f'{self.name} умер из-за депрессии!', color='red')
+            # cprint(f'{self.name} умер из-за депрессии!', color='red')
             return False
         else:
             return True
@@ -119,7 +118,7 @@ class Human(General):
     def pick_up_cat(self, name_cat):
         new_cat = Cat(name=name_cat)
         new_cat.home = self.home
-        cprint(f'{self.name} подобрал кота {new_cat.name}', color='cyan')
+        # cprint(f'{self.name} подобрал кота {new_cat.name}', color='cyan')
         return new_cat
 
     def act(self):
@@ -131,23 +130,24 @@ class Human(General):
 
 class Husband(Human):
 
-    def __init__(self, name):
+    def __init__(self, name, salary):
         super().__init__(name=name, voracity=30)
+        self.salary = salary
         self.total_money = 0
 
     def work(self):
-        cprint(f'{self.name} сходил на работу', color='yellow')
-        self.home.money += 150
-        self.total_money += 150
+        # cprint(f'{self.name} сходил на работу', color='yellow')
+        self.home.money += self.salary
+        self.total_money += self.salary
         self.fullness -= 10
 
     def gaming(self):
-        cprint(f'{self.name} поиграл в WoT.', color='yellow')
+        # cprint(f'{self.name} поиграл в WoT.', color='yellow')
         self.happiness += 20
         self.fullness -= 10
 
     def caress_cat(self):
-        cprint(f'{self.name} гладила кота.', color='yellow')
+        # cprint(f'{self.name} гладила кота.', color='yellow')
         self.happiness += 5
         self.fullness -= 10
 
@@ -155,9 +155,9 @@ class Husband(Human):
         super().act()
         if self.fullness <= 10:
             self.eat()
-        elif self.happiness <= 25:
+        elif self.happiness <= 40:
             self.gaming()
-        elif self.home.money <= 500:
+        elif self.home.money <= 600:
             self.work()
         else:
             choice([self.eat, self.work, self.gaming, self.caress_cat])()
@@ -170,57 +170,58 @@ class Wife(Human):
         self.total_coat = 0
 
     def shopping(self):
-        if self.home.money >= 60:
-            cprint(f'{self.name} сходила в магазин за едой.', color='yellow')
-            self.home.fridge[HUMAN_FOOD] += 60
-            self.home.money -= 60
+        if self.home.money >= 70:
+            # cprint(f'{self.name} сходила в магазин за едой.', color='yellow')
+            self.home.fridge[HUMAN_FOOD] += 70
+            self.home.money -= 70
             self.fullness -= 10
-        else:
-            cprint(f'Деньги кончились!', color='red')
+        # else:
+        #     cprint(f'Деньги кончились!', color='red')
 
     def buy_fur_coat(self):
-        if self.home.money >= 400:
-            cprint(f'{self.name} купила шубу. Урааа!.', color='yellow')
+        if self.home.money >= 600:
+            # cprint(f'{self.name} купила шубу. Урааа!.', color='yellow')
             self.happiness += 60
             self.home.money -= 350
             self.fullness -= 10
             self.total_coat += 1
-        else:
-            cprint(f'Денег на шубу нет!', color='red')
+        # else:
+        #     cprint(f'Денег на шубу нет!', color='red')
 
     def clean_house(self):
         level_mess = min(100, self.home.level_mess)
         if level_mess:
-            cprint(f'{self.name} убрала дом.', color='yellow')
+            # cprint(f'{self.name} убрала дом.', color='yellow')
             self.home.level_mess -= level_mess
             self.fullness -= 10
-        else:
-            cprint(f'Дома чисто!', color='red')
+        # else:
+        #     cprint(f'Дома чисто!', color='red')
 
     def buy_cat_food(self):
-        if self.home.money >= 20:
-            cprint(f'{self.name} сходила в магазин за едой для кота.', color='yellow')
-            self.home.money -= 20
-            self.home.fridge[CAT_FOOD] += 20
-        else:
-            cprint(f'Денег на еду коту нет!', color='red')
+        if self.home.money >= 50:
+            # cprint(f'{self.name} сходила в магазин за едой для кота.', color='yellow')
+            self.home.money -= 50
+            self.home.fridge[CAT_FOOD] += 50
+            self.fullness -= 10
+        # else:
+        #     cprint(f'Денег на еду коту нет!', color='red')
 
     def caress_cat(self):
-        cprint(f'{self.name} гладила кота.', color='yellow')
+        # cprint(f'{self.name} гладила кота.', color='yellow')
         self.happiness += 5
         self.fullness -= 10
 
     def act(self):
         super().act()
-        if self.fullness <= 10:
+        if self.fullness <= 20:
             self.eat()
-        elif self.home.fridge[HUMAN_FOOD] <= 60:
-            self.shopping()
-        elif self.happiness <= 25:
+        elif self.happiness <= 40:
             self.buy_fur_coat()
-        elif self.home.fridge[CAT_FOOD] <= 20:
+        elif self.home.fridge[HUMAN_FOOD] <= 80:
+            self.shopping()
+        elif self.home.fridge[CAT_FOOD] <= 60:
             self.buy_cat_food()
-        elif self.home.level_mess >= 110:
+        elif self.home.level_mess >= 90:
             self.clean_house()
         else:
             choice([self.eat, self.shopping, self.buy_fur_coat, self.caress_cat])()
@@ -236,11 +237,11 @@ class Cat(General):
         return f'Я кот {self.name}. Сытость {self.fullness} ед.'
 
     def sleep(self):
-        cprint(f'{self.name} поспал.', color='yellow')
+        # cprint(f'{self.name} поспал.', color='yellow')
         self.fullness -= 10
 
     def soil(self):
-        cprint(f'{self.name} дерет обои.', color='yellow')
+        # cprint(f'{self.name} дерет обои.', color='yellow')
         self.home.level_mess += 5
         self.fullness -= 10
 
@@ -258,7 +259,7 @@ class Child(Human):
         self.total_coat = 0
 
     def sleep(self):
-        cprint(f'{self.name} поспал.', color='yellow')
+        # cprint(f'{self.name} поспал.', color='yellow')
         self.fullness -= 10
 
     def act(self):
@@ -268,34 +269,189 @@ class Child(Human):
             choice([self.eat, self.sleep])()
 
 
-home = House()
-serge = Husband(name='Сережа')
-masha = Wife(name='Маша')
-petya = Child(name='Петя')
-serge.settle_in_house(house=home)
-masha.settle_in_house(house=home)
-petya.settle_in_house(house=home)
-cat = serge.pick_up_cat(name_cat='Барсик')
+class Experiment:
+    """ Семья из 3-х человек (муж, жена, ребенок).
+    Определить со скольми котами сможет выжить семья при различных условиях. """
 
-for day in range(366):
-    print(end='\n\n')
-    cprint(f'================== День {day} ==================', color='white')
-    f_success = True
-    for home_resident in (serge, masha, petya, cat):
-        home_resident.act()
-        f_success &= home_resident.is_alive()
-        cprint(home_resident, color='cyan')
-        cprint('-------------------------------------------', color='blue')
-    home.pollute_house()
-    cprint(home, color='cyan')
-    if not f_success:
-        break
+    def __init__(self, salary, money_incidents, food_incidents, numb_of_cats,  numb_of_experiments):
+        self.salary = salary
+        self.money_incidents = money_incidents
+        self.food_incidents = food_incidents
+        self.numb_of_cats = numb_of_cats
+        self.numb_of_experiments = numb_of_experiments
+        self.successful_experiments = 0
+        self.weight_experiment = 0
 
-print(end='\n\n')
-cprint(f'За год заработано денег: {serge.total_money}.', color='magenta')
-cprint(f'За год съедено еды: {serge.total_eat + masha.total_eat + petya.total_eat}.', color='magenta')
-cprint(f'За год куплено шуб: {masha.total_coat}.', color='magenta')
-cprint(f'За год кот съел еды: {cat.total_eat}.', color='magenta')
+    def __str__(self):
+        return f'|{self.salary:^20}|{self.numb_of_cats:^20}|{self.food_incidents:^20}|{self.money_incidents:^20}|' \
+               f'{self.numb_of_experiments:^20}|{self.successful_experiments:^25}|{self.weight_experiment:^20.4f}|'
+
+    def __lt__(self, other):
+        if self.weight_experiment < other.weight_experiment:
+            return True
+        else:
+            return False
+
+    def give_weight(self):
+        x1 = self.successful_experiments / self.numb_of_experiments
+        x2 = self.food_incidents / 5
+        x3 = self.money_incidents / 5
+        x4 = 200 / self.salary
+        return (0.45 * x1) + (0.15 * x2) + (0.15 * x3) + (0.25 * x4)
+
+    def create_residents(self, home):
+        home_residents_list = []
+        # Отец
+        serge = Husband(name='Сережа', salary=self.salary)
+        serge.settle_in_house(house=home)
+        home_residents_list.append(serge)
+        # Жена
+        masha = Wife(name='Маша')
+        masha.settle_in_house(house=home)
+        home_residents_list.append(masha)
+        # Сын
+        petya = Child(name='Петя')
+        petya.settle_in_house(house=home)
+        home_residents_list.append(petya)
+        # Коты
+        for cat in range(self.numb_of_cats):
+            home_residents_list.append(serge.pick_up_cat(name_cat='Кот'))
+        return home_residents_list
+
+    def simulate(self):
+        for _ in range(self.numb_of_experiments):
+            successful_experiment = True
+
+            days_year = range(1, 365 + 1)
+            days_money_incidents = sorted(sample(days_year, self.money_incidents))
+            days_food_incidents = sorted(sample(days_year, self.food_incidents))
+
+            home = House()
+            home_residents_list = self.create_residents(home=home)
+            for day in days_year:
+                for home_resident in home_residents_list:
+                    home_resident.act()
+                    successful_experiment &= home_resident.is_alive()
+                home.pollute_house()
+
+                if day in days_money_incidents:
+                    home.money //= 2
+                if day in days_food_incidents:
+                    home.fridge[CAT_FOOD] //= 2
+                    home.fridge[HUMAN_FOOD] //= 2
+
+                if not successful_experiment:
+                    break
+            if successful_experiment:
+                self.successful_experiments += 1
+        self.weight_experiment = self.give_weight()
+
+
+results = []
+for food_incidents in range(6):
+    for money_incidents in range(6):
+        for salary in range(200, 401, 50):
+            experiment = Experiment(salary, money_incidents, food_incidents, numb_of_cats=3, numb_of_experiments=5)
+            experiment.simulate()
+            results.append(experiment)
+
+results.sort(reverse=True)
+print(f'{"Наилучшие эксперименты":^153}')
+print(f'{"-":-^153}')
+print(f'|{"Зарплата":^20}|{"Кол-во котов":^20}|{"Пропадание еды":^20}|{"Пропадание денег":^20}|'
+      f'{"Кол-во экспериментов":^20}|{"Удачных экспериментов":^25}|{"Вес экперимента":^20}|')
+print(f'{"-":-^153}')
+for exp in results[:6]:
+    print(exp)
+    print(f'{"-":-^153}')
+print()
+print(f'{"Наихудшие эксперименты эксперименты":^153}')
+print(f'{"-":-^153}')
+print(f'|{"Зарплата":^20}|{"Кол-во котов":^20}|{"Пропадание еды":^20}|{"Пропадание денег":^20}|'
+      f'{"Кол-во экспериментов":^20}|{"Удачных экспериментов":^25}|{"Вес экперимента":^20}|')
+print(f'{"-":-^153}')
+for exp in results[-6:]:
+    print(exp)
+    print(f'{"-":-^153}')
+
+
+# Класс Эксперимент.
+#  Сделайте небольшой класс Experiment.
+#  В конструкторе будут все поля: число людей, кошек, ЗП, частота пропадания еды и денег, число повторений эксперимента,
+#  число удачных повторений.
+#  Так же нужно будет перегрузить оператор сравнения - __lt__.
+#  Примечание: "__lt__" - метод вызывается при использовании оператора "<".
+#  Например:   "exp_1 < exp_2" по факту вызовет следующее "Experiment.__lt__(exp_1, exp_2)".
+#  Должно возвращать True или False.
+#  .
+#  Запускаем несколько вложенных циклов (по ЗП, кол-во кошек и т.п.), перебираем разные наборы
+#  параметров. Проводим симуляции, результаты сохраняем в объекты Experiment().
+#  Все результаты сохраняются в список Experiment`ов.
+#  Перегрузка оператора __lt__ позволит нам отсортировать список стандартной функцией
+#  sorted(my_list) и взять срез лучших и худших 5 примеров.
+#  .
+#  Далее, перегрузив метод __str__ у Experiment мы сможем печатать информацию об экспериментах в цикле, не
+#  зная ничего о его полях, логика будет инкапсулировано в класс Эксперимент. Т.е. 1 раз написали, а дальше
+#  используем, и не приходится каждый раз вспоминать, какое поле должно быть больше, меньше или
+#  равно нулю.
+#  .
+#  p.s. так же можно добавить поле "число повторений". Чем больше повторений, тем более
+#  достоверны результаты эксперимента.
+
+
+#  Коэффициент. Вес эксперимента.
+#  У класса Experiment нужно добавить ф-цию "отдай вес". Вес эксперимента, т.е. насколько он,
+#  скажем так, "крут" (т.е. эксперимент с 1 человеком, ЗП 10000, и 0 котами нас не слишком
+#  интересует, поэтому его вес должен быть низкий; а вот случай, где 3 человека и 4 кота
+#  выживают на 200 рублей - для нас интересен (конечно, если он успешен)).
+#  .
+#  Это нам пригодится для сравнения Экспериментов между собой. Мы можем ввести "веса" и сранивать этим результат, и
+#  определить какой наиболее сторгий набор параметров позволит нам прокормить как можно больше котов.
+#  .
+#  Пример как посчитать вес:
+#     вес_эксперимента = (число_успешных_попыток_эксперимента / (общее_число попыток + 3))
+#                        * (число_пропаж_еды / 5)
+#                        * (число_пропаж_денег / 7)
+#                        * (число_человек * 30 + число_котов * 20) / ЗП
+#  Посчитанный вес будет отражать ценность данного эксперимента. И будет учитывать все параметры.
+#  Я написал приблизительную формулу. Вероятно, вы можете ее уточнить, т.к. например понимаете
+#  что какой-то из параметров доментирует над другими.
+#  .
+#  Наша задача: определить эксперитмен, отражающий самый-самый экстремальный способ выживания семьи.
+#  .
+#  Основной плюс: мы используем средства питона,
+#  1. перегрузив __lt__ может использовать sort() + срезы для получения лучших/худших;
+#  2. перегрузив __str__ можем получать инфу об эксперименте не вдаваясь в то, какие поля у эксперимента.
+
+# ===================== 1 ЧАСТЬ ДЗ =====================
+# home = House()
+# serge = Husband(name='Сережа')
+# masha = Wife(name='Маша')
+# petya = Child(name='Петя')
+# serge.settle_in_house(house=home)
+# masha.settle_in_house(house=home)
+# petya.settle_in_house(house=home)
+# cat = serge.pick_up_cat(name_cat='Барсик')
+#
+# for day in range(366):
+#     print(end='\n\n')
+#     cprint(f'================== День {day} ==================', color='white')
+#     f_success = True
+#     for home_resident in (serge, masha, petya, cat):
+#         home_resident.act()
+#         f_success &= home_resident.is_alive()
+#         cprint(home_resident, color='cyan')
+#         cprint('-------------------------------------------', color='blue')
+#     home.pollute_house()
+#     cprint(home, color='cyan')
+#     if not f_success:
+#         break
+#
+# print(end='\n\n')
+# cprint(f'За год заработано денег: {serge.total_money}.', color='magenta')
+# cprint(f'За год съедено еды: {serge.total_eat + masha.total_eat + petya.total_eat}.', color='magenta')
+# cprint(f'За год куплено шуб: {masha.total_coat}.', color='magenta')
+# cprint(f'За год кот съел еды: {cat.total_eat}.', color='magenta')
 
 #  Наша задача не просто сделать классы Муж и Жена, а сделать эти классы так, чтобы в случае чего от них можно было
 #  наследоваться, а не копировать код из них создавая подклассы МужКаскадер или ДепрессивнаяЖена.
@@ -347,63 +503,3 @@ cprint(f'За год кот съел еды: {cat.total_eat}.', color='magenta')
 #         if choice([1, 0]):
 #             # вызов метода с распаковкой его параметров внутрь. Т.е. 1 подставится вместо "x", ... False вместо "b".
 #             my_print(*params)
-
-
-# TODO: Класс Эксперимент.
-#  Сделайте небольшой класс Experiment.
-#  В конструкторе будут все поля: число людей, кошек, ЗП, частота пропадания еды и денег, число повторений эксперимента, число удачных повторений.
-#  Так же нужно будет перегрузить оператор сравнения - __lt__.
-#  Примечание: "__lt__" - метод вызывается при использовании оператора "<".
-#  Например:   "exp_1 < exp_2" по факту вызовет следующее "Experiment.__lt__(exp_1, exp_2)". Должно возвращать True или False.
-#  .
-#  Запускаем несколько вложенных циклов (по ЗП, кол-во кошек и т.п.), перебираем разные наборы
-#  параметров. Проводим симуляции, результаты сохраняем в объекты Experiment().
-#  Все результаты сохраняются в список Experiment`ов.
-#  Перегрузка оператора __lt__ позволит нам отсортировать список стандартной функцией
-#  sorted(my_list) и взять срез лучших и худших 5 примеров.
-#  .
-#  Далее, перегрузив метод __str__ у Experiment мы сможем печатать информацию об экспериментах в цикле, не
-#  зная ничего о его полях, логика будет инкапсулировано в класс Эксперимент. Т.е. 1 раз написали, а дальше
-#  используем, и не приходится каждый раз вспоминать, какое поле должно быть больше, меньше или
-#  равно нулю.
-#  .
-#  p.s. так же можно добавить поле "число повторений". Чем больше повторений, тем более
-#  достоверны результаты эксперимента.
-
-
-
-# TODO: Коэффициент. Вес эксперимента.
-#  У класса Experiment нужно добавить ф-цию "отдай вес". Вес эксперимента, т.е. насколько он,
-#  скажем так, "крут" (т.е. эксперимент с 1 человеком, ЗП 10000, и 0 котами нас не слишком
-#  интересует, поэтому его вес должен быть низкий; а вот случай, где 3 человека и 4 кота
-#  выживают на 200 рублей - для нас интересен (конечно, если он успешен)).
-#  .
-#  Это нам пригодится для сравнения Экспериментов между собой. Мы можем ввести "веса" и сранивать этим результат, и
-#  определить какой наиболее сторгий набор параметров позволит нам прокормить как можно больше котов.
-#  .
-#  Пример как посчитать вес:
-#     вес_эксперимента = (число_успешных_попыток_эксперимента / (общее_число попыток + 3))
-#                        * (число_пропаж_еды / 5)
-#                        * (число_пропаж_денег / 7)
-#                        * (число_человек * 30 + число_котов * 20) / ЗП
-#  Посчитанный вес будет отражать ценность данного эксперимента. И будет учитывать все параметры.
-#  Я написал приблизительную формулу. Вероятно, вы можете ее уточнить, т.к. например понимаете
-#  что какой-то из параметров доментирует над другими.
-#  .
-#  Наша задача: определить эксперитмен, отражающий самый-самый экстремальный способ выживания семьи.
-#  .
-#  Основной плюс: мы используем средства питона,
-#  1. перегрузив __lt__ может использовать sort() + срезы для получения лучших/худших;
-#  2. перегрузив __str__ можем получать инфу об эксперименте не вдаваясь в то, какие поля у эксперимента.
-
-
-
-# TODO:
-#  В итоге должен получится приблизительно такой код экспериментов.
-#     for food_incidents in range(6):
-#       for money_incidents in range(6):
-#         for salary in range(50, 401, 50):
-#           experiment = Experiment(salary, numb_of_cats, money_incidents, food_incidents)
-#           experiment.simulate(n=5)        # 5 попыток
-#           results.append(experiment)
-

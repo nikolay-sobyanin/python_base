@@ -44,6 +44,18 @@ from random import choice, sample
 CAT_FOOD = 'cat_food'
 HUMAN_FOOD = 'human_food'
 
+# TODO: Как избавиться от лишних print`ов?
+#  Мы можем закомментировать все вызовы print() и переделать много кода, чтобы не было так много выводов, а можем поступить иначе.
+#  Как можно решить эту проблему аккуратно, не перепахивая сотни строк кода?
+#       verbose = False             # глобальный флаг "печатать или нет"
+#       native_print = print        # запоминаем исходную функцию print
+#  .
+#  .
+#       def print(*args, **kwargs):                 # перегружаем функцию print() своей собственной
+#           if verbose:                             #
+#               native_print(*args, **kwargs).      # вызываем исходных print(), если глобальный флаг разрешает печать.
+#  .
+#  А там, где нужно напечатать всегда, независимо от флага verbose, используем native_print.
 
 class House:
 
@@ -300,6 +312,9 @@ class Experiment:
         return (0.45 * x1) + (0.15 * x2) + (0.15 * x3) + (0.25 * x4)
 
     def create_residents(self, home):
+        # TODO: действия для всех однотипные.
+        #  Пусть объекты создаются сразу внутри home_residents_list, а потом запускается цикл, который всех запишет
+        #  в один и тот же дом.
         home_residents_list = []
         # Отец
         serge = Husband(name='Сережа', salary=self.salary)
@@ -315,6 +330,7 @@ class Experiment:
         home_residents_list.append(petya)
         # Коты
         for cat in range(self.numb_of_cats):
+            # TODO: добавить id кота. чтобы можно было отличить
             home_residents_list.append(serge.pick_up_cat(name_cat='Кот'))
         return home_residents_list
 
@@ -323,7 +339,7 @@ class Experiment:
             successful_experiment = True
 
             days_year = range(1, 365 + 1)
-            days_money_incidents = sorted(sample(days_year, self.money_incidents))
+            days_money_incidents = sorted(sample(days_year, self.money_incidents))  # TODO: отлично
             days_food_incidents = sorted(sample(days_year, self.food_incidents))
 
             home = House()
@@ -342,6 +358,10 @@ class Experiment:
 
                 if not successful_experiment:
                     break
+
+            # TODO: небольшой фокус. Но применять с осторожностью.
+            #  "successful_experiment" - это True или False. True эквивалентен 1. А False - 0.
+            #  Поэтому можно написать "self.successful_experiments += successful_experiment". Без if`а.
             if successful_experiment:
                 self.successful_experiments += 1
         self.weight_experiment = self.give_weight()

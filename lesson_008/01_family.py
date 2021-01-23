@@ -44,18 +44,14 @@ from random import choice, sample
 CAT_FOOD = 'cat_food'
 HUMAN_FOOD = 'human_food'
 
-# TODO: Как избавиться от лишних print`ов?
-#  Мы можем закомментировать все вызовы print() и переделать много кода, чтобы не было так много выводов, а можем поступить иначе.
-#  Как можно решить эту проблему аккуратно, не перепахивая сотни строк кода?
-#       verbose = False             # глобальный флаг "печатать или нет"
-#       native_print = print        # запоминаем исходную функцию print
-#  .
-#  .
-#       def print(*args, **kwargs):                 # перегружаем функцию print() своей собственной
-#           if verbose:                             #
-#               native_print(*args, **kwargs).      # вызываем исходных print(), если глобальный флаг разрешает печать.
-#  .
-#  А там, где нужно напечатать всегда, независимо от флага verbose, используем native_print.
+verbose = False
+native_cprint = cprint
+
+
+def cprint(*args, **kwargs):
+    if verbose:
+        native_cprint(*args, **kwargs)
+
 
 class House:
 
@@ -88,19 +84,19 @@ class General:
 
     def is_alive(self):
         if self.fullness <= 0:
-            # cprint(f'{self.name} умер из-за голода!', color='red')
+            cprint(f'{self.name} умер из-за голода!', color='red')
             return False
         else:
             return True
 
     def eat(self):
         if self.home.fridge[self.kind_food] >= self.voracity:
-            # cprint(f'{self.name} поел.', color='yellow')
+            cprint(f'{self.name} поел.', color='yellow')
             self.fullness += self.voracity * self.coef_fullness
             self.home.fridge[self.kind_food] -= self.voracity
             self.total_eat += self.voracity
         else:
-            # cprint(f'{self.name} нет еды!', color='red')
+            cprint(f'{self.name} нет еды!', color='red')
             self.fullness -= self.voracity * self.coef_fullness * 0.5  # Еды нет, поэтому в режиме сбережения энергии
 
 
@@ -116,13 +112,13 @@ class Human(General):
 
     def settle_in_house(self, house):
         self.home = house
-        # cprint(f'{self.name} вьехал в дом', color='green')
+        cprint(f'{self.name} вьехал в дом', color='green')
 
     def is_alive(self):
         if not super().is_alive():
             return False
         elif self.happiness < 10:
-            # cprint(f'{self.name} умер из-за депрессии!', color='red')
+            cprint(f'{self.name} умер из-за депрессии!', color='red')
             return False
         else:
             return True
@@ -130,7 +126,7 @@ class Human(General):
     def pick_up_cat(self, name_cat):
         new_cat = Cat(name=name_cat)
         new_cat.home = self.home
-        # cprint(f'{self.name} подобрал кота {new_cat.name}', color='cyan')
+        cprint(f'{self.name} подобрал кота {new_cat.name}', color='cyan')
         return new_cat
 
     def act(self):
@@ -148,18 +144,18 @@ class Husband(Human):
         self.total_money = 0
 
     def work(self):
-        # cprint(f'{self.name} сходил на работу', color='yellow')
+        cprint(f'{self.name} сходил на работу', color='yellow')
         self.home.money += self.salary
         self.total_money += self.salary
         self.fullness -= 10
 
     def gaming(self):
-        # cprint(f'{self.name} поиграл в WoT.', color='yellow')
+        cprint(f'{self.name} поиграл в WoT.', color='yellow')
         self.happiness += 20
         self.fullness -= 10
 
     def caress_cat(self):
-        # cprint(f'{self.name} гладила кота.', color='yellow')
+        cprint(f'{self.name} гладила кота.', color='yellow')
         self.happiness += 5
         self.fullness -= 10
 
@@ -183,43 +179,43 @@ class Wife(Human):
 
     def shopping(self):
         if self.home.money >= 70:
-            # cprint(f'{self.name} сходила в магазин за едой.', color='yellow')
+            cprint(f'{self.name} сходила в магазин за едой.', color='yellow')
             self.home.fridge[HUMAN_FOOD] += 70
             self.home.money -= 70
             self.fullness -= 10
-        # else:
-        #     cprint(f'Деньги кончились!', color='red')
+        else:
+            cprint(f'Деньги кончились!', color='red')
 
     def buy_fur_coat(self):
         if self.home.money >= 600:
-            # cprint(f'{self.name} купила шубу. Урааа!.', color='yellow')
+            cprint(f'{self.name} купила шубу. Урааа!.', color='yellow')
             self.happiness += 60
             self.home.money -= 350
             self.fullness -= 10
             self.total_coat += 1
-        # else:
-        #     cprint(f'Денег на шубу нет!', color='red')
+        else:
+            cprint(f'Денег на шубу нет!', color='red')
 
     def clean_house(self):
         level_mess = min(100, self.home.level_mess)
         if level_mess:
-            # cprint(f'{self.name} убрала дом.', color='yellow')
+            cprint(f'{self.name} убрала дом.', color='yellow')
             self.home.level_mess -= level_mess
             self.fullness -= 10
-        # else:
-        #     cprint(f'Дома чисто!', color='red')
+        else:
+            cprint(f'Дома чисто!', color='red')
 
     def buy_cat_food(self):
         if self.home.money >= 50:
-            # cprint(f'{self.name} сходила в магазин за едой для кота.', color='yellow')
+            cprint(f'{self.name} сходила в магазин за едой для кота.', color='yellow')
             self.home.money -= 50
             self.home.fridge[CAT_FOOD] += 50
             self.fullness -= 10
-        # else:
-        #     cprint(f'Денег на еду коту нет!', color='red')
+        else:
+            cprint(f'Денег на еду коту нет!', color='red')
 
     def caress_cat(self):
-        # cprint(f'{self.name} гладила кота.', color='yellow')
+        cprint(f'{self.name} гладила кота.', color='yellow')
         self.happiness += 5
         self.fullness -= 10
 
@@ -249,11 +245,11 @@ class Cat(General):
         return f'Я кот {self.name}. Сытость {self.fullness} ед.'
 
     def sleep(self):
-        # cprint(f'{self.name} поспал.', color='yellow')
+        cprint(f'{self.name} поспал.', color='yellow')
         self.fullness -= 10
 
     def soil(self):
-        # cprint(f'{self.name} дерет обои.', color='yellow')
+        cprint(f'{self.name} дерет обои.', color='yellow')
         self.home.level_mess += 5
         self.fullness -= 10
 
@@ -271,7 +267,7 @@ class Child(Human):
         self.total_coat = 0
 
     def sleep(self):
-        # cprint(f'{self.name} поспал.', color='yellow')
+        cprint(f'{self.name} поспал.', color='yellow')
         self.fullness -= 10
 
     def act(self):
@@ -312,26 +308,17 @@ class Experiment:
         return (0.45 * x1) + (0.15 * x2) + (0.15 * x3) + (0.25 * x4)
 
     def create_residents(self, home):
-        # TODO: действия для всех однотипные.
-        #  Пусть объекты создаются сразу внутри home_residents_list, а потом запускается цикл, который всех запишет
-        #  в один и тот же дом.
-        home_residents_list = []
-        # Отец
-        serge = Husband(name='Сережа', salary=self.salary)
-        serge.settle_in_house(house=home)
-        home_residents_list.append(serge)
-        # Жена
-        masha = Wife(name='Маша')
-        masha.settle_in_house(house=home)
-        home_residents_list.append(masha)
-        # Сын
-        petya = Child(name='Петя')
-        petya.settle_in_house(house=home)
-        home_residents_list.append(petya)
+        home_residents_list = [
+            Husband(name='Сережа', salary=self.salary),
+            Wife(name='Маша'),
+            Child(name='Петя')
+        ]
+        for resident in home_residents_list:
+            resident.settle_in_house(house=home)
         # Коты
-        for cat in range(self.numb_of_cats):
-            # TODO: добавить id кота. чтобы можно было отличить
-            home_residents_list.append(serge.pick_up_cat(name_cat='Кот'))
+        for i in range(self.numb_of_cats):
+            name_cat = f'Кот {i + 1}'
+            home_residents_list.append(home_residents_list[0].pick_up_cat(name_cat=name_cat))
         return home_residents_list
 
     def simulate(self):
@@ -358,12 +345,7 @@ class Experiment:
 
                 if not successful_experiment:
                     break
-
-            # TODO: небольшой фокус. Но применять с осторожностью.
-            #  "successful_experiment" - это True или False. True эквивалентен 1. А False - 0.
-            #  Поэтому можно написать "self.successful_experiments += successful_experiment". Без if`а.
-            if successful_experiment:
-                self.successful_experiments += 1
+            self.successful_experiments += successful_experiment
         self.weight_experiment = self.give_weight()
 
 

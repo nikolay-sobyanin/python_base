@@ -55,6 +55,12 @@ class LetterStatistics:
     def print_statistics(self):
         total_letters = sum(self.statistics.values())
         column_width = 15
+
+        # TODO: f'+{"":-^{column_width}}+{"":-^{column_width}}+'
+        #  строка ниже повторяет 4 раза. Можно ее вынести в отдельную переменную, а потом подставлять в print`ах.
+        #  Очень непростая строка: выравнивания, вложенные {} - непросто. Лучше сделать 1 строку, чтобы не приходилось
+        #  вглядываться в каждую. Так же строка почти симметрична. Что это нам дает?
+        #  Вместо '+abcd+abcd+' мы можем 2 * '+abcd' + '+'.
         print(f'+{"":-^{column_width}}+{"":-^{column_width}}+')
         print(f'|{"Буква":^{column_width}}|{"Частота":^{column_width}}|')
         print(f'+{"":-^{column_width}}+{"":-^{column_width}}+')
@@ -69,6 +75,17 @@ class LetterStatistics:
 
 
 class SortAlphabetDown(LetterStatistics):
+    # TODO: исправлять не нужно, но немного надо озвучить:
+    #  сейчас сортировка сделана через список отсортированных ключей. А можно напрямую через .items().
+    #  Схема могла быть такая:
+    #   1. self.sort() возвращает отсортированные данные:
+    #          return sorted(self.statistics.items(), key=itemgetter(1), reverse=True)
+    #   2. а где вызывается sort? он вызывается либо внутри print_statistics:
+    #          for letter, amount in self.sort():
+    #             ....
+    #   .
+    #   .
+    #   Менять не нужно! Это для ознакомления. Мы используем себе на пользу наличие поля "self.sorted_keys".
     def sort(self):
         self.sorted_keys = sorted(self.statistics.keys(), reverse=False)
 
@@ -104,6 +121,8 @@ list_sort = [
 ]
 
 while True:
+    # TODO: немного доп. инфы: имя класса можно достатать так:
+    #  SortAlphabetDown.__name__
     for i, elm in enumerate(list_sort):
         print(f'{i + 1} - {elm["name"]}')
 
@@ -111,7 +130,10 @@ while True:
     if not enter_sort.isdigit():
         print('Используйте только цифры!')
         continue
+    # TODO: Здесь можно if, т.к. выше есть continue, т.е. условия не связаны между собой. Одно не исключает другое.
     elif int(enter_sort) not in range(1, len(list_sort) + 1):
+        # TODO: лучше сравнивать "0 <= x < len(...)". Сейчас мы создаем маленьки кортеж, чтобы сравнить с каждым
+        #  элементом в отдельности.
         print('Неверно введено значение!')
         continue
 
@@ -119,7 +141,11 @@ while True:
     # Но получается, что каждую итерацию цикла заново собирается статистика. Это получается медлеене, чем сначала
     # собрать статистику, а затем ее сортировать.
 
+    # TODO: вынесите print_statistics из collect_statistics.
+    #  Используем тот факт, что есть поле, хранящее отсортированные данные, здесь будем вызывать только print`ы.
+
     stop = input('Закончить работу? ')
+    # TODO: вот это норм. ПОтому что это 2 несвязанных между собой слова. Нельзя написать, "от да до yes"
     if stop.lower() in ['да', 'yes']:
         break
 

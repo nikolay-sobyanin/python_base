@@ -53,39 +53,24 @@ class LetterStatistics:
         self.print_statistics()
 
     def print_statistics(self):
+        self.sort()
         total_letters = sum(self.statistics.values())
         column_width = 15
-
-        # TODO: f'+{"":-^{column_width}}+{"":-^{column_width}}+'
-        #  строка ниже повторяет 4 раза. Можно ее вынести в отдельную переменную, а потом подставлять в print`ах.
-        #  Очень непростая строка: выравнивания, вложенные {} - непросто. Лучше сделать 1 строку, чтобы не приходилось
-        #  вглядываться в каждую. Так же строка почти симметрична. Что это нам дает?
-        #  Вместо '+abcd+abcd+' мы можем 2 * '+abcd' + '+'.
-        print(f'+{"":-^{column_width}}+{"":-^{column_width}}+')
+        line = 2 * f'+{"":-^{column_width}}' + '+'
+        print(line)
         print(f'|{"Буква":^{column_width}}|{"Частота":^{column_width}}|')
-        print(f'+{"":-^{column_width}}+{"":-^{column_width}}+')
+        print(line)
         for i in self.sorted_keys:
             print(f'|{i:^{column_width}}|{self.statistics[i]:^{column_width}}|')
-            print(f'+{"":-^{column_width}}+{"":-^{column_width}}+')
+            print(line)
         print(f'|{"Итого":^{column_width}}|{total_letters:^{column_width}}|')
-        print(f'+{"":-^{column_width}}+{"":-^{column_width}}+')
+        print(line)
 
     def sort(self):
         pass
 
 
 class SortAlphabetDown(LetterStatistics):
-    # TODO: исправлять не нужно, но немного надо озвучить:
-    #  сейчас сортировка сделана через список отсортированных ключей. А можно напрямую через .items().
-    #  Схема могла быть такая:
-    #   1. self.sort() возвращает отсортированные данные:
-    #          return sorted(self.statistics.items(), key=itemgetter(1), reverse=True)
-    #   2. а где вызывается sort? он вызывается либо внутри print_statistics:
-    #          for letter, amount in self.sort():
-    #             ....
-    #   .
-    #   .
-    #   Менять не нужно! Это для ознакомления. Мы используем себе на пользу наличие поля "self.sorted_keys".
     def sort(self):
         self.sorted_keys = sorted(self.statistics.keys(), reverse=False)
 
@@ -106,13 +91,6 @@ class SortResultUp(LetterStatistics):
 
 
 file_name = 'voyna-i-mir.txt'
-# dict_sort = {
-#     '1': SortAlphabetDown,
-#     '2': SortAlphabetUp,
-#     '3': SortResultDown,
-#     '4': SortResultUp
-# }
-
 list_sort = [
     {'name': 'по алфавиту по возрастанию', 'class': SortAlphabetDown},
     {'name': 'по алфавиту по убыванию', 'class': SortAlphabetUp},
@@ -121,8 +99,6 @@ list_sort = [
 ]
 
 while True:
-    # TODO: немного доп. инфы: имя класса можно достатать так:
-    #  SortAlphabetDown.__name__
     for i, elm in enumerate(list_sort):
         print(f'{i + 1} - {elm["name"]}')
 
@@ -130,22 +106,27 @@ while True:
     if not enter_sort.isdigit():
         print('Используйте только цифры!')
         continue
-    # TODO: Здесь можно if, т.к. выше есть continue, т.е. условия не связаны между собой. Одно не исключает другое.
-    elif int(enter_sort) not in range(1, len(list_sort) + 1):
-        # TODO: лучше сравнивать "0 <= x < len(...)". Сейчас мы создаем маленьки кортеж, чтобы сравнить с каждым
-        #  элементом в отдельности.
+    if not 1 <= int(enter_sort) <= len(list_sort):  # Сделал через range, потому что думал что .isdigit() пропустит число с плавющей точкой, а оказалось нет (на да "." не число).
         print('Неверно введено значение!')
         continue
 
     list_sort[int(enter_sort) - 1]['class'](file_name=file_name).collect_statistics()
-    # Но получается, что каждую итерацию цикла заново собирается статистика. Это получается медлеене, чем сначала
-    # собрать статистику, а затем ее сортировать.
+
+    # Сейчас алгоритм работы такой: пользователь вводит данные как надо отсортировать информацию, собираем статистику, сортируем статистику, печатаем. Все выполняется по шаблону.
+    # Но куда лучше след алгоритм: собрать статистику (записать ее в буфер), пользователь вводит как ему отсортировать ее, сортируем, печатаем.
+    # Если нужна будет другая сортировка статистики уже не нужно будет заново считывать файл и собирать статистику.
+    # Сейчас код быстро работает, а если бы был файл больше по объему.
+
 
     # TODO: вынесите print_statistics из collect_statistics.
     #  Используем тот факт, что есть поле, хранящее отсортированные данные, здесь будем вызывать только print`ы.
 
+    # Я вынесу print_statistics. Но поле хранящее отсортированные данные будет снова и снова формироваться каждую итерацию цикла.
+    
+    # Паттерн "шаблонный метод" ну логично действие выполняется по шаблону, но в данной конкретной задаче, применение данного метода, как я понял ни есть оптимально.
+    # Ну либо я не правильно его применил в данной задачи, либо я overthinking снова.
+
     stop = input('Закончить работу? ')
-    # TODO: вот это норм. ПОтому что это 2 несвязанных между собой слова. Нельзя написать, "от да до yes"
     if stop.lower() in ['да', 'yes']:
         break
 
@@ -210,3 +191,18 @@ while True:
 #  раз в задаче 03_files_arrange.py.
 
 #  добавить подклассы и родительский класс
+
+# исправлять не нужно, но немного надо озвучить:
+#  сейчас сортировка сделана через список отсортированных ключей. А можно напрямую через .items().
+#  Схема могла быть такая:
+#   1. self.sort() возвращает отсортированные данные:
+#          return sorted(self.statistics.items(), key=itemgetter(1), reverse=True)
+#   2. а где вызывается sort? он вызывается либо внутри print_statistics:
+#          for letter, amount in self.sort():
+#             ....
+#   .
+#   .
+#   Менять не нужно! Это для ознакомления. Мы используем себе на пользу наличие поля "self.sorted_keys".
+
+# немного доп. инфы: имя класса можно достатать так:
+#  SortAlphabetDown.__name__

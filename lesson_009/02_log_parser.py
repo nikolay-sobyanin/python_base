@@ -22,12 +22,14 @@
 # Для этого пригодится шаблон проектирование "Шаблонный метод"
 #   см https://refactoring.guru/ru/design-patterns/template-method
 #   и https://gitlab.skillbox.ru/vadim_shandrinov/python_base_snippets/snippets/4
+
+from abc import ABC, abstractmethod
 from collections import defaultdict
 
 
-class LogParser:
+class LogParser(ABC):
 
-    def __init__(self, file_name_in, file_name_out):
+    def __init__(self, file_name_in=None, file_name_out=None):
         self.file_name_in = file_name_in
         self.file_name_out = file_name_out
         self.list_log = []
@@ -41,45 +43,112 @@ class LogParser:
     def read_file(self):
         with open(file=self.file_name_in, mode='r', encoding='utf8') as file:
             for line in file:
-                # TODO: создать отдельный метод, который возвращает то, что нужно для данного вида сортировки:
-                #  тип события и временную_метку. Для разных подклассов будет совершенно разный способ парсинга
-                #  строки. Прям может быть вообще разный! Профит: разные файлый, разный формат, но алгоритм одинаков,
-                #  и хранится в главном файле. Отличие между классами будет только в "parse_line".
-                date = line[1:11]
-                time = line[12:17]
-                status = line[29:-1]
-                year = date[0:4]
-                month = date[5:7]
-                day = date[8:10]
-                hour = time[0:2]
-                minute = time[3:5]
-                self.list_log.append({
-                    'year': year,
-                    'month': month,
-                    'day': day,
-                    'hour': hour,
-                    'minute': minute,
-                    'status': status,
-                })
+                self.list_log.append(self.parser_line(line=line))
+
+    @abstractmethod
+    def parser_line(self, line):
+        pass
 
     def group_events(self):
         for log in self.list_log:
-            time_log = f'[{log["year"]}-{log["month"]}-{log["day"]} {log["hour"]}:{log["minute"]}]'
             if log['status'] == 'NOK':
-                self.list_result[time_log] += 1
+                self.list_result[log['time']] += 1
 
     def write_result_file(self):
         with open(file=self.file_name_out, mode='w', encoding='utf8') as file:
             for time, res in self.list_result.items():
                 line = f'{time} {res}\n'
                 file.write(line)
+        print(f'Файл результатов {self.file_name_out} создан.')
+
+
+class ParserMinute(LogParser):
+    def __str__(self):
+        return 'отказов в минуту'
+
+    def parser_line(self, line):
+        date = line[1:11]
+        time = line[12:17]
+        year = date[0:4]
+        month = date[5:7]
+        day = date[8:10]
+        hour = time[0:2]
+        minute = time[3:5]
+        status = line[29:-1]
+        return {
+            'time': f'{year}-{month}-{day} {hour}:{minute}',
+            'status': status
+        }
+
+
+class ParserHour(LogParser):
+    def __str__(self):
+        return 'отказов в час'
+
+    def parser_line(self, line):
+        date = line[1:11]
+        time = line[12:17]
+        year = date[0:4]
+        month = date[5:7]
+        day = date[8:10]
+        hour = time[0:2]
+        status = line[29:-1]
+        return {
+            'time': f'{year}-{month}-{day} {hour}:00',
+            'status': status
+        }
+
+
+class ParserDay(LogParser):
+    def __str__(self):
+        return 'отказов в день'
+
+    def parser_line(self, line):
+        date = line[1:11]
+        year = date[0:4]
+        month = date[5:7]
+        day = date[8:10]
+        status = line[29:-1]
+        return {
+            'time': f'{year}-{month}-{day}',
+            'status': status
+        }
+
+
+class ParserMonth(LogParser):
+    def __str__(self):
+        return 'отказов в месяц'
+
+    def parser_line(self, line):
+        date = line[1:11]
+        year = date[0:4]
+        month = date[5:7]
+        status = line[29:-1]
+        return {
+            'time': f'{year}-{month}',
+            'status': status
+        }
 
 
 file_name_in = 'events.txt'
 file_name_out = 'out.txt'
-LogParser(file_name_in=file_name_in, file_name_out=file_name_out).parser()
 
+list_parser = [ParserMinute, ParserHour, ParserDay, ParserMonth]
 
+while True:
+    for i, elm in enumerate(list_parser, 1):
+        print(f'{i} - {elm().__str__()}')
+
+    enter_sort = input('Как групировать: ')
+    if not enter_sort.isdigit():
+        print('Используйте только цифры!')
+        continue
+    if not 1 <= int(enter_sort) <= len(list_parser):
+        print('Неверно введено значение!')
+        continue
+
+    list_parser[int(enter_sort) - 1](file_name_in, file_name_out).parser()
+    break
 
 
 # После зачета первого этапа нужно сделать группировку событий

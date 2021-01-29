@@ -43,6 +43,9 @@ class LogParser(ABC):
     def read_file(self):
         with open(file=self.file_name_in, mode='r', encoding='utf8') as file:
             for line in file:
+                # TODO: объединить с методом group_events.
+                #  Сейчас мы храним данные 2 раза: первая копия в list_log, вторая в list_result.
+                #  Т.е. если данных будет 1ГБ, то нам понадобится 2ГБ оперативно памяти, вместо 1Гб.
                 self.list_log.append(self.parser_line(line=line))
 
     @abstractmethod
@@ -67,6 +70,17 @@ class ParserMinute(LogParser):
         return 'отказов в минуту'
 
     def parser_line(self, line):
+        # TODO:
+        #  1. Это парсерМинут. Зачем он в нем все остальные поля?
+        #  2. Зачем использован словарь для передачи данных? Можно передать кортеж. Пример:
+        #        def get_data():
+        #           return 100500, 'abcd', False
+        #        sto_petsot, str_abcd, bool_value = get_data()
+        #  3. Сделать тело parser_line в 1 строку:
+        #       def parser_line(self, line):
+        #           return ...
+        #     .
+        #     * пусть возвращает срезы line. Пересобирать строку нам не нужно
         date = line[1:11]
         time = line[12:17]
         year = date[0:4]
@@ -137,6 +151,7 @@ list_parser = [ParserMinute, ParserHour, ParserDay, ParserMonth]
 
 while True:
     for i, elm in enumerate(list_parser, 1):
+        # TODO: за что отвечает __str__? посмотреть как мы его вызываели в модуле 008.
         print(f'{i} - {elm().__str__()}')
 
     enter_sort = input('Как групировать: ')

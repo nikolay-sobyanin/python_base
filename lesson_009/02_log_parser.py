@@ -29,33 +29,25 @@ from collections import defaultdict
 
 class LogParser(ABC):
 
-    def __init__(self, file_name_in=None, file_name_out=None):
+    def __init__(self, file_name_in, file_name_out):
         self.file_name_in = file_name_in
         self.file_name_out = file_name_out
-        self.list_log = []
         self.list_result = defaultdict(int)
 
     def parser(self):
         self.read_file()
-        self.group_events()
         self.write_result_file()
 
     def read_file(self):
         with open(file=self.file_name_in, mode='r', encoding='utf8') as file:
             for line in file:
-                # TODO: объединить с методом group_events.
-                #  Сейчас мы храним данные 2 раза: первая копия в list_log, вторая в list_result.
-                #  Т.е. если данных будет 1ГБ, то нам понадобится 2ГБ оперативно памяти, вместо 1Гб.
-                self.list_log.append(self.parser_line(line=line))
+                time, status = self.parser_line(line=line)
+                if status == 'NOK':
+                    self.list_result[time] += 1
 
     @abstractmethod
     def parser_line(self, line):
         pass
-
-    def group_events(self):
-        for log in self.list_log:
-            if log['status'] == 'NOK':
-                self.list_result[log['time']] += 1
 
     def write_result_file(self):
         with open(file=self.file_name_out, mode='w', encoding='utf8') as file:
@@ -66,93 +58,38 @@ class LogParser(ABC):
 
 
 class ParserMinute(LogParser):
-    def __str__(self):
-        return 'отказов в минуту'
-
     def parser_line(self, line):
-        # TODO:
-        #  1. Это парсерМинут. Зачем он в нем все остальные поля?
-        #  2. Зачем использован словарь для передачи данных? Можно передать кортеж. Пример:
-        #        def get_data():
-        #           return 100500, 'abcd', False
-        #        sto_petsot, str_abcd, bool_value = get_data()
-        #  3. Сделать тело parser_line в 1 строку:
-        #       def parser_line(self, line):
-        #           return ...
-        #     .
-        #     * пусть возвращает срезы line. Пересобирать строку нам не нужно
-        date = line[1:11]
-        time = line[12:17]
-        year = date[0:4]
-        month = date[5:7]
-        day = date[8:10]
-        hour = time[0:2]
-        minute = time[3:5]
-        status = line[29:-1]
-        return {
-            'time': f'{year}-{month}-{day} {hour}:{minute}',
-            'status': status
-        }
+        return '[' + line[1:17] + ']', line[29:-1]
 
 
 class ParserHour(LogParser):
-    def __str__(self):
-        return 'отказов в час'
-
     def parser_line(self, line):
-        date = line[1:11]
-        time = line[12:17]
-        year = date[0:4]
-        month = date[5:7]
-        day = date[8:10]
-        hour = time[0:2]
-        status = line[29:-1]
-        return {
-            'time': f'{year}-{month}-{day} {hour}:00',
-            'status': status
-        }
+        return '[' + line[1:14] + ':00]', line[29:-1]
 
 
 class ParserDay(LogParser):
-    def __str__(self):
-        return 'отказов в день'
-
     def parser_line(self, line):
-        date = line[1:11]
-        year = date[0:4]
-        month = date[5:7]
-        day = date[8:10]
-        status = line[29:-1]
-        return {
-            'time': f'{year}-{month}-{day}',
-            'status': status
-        }
+        return '[' + line[1:11] + ']', line[29:-1]
 
 
 class ParserMonth(LogParser):
-    def __str__(self):
-        return 'отказов в месяц'
-
     def parser_line(self, line):
-        date = line[1:11]
-        year = date[0:4]
-        month = date[5:7]
-        status = line[29:-1]
-        return {
-            'time': f'{year}-{month}',
-            'status': status
-        }
+        return '[' + line[1:8] + ']', line[29:-1]
 
 
 file_name_in = 'events.txt'
 file_name_out = 'out.txt'
 
-list_parser = [ParserMinute, ParserHour, ParserDay, ParserMonth]
+list_parser = [
+    {'name': 'отказов в минуту', 'function': ParserMinute},
+    {'name': 'отказов в час', 'function': ParserHour},
+    {'name': 'отказов в день', 'function': ParserDay},
+    {'name': 'отказов в месяц', 'function': ParserMonth},
+]
 
 while True:
     for i, elm in enumerate(list_parser, 1):
-        # TODO: за что отвечает __str__? посмотреть как мы его вызываели в модуле 008.
-        print(f'{i} - {elm().__str__()}')
+        print(f'{i} - {elm["name"]}')
 
     enter_sort = input('Как групировать: ')
     if not enter_sort.isdigit():
@@ -162,7 +99,7 @@ while True:
         print('Неверно введено значение!')
         continue
 
-    list_parser[int(enter_sort) - 1](file_name_in, file_name_out).parser()
+    list_parser[int(enter_sort) - 1]['function'](file_name_in, file_name_out).parser()
     break
 
 

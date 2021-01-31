@@ -1,9 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import os
-import time
-import shutil
-
 # Нужно написать скрипт для упорядочивания фотографий (вообще любых файлов)
 # Скрипт должен разложить файлы из одной папки по годам и месяцам в другую.
 # Например, так:
@@ -40,7 +36,45 @@ import shutil
 #   см https://refactoring.guru/ru/design-patterns/template-method
 #   и https://gitlab.skillbox.ru/vadim_shandrinov/python_base_snippets/snippets/4
 
-# TODO здесь ваш код
+
+import os
+import time
+import shutil
+from abc import abstractmethod, ABC
+
+
+class SortFiles(ABC):
+    def __init__(self, dir_from, dir_to):
+        self.dir_from = os.path.normpath(os.path.join(os.path.dirname(__file__), dir_from))
+        self.dir_to = os.path.normpath(os.path.join(os.path.dirname(__file__), dir_to))
+
+    def sort_files(self):
+        for dirpath, dirnames, filenames in os.walk(self.dir_from):
+            for file in filenames:
+                file_path = os.path.join(dirpath, file)
+                self.copy_file(file_path=file_path)
+
+    @abstractmethod
+    def copy_file(self, file_path):
+        pass
+
+
+class SortFilesByTime(SortFiles):
+    def copy_file(self, file_path):
+        file_time = time.gmtime(os.path.getmtime(file_path))
+        path_copy_file = os.path.join(self.dir_to, str(file_time[0]), str(file_time[1]))
+        if not os.path.isdir(path_copy_file):
+            os.makedirs(path_copy_file)
+        shutil.copy2(src=file_path, dst=path_copy_file)
+
+
+dir_from = 'icons'
+dir_to = 'icons_by_year'
+
+SortFilesByTime(dir_from=dir_from, dir_to=dir_to).sort_files()
+print(f'Скрипт сработал. Файлы записаны в дерикторию "{dir_to}"')
+
+
 
 # Усложненное задание (делать по желанию)
 # Нужно обрабатывать zip-файл, содержащий фотографии, без предварительного извлечения файлов в папку.

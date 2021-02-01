@@ -45,11 +45,17 @@ from abc import abstractmethod, ABC
 
 class SortFiles(ABC):
     def __init__(self, dir_from, dir_to):
-        self.dir_from = os.path.normpath(os.path.join(os.path.dirname(__file__), dir_from))
+        # TODO: почему строку ниже можно заменить и все работает?
+        #  Докопайтесь почему.
+        #self.dir_from = os.path.normpath(os.path.join(os.path.dirname(__file__), dir_from))    # было
+        self.dir_from = os.path.normpath(dir_from)                                              # стало
+
         self.dir_to = os.path.normpath(os.path.join(os.path.dirname(__file__), dir_to))
 
+
+
     def sort_files(self):
-        for dirpath, dirnames, filenames in os.walk(self.dir_from):
+        for dirpath, dirnames, filenames in os.walk(self.dir_from): # TODO: в архиве os.walk работать не будет
             for file in filenames:
                 file_path = os.path.join(dirpath, file)
                 self.copy_file(file_path=file_path)
@@ -61,7 +67,9 @@ class SortFiles(ABC):
 
 class SortFilesByTime(SortFiles):
     def copy_file(self, file_path):
+        # TODO: используйте распаковку для file_time.
         file_time = time.gmtime(os.path.getmtime(file_path))
+        # TODO: чтобы тут подставить переменную с понятным именем вместо "file_time[0]"
         path_copy_file = os.path.join(self.dir_to, str(file_time[0]), str(file_time[1]))
         if not os.path.isdir(path_copy_file):
             os.makedirs(path_copy_file)
@@ -81,3 +89,6 @@ print(f'Скрипт сработал. Файлы записаны в дерик
 # Это относится только к чтению файлов в архиве. В случае паттерна "Шаблонный метод" изменяется способ
 # получения данных (читаем os.walk() или zip.namelist и т.д.)
 # Документация по zipfile: API https://docs.python.org/3/library/zipfile.html
+
+# TODO: если есть запал - можно начинать) скучно не будет точно (как по мне, 9.3 - одна из самых сложных задач за весь
+#  курс).

@@ -45,17 +45,11 @@ from abc import abstractmethod, ABC
 
 class SortFiles(ABC):
     def __init__(self, dir_from, dir_to):
-        # TODO: почему строку ниже можно заменить и все работает?
-        #  Докопайтесь почему.
-        #self.dir_from = os.path.normpath(os.path.join(os.path.dirname(__file__), dir_from))    # было
-        self.dir_from = os.path.normpath(dir_from)                                              # стало
-
-        self.dir_to = os.path.normpath(os.path.join(os.path.dirname(__file__), dir_to))
-
-
+        self.dir_from = os.path.normpath(dir_from)  # Потому что он начинает поиск изначально в той директории, где файл скрипта
+        self.dir_to = os.path.normpath(dir_to)
 
     def sort_files(self):
-        for dirpath, dirnames, filenames in os.walk(self.dir_from): # TODO: в архиве os.walk работать не будет
+        for dirpath, dirnames, filenames in os.walk(self.dir_from):
             for file in filenames:
                 file_path = os.path.join(dirpath, file)
                 self.copy_file(file_path=file_path)
@@ -67,10 +61,8 @@ class SortFiles(ABC):
 
 class SortFilesByTime(SortFiles):
     def copy_file(self, file_path):
-        # TODO: используйте распаковку для file_time.
         file_time = time.gmtime(os.path.getmtime(file_path))
-        # TODO: чтобы тут подставить переменную с понятным именем вместо "file_time[0]"
-        path_copy_file = os.path.join(self.dir_to, str(file_time[0]), str(file_time[1]))
+        path_copy_file = os.path.join(self.dir_to, str(file_time.tm_year), str(file_time.tm_mon))
         if not os.path.isdir(path_copy_file):
             os.makedirs(path_copy_file)
         shutil.copy2(src=file_path, dst=path_copy_file)
@@ -81,7 +73,6 @@ dir_to = 'icons_by_year'
 
 SortFilesByTime(dir_from=dir_from, dir_to=dir_to).sort_files()
 print(f'Скрипт сработал. Файлы записаны в дерикторию "{dir_to}"')
-
 
 
 # Усложненное задание (делать по желанию)

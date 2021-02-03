@@ -40,6 +40,7 @@
 import os
 import time
 import shutil
+import zipfile
 from abc import abstractmethod, ABC
 
 
@@ -49,6 +50,15 @@ class SortFiles(ABC):
         self.dir_to = os.path.normpath(dir_to)
 
     def sort_files(self):
+        self.search_copy_files()
+
+    @abstractmethod
+    def search_copy_files(self):
+        pass
+
+
+class SortFolder(SortFiles):
+    def search_copy_files(self):
         for dirpath, dirnames, filenames in os.walk(self.dir_from):
             for file in filenames:
                 file_path = os.path.join(dirpath, file)
@@ -59,7 +69,7 @@ class SortFiles(ABC):
         pass
 
 
-class SortFilesByTime(SortFiles):
+class SortFolderByTime(SortFolder):
     def copy_file(self, file_path):
         file_time = time.gmtime(os.path.getmtime(file_path))
         path_copy_file = os.path.join(self.dir_to, str(file_time.tm_year), str(file_time.tm_mon))
@@ -68,11 +78,40 @@ class SortFilesByTime(SortFiles):
         shutil.copy2(src=file_path, dst=path_copy_file)
 
 
+class SortZip(SortFiles):
+    def search_copy_files(self):
+        with zipfile.ZipFile(self.dir_from, 'r') as zip_file:
+            for elem in zip_file.infolist():
+                self.unpacking_file(zip_file=zip_file, elem=elem)
+
+    @abstractmethod
+    def unpacking_file(self, zip_file, elem):
+        pass
+
+
+class SortZipByTime(SortZip):
+    def unpacking_file(self, zip_file, elem):
+        path = zipfile.Path(zip_file.filename, elem.filename)
+        if path.is_file():
+            path_unpacking_file = os.path.join(self.dir_to, str(elem.date_time[0]), str(elem.date_time[1]))
+            if not os.path.isdir(path_unpacking_file):
+                os.makedirs(path_unpacking_file)
+            elem.filename = path.name
+            zip_file.extract(elem, path_unpacking_file)
+
+
 dir_from = 'icons'
 dir_to = 'icons_by_year'
 
-SortFilesByTime(dir_from=dir_from, dir_to=dir_to).sort_files()
-print(f'Скрипт сработал. Файлы записаны в дерикторию "{dir_to}"')
+if os.path.isdir(dir_from):
+    SortFolderByTime(dir_from, dir_to).sort_files()
+    print(f'Скрипт сработал. Файлы записаны в дерикторию "{dir_to}"')
+elif zipfile.is_zipfile(dir_from):
+    dir_to += '_zip'
+    SortZipByTime(dir_from, dir_to).sort_files()
+    print(f'Скрипт сработал. Файлы записаны в дерикторию "{dir_to}"')
+else:
+    print('Error')
 
 
 # Усложненное задание (делать по желанию)
@@ -80,6 +119,3 @@ print(f'Скрипт сработал. Файлы записаны в дерик
 # Это относится только к чтению файлов в архиве. В случае паттерна "Шаблонный метод" изменяется способ
 # получения данных (читаем os.walk() или zip.namelist и т.д.)
 # Документация по zipfile: API https://docs.python.org/3/library/zipfile.html
-
-# TODO: если есть запал - можно начинать) скучно не будет точно (как по мне, 9.3 - одна из самых сложных задач за весь
-#  курс).

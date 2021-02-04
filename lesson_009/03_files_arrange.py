@@ -46,58 +46,52 @@ from abc import abstractmethod, ABC
 
 class SortFiles(ABC):
     def __init__(self, dir_from, dir_to):
-        self.dir_from = os.path.normpath(dir_from)  # Потому что он начинает поиск изначально в той директории, где файл скрипта
+        self.dir_from = os.path.normpath(dir_from)
         self.dir_to = os.path.normpath(dir_to)
 
     def sort_files(self):
-        self.search_copy_files()
+        for file in self.get_files():
+            self.copy_file(file=file)
 
     @abstractmethod
-    def search_copy_files(self):
+    def get_files(self):
+        pass
+
+    @abstractmethod
+    def copy_file(self, file):
         pass
 
 
-class SortFolder(SortFiles):
-    def search_copy_files(self):
+class SortFolderByTime(SortFiles):
+    def get_files(self):
+        list_path_files = []
         for dirpath, dirnames, filenames in os.walk(self.dir_from):
             for file in filenames:
-                file_path = os.path.join(dirpath, file)
-                self.copy_file(file_path=file_path)
+                list_path_files.append(os.path.join(dirpath, file))
+        return list_path_files
 
-    @abstractmethod
-    def copy_file(self, file_path):
-        pass
-
-
-class SortFolderByTime(SortFolder):
-    def copy_file(self, file_path):
-        file_time = time.gmtime(os.path.getmtime(file_path))
+    def copy_file(self, file):
+        file_time = time.gmtime(os.path.getmtime(file))
         path_copy_file = os.path.join(self.dir_to, str(file_time.tm_year), str(file_time.tm_mon))
         if not os.path.isdir(path_copy_file):
             os.makedirs(path_copy_file)
-        shutil.copy2(src=file_path, dst=path_copy_file)
+        shutil.copy2(src=file, dst=path_copy_file)
 
 
-class SortZip(SortFiles):
-    def search_copy_files(self):
+class SortZipByTime(SortFiles):
+    def get_files(self):
         with zipfile.ZipFile(self.dir_from, 'r') as zip_file:
-            for elem in zip_file.infolist():
-                self.unpacking_file(zip_file=zip_file, elem=elem)
+            return zip_file.infolist()
 
-    @abstractmethod
-    def unpacking_file(self, zip_file, elem):
-        pass
-
-
-class SortZipByTime(SortZip):
-    def unpacking_file(self, zip_file, elem):
-        path = zipfile.Path(zip_file.filename, elem.filename)
-        if path.is_file():
-            path_unpacking_file = os.path.join(self.dir_to, str(elem.date_time[0]), str(elem.date_time[1]))
-            if not os.path.isdir(path_unpacking_file):
-                os.makedirs(path_unpacking_file)
-            elem.filename = path.name
-            zip_file.extract(elem, path_unpacking_file)
+    def copy_file(self, file):
+        with zipfile.ZipFile(self.dir_from, 'r') as zip_file:
+            path = zipfile.Path(zip_file.filename, file.filename)
+            if path.is_file():
+                path_unpacking_file = os.path.join(self.dir_to, str(file.date_time[0]), str(file.date_time[1]))
+                if not os.path.isdir(path_unpacking_file):
+                    os.makedirs(path_unpacking_file)
+                file.filename = path.name
+                zip_file.extract(file, path_unpacking_file)
 
 
 dir_from = 'icons'
@@ -112,7 +106,6 @@ elif zipfile.is_zipfile(dir_from):
     print(f'Скрипт сработал. Файлы записаны в дерикторию "{dir_to}"')
 else:
     print('Error')
-
 
 # Усложненное задание (делать по желанию)
 # Нужно обрабатывать zip-файл, содержащий фотографии, без предварительного извлечения файлов в папку.

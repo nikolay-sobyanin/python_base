@@ -50,19 +50,31 @@ class SortFiles(ABC):
         self.dir_to = os.path.normpath(dir_to)
 
     def sort_files(self):
-        for file in self.get_files():
-            self.copy_file(file=file)
+        for file_path in self.get_files():
+            if self.is_dir(file_path):
+                continue
+            destination_dir = self.create_dir(file_path)
+            self.copy_file(file_path, destination_dir)
 
     @abstractmethod
     def get_files(self):
         pass
 
     @abstractmethod
-    def copy_file(self, file):
+    def is_dir(self, file_path):
+        pass
+
+    @abstractmethod
+    def create_dir(self, file_path):
+        pass
+
+    @abstractmethod
+    def copy_file(self, file_path, destination_dir):
         pass
 
 
 class SortFolderByTime(SortFiles):
+
     def get_files(self):
         list_path_files = []
         for dirpath, dirnames, filenames in os.walk(self.dir_from):
@@ -70,31 +82,50 @@ class SortFolderByTime(SortFiles):
                 list_path_files.append(os.path.join(dirpath, file))
         return list_path_files
 
-    def copy_file(self, file):
-        file_time = time.gmtime(os.path.getmtime(file))
+    def is_dir(self, file_path):
+        return os.path.isdir(file_path)
+
+    def create_dir(self, file_path):
+        file_time = time.gmtime(os.path.getmtime(file_path))
         path_copy_file = os.path.join(self.dir_to, str(file_time.tm_year), str(file_time.tm_mon))
         if not os.path.isdir(path_copy_file):
             os.makedirs(path_copy_file)
-        shutil.copy2(src=file, dst=path_copy_file)
+        return path_copy_file
+
+    def copy_file(self, file_path, destination_dir):
+        shutil.copy2(src=file_path, dst=destination_dir)
 
 
 class SortZipByTime(SortFiles):
+    def __init__(self, dir_from, dir_to):
+        super().__init__(dir_from, dir_to)
+        self.zip_file = zipfile.ZipFile(self.dir_from)
+
+    def __del__(self):
+        self.zip_file.close()
+
     def get_files(self):
-        with zipfile.ZipFile(self.dir_from, 'r') as zip_file:
-            return zip_file.infolist()
+        return self.zip_file.namelist()
 
-    def copy_file(self, file):
-        with zipfile.ZipFile(self.dir_from, 'r') as zip_file:
-            path = zipfile.Path(zip_file.filename, file.filename)
-            if path.is_file():
-                path_unpacking_file = os.path.join(self.dir_to, str(file.date_time[0]), str(file.date_time[1]))
-                if not os.path.isdir(path_unpacking_file):
-                    os.makedirs(path_unpacking_file)
-                file.filename = path.name
-                zip_file.extract(file, path_unpacking_file)
+    def is_dir(self, file_path):
+        return self.zip_file.getinfo(file_path).is_dir()
+
+    def create_dir(self, file_path):
+        info_file = self.zip_file.getinfo(file_path)
+        path_unpacking_file = os.path.join(self.dir_to, str(info_file.date_time[0]), str(info_file.date_time[1]))
+        if not os.path.isdir(path_unpacking_file):
+            os.makedirs(path_unpacking_file)
+        return path_unpacking_file
+
+    def copy_file(self, file_path, destination_dir):
+        file_from = self.zip_file.open(file_path)
+        file_to = open(os.path.join(destination_dir, os.path.basename(file_path)), 'wb')
+        shutil.copyfileobj(file_from, file_to)
+        file_from.close()
+        file_to.close()
 
 
-dir_from = 'icons'
+dir_from = 'icons.zip'
 dir_to = 'icons_by_year'
 
 if os.path.isdir(dir_from):

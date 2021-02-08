@@ -43,6 +43,20 @@ class DepressionError(Exception):
 class SuicideError(Exception):
     pass
 
+    # TODO: если у классов реализовать метод __str__, который будет возвращать сообщение об ошибке, то
+    #  список ниже можно будет превратить в список (а лучше кортеж) классов.
+    #  Мы же чаще делаем:
+    #       raise ValueError        # класс
+    #  а не:
+    #       raise ValueError()      # объект
+    #  .
+    #  К тому же нельзя будет создать по ошибке или случайно такое исключение:
+    #       IamGodError('Я пил!')
+    #       DrunkError('Я пил!')
+    #  .
+    #  Можно конечно и как сейчас оставить, но тогда контр-аргументы в студию)
+
+
 
 list_exception = [
         IamGodError('Я бог!'),
@@ -79,3 +93,5 @@ while carma_level < ENLIGHTENMENT_CARMA_LEVEL:
 print(f'Скрипт сработал. Всего прожито дней {day}. Записан файл ошибок {log_file_name}')
 
 # https://goo.gl/JnsDqu
+
+# почти зачтено

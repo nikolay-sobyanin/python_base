@@ -118,14 +118,29 @@ class SortZipByTime(SortFiles):
         return path_unpacking_file
 
     def copy_file(self, file_path, destination_dir):
+        # TODO: если открываем и закрываем в одном методе, то стоит использовать with
         file_from = self.zip_file.open(file_path)
         file_to = open(os.path.join(destination_dir, os.path.basename(file_path)), 'wb')
         shutil.copyfileobj(file_from, file_to)
         file_from.close()
         file_to.close()
 
+        # TODO: Открытие файлов через with.
+        #     Можно вкладывать друг в друга:
+        #           with open(...) as f_1:
+        #               with open(...) as f_2:
+        #                   line_file_1 = f_1.readline()
+        #                   line_file_2 = f_2.readline()
+        #     .
+        #     А можно использовать следующий синтаксис:
+        #           with open("1.txt") as f1, open("2.txt") as f2:
+        #               line_file_1 = f_1.readline()
+        #               line_file_2 = f_2.readline()
+        #     .
+        #     Если вложенности кода небольшая - первый вариант лучше. Если большая - только второй.
 
-dir_from = 'icons.zip'
+
+dir_from = 'icons'
 dir_to = 'icons_by_year'
 
 if os.path.isdir(dir_from):
@@ -143,3 +158,5 @@ else:
 # Это относится только к чтению файлов в архиве. В случае паттерна "Шаблонный метод" изменяется способ
 # получения данных (читаем os.walk() или zip.namelist и т.д.)
 # Документация по zipfile: API https://docs.python.org/3/library/zipfile.html
+
+# зачет!

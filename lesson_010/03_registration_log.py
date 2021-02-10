@@ -45,7 +45,7 @@ def read_line(line):
 
     item_included = True
     for item in ['@', '.']:
-        item_included *= item in email
+        item_included *= item in email      # TODO: &= будет несколько точнее, чем *=
     if not item_included:
         raise NotEmailError
 
@@ -64,15 +64,39 @@ if os.path.isfile(log_good):
 if os.path.isfile(log_bad):
     os.remove(log_bad)
 
+# TODO: указали кодировку 👍
 with open('registrations.txt', 'r', encoding='utf8') as file:
     for line in file:
+        # TODO: здесь лучше вызвать .strip() вместо [:-1]
         line = line[:-1]
         try:
             read_line(line=line)
         except (ValueError, NotNameError, NotEmailError) as exc:
+            # TODO: а здесь не указали 😡
             with open(log_bad, 'a') as log_file:
                 log_file.write(f'В строке "{line:^35}". Ошибка: {exc}.\n')
         else:
+            # TODO: и здесь не указали 😡
             with open(log_good, 'a') as log_file:
                 log_file.write(f'{line}\n')
 print(f'Скрипт сработал. Log файлы записаны.')
+
+# TODO и как итог на win10 машине:
+#  
+#  Traceback (most recent call last):
+#   File "D:/job/skillbox/students_works/sobianin_nikolai/lesson_010/03_registration_log.py", line 72, in <module>
+#     read_line(line=line)
+#   File "D:/job/skillbox/students_works/sobianin_nikolai/lesson_010/03_registration_log.py", line 56, in read_line
+#     raise ValueError('Поле age НЕ является числом от 10 до 99')
+# ValueError: Поле age НЕ является числом от 10 до 99
+#
+# During handling of the above exception, another exception occurred:
+#
+# Traceback (most recent call last):
+#   File "D:/job/skillbox/students_works/sobianin_nikolai/lesson_010/03_registration_log.py", line 75, in <module>
+#     log_file.write(f'В строке "{line:^35}". Ошибка: {exc}.\n')
+#   File "C:\Program Files\Python\Python38\lib\encodings\cp1252.py", line 19, in encode
+#     return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+# UnicodeEncodeError: 'charmap' codec can't encode character '\u0412' in position 0: character maps to <undefined>
+#
+# Process finished with exit code 1

@@ -45,7 +45,7 @@ def read_line(line):
 
     item_included = True
     for item in ['@', '.']:
-        item_included *= item in email      # TODO: &= будет несколько точнее, чем *=
+        item_included &= item in email
     if not item_included:
         raise NotEmailError
 
@@ -64,24 +64,19 @@ if os.path.isfile(log_good):
 if os.path.isfile(log_bad):
     os.remove(log_bad)
 
-# TODO: указали кодировку 👍
 with open('registrations.txt', 'r', encoding='utf8') as file:
     for line in file:
-        # TODO: здесь лучше вызвать .strip() вместо [:-1]
-        line = line[:-1]
+        line = line.strip()
         try:
             read_line(line=line)
         except (ValueError, NotNameError, NotEmailError) as exc:
-            # TODO: а здесь не указали 😡
-            with open(log_bad, 'a') as log_file:
+            with open(log_bad, 'a', encoding='utf8') as log_file:
                 log_file.write(f'В строке "{line:^35}". Ошибка: {exc}.\n')
         else:
-            # TODO: и здесь не указали 😡
-            with open(log_good, 'a') as log_file:
+            with open(log_good, 'a', encoding='utf8') as log_file:
                 log_file.write(f'{line}\n')
 print(f'Скрипт сработал. Log файлы записаны.')
 
-# TODO и как итог на win10 машине:
 #  
 #  Traceback (most recent call last):
 #   File "D:/job/skillbox/students_works/sobianin_nikolai/lesson_010/03_registration_log.py", line 72, in <module>

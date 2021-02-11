@@ -77,21 +77,4 @@ with open('registrations.txt', 'r', encoding='utf8') as file:
                 log_file.write(f'{line}\n')
 print(f'Скрипт сработал. Log файлы записаны.')
 
-#  
-#  Traceback (most recent call last):
-#   File "D:/job/skillbox/students_works/sobianin_nikolai/lesson_010/03_registration_log.py", line 72, in <module>
-#     read_line(line=line)
-#   File "D:/job/skillbox/students_works/sobianin_nikolai/lesson_010/03_registration_log.py", line 56, in read_line
-#     raise ValueError('Поле age НЕ является числом от 10 до 99')
-# ValueError: Поле age НЕ является числом от 10 до 99
-#
-# During handling of the above exception, another exception occurred:
-#
-# Traceback (most recent call last):
-#   File "D:/job/skillbox/students_works/sobianin_nikolai/lesson_010/03_registration_log.py", line 75, in <module>
-#     log_file.write(f'В строке "{line:^35}". Ошибка: {exc}.\n')
-#   File "C:\Program Files\Python\Python38\lib\encodings\cp1252.py", line 19, in encode
-#     return codecs.charmap_encode(input,self.errors,encoding_table)[0]
-# UnicodeEncodeError: 'charmap' codec can't encode character '\u0412' in position 0: character maps to <undefined>
-#
-# Process finished with exit code 1
+# зачет!

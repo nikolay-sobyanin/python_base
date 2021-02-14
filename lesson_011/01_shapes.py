@@ -33,3 +33,5 @@ draw_square(point=sd.get_point(500, 200), angle=45, length=100)
 
 
 sd.pause()
+
+# зачет!

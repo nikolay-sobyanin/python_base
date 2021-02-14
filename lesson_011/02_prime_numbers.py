@@ -39,8 +39,9 @@ class PrimeNumbers:
             else:
                 self.prime_numbers.append(self.i)
                 return self.i
+        # TODO: else не нужен. Можно сразу raise.
         else:
-            raise StopIteration()
+            raise StopIteration()   # TODO: скобки не обязательны
 
 
 print(f'{"Итератор":-^20}')
@@ -71,6 +72,7 @@ for number in prime_numbers_generator(n=100):
 
 
 
+# TODO: можно часть 3.
 
 # Часть 3
 # Написать несколько функций-фильтров, которые выдает True, если число:

@@ -84,6 +84,8 @@ def prime_numbers_generator(n):
 # простых счастливых палиндромных чисел и так далее. Придумать не менее 2х способов.
 #
 # Подсказка: возможно, нужно будет добавить параметр в итератор/генератор.
+# TODO: если что - должно быть 3 функции. См.описание части 3.
+#  (не хватает 2х функций).
 
 def lucky_numb(numb):
     numb = str(numb)
@@ -91,6 +93,8 @@ def lucky_numb(numb):
     if size_numb == 1:
         return False
     left_numb = numb[:size_numb // 2]
+
+    # TODO: используйте срез с отрицательным индексом, чтобы 4 строки ниже превратить в 1
     if size_numb % 2 == 0:
         right_numb = numb[size_numb // 2:]
     else:
@@ -100,6 +104,7 @@ def lucky_numb(numb):
     return left_sum == right_sum
 
 
+# TODO: применено верно
 lucky_and_prime_numbers = filter(lucky_numb, prime_numbers_generator(n=10000))
 for number in lucky_and_prime_numbers:
     print(number)

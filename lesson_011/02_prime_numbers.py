@@ -39,15 +39,13 @@ class PrimeNumbers:
             else:
                 self.prime_numbers.append(self.i)
                 return self.i
-        # TODO: else не нужен. Можно сразу raise.
-        else:
-            raise StopIteration()   # TODO: скобки не обязательны
+        raise StopIteration
 
 
-print(f'{"Итератор":-^20}')
-prime_number_iterator = PrimeNumbers(n=100)
-for number in prime_number_iterator:
-    print(number)
+# print(f'{"Итератор":-^20}')
+# prime_number_iterator = PrimeNumbers(n=100)
+# for number in prime_number_iterator:
+#     print(number)
 
 
 # Часть 2
@@ -66,13 +64,10 @@ def prime_numbers_generator(n):
             yield number
 
 
-print(f'{"Генератор":-^20}')
-for number in prime_numbers_generator(n=100):
-    print(number)
+# print(f'{"Генератор":-^20}')
+# for number in prime_numbers_generator(n=100):
+#     print(number)
 
-
-
-# TODO: можно часть 3.
 
 # Часть 3
 # Написать несколько функций-фильтров, которые выдает True, если число:
@@ -89,5 +84,24 @@ for number in prime_numbers_generator(n=100):
 # простых счастливых палиндромных чисел и так далее. Придумать не менее 2х способов.
 #
 # Подсказка: возможно, нужно будет добавить параметр в итератор/генератор.
+
+def lucky_numb(numb):
+    numb = str(numb)
+    size_numb = len(numb)
+    if size_numb == 1:
+        return False
+    left_numb = numb[:size_numb // 2]
+    if size_numb % 2 == 0:
+        right_numb = numb[size_numb // 2:]
+    else:
+        right_numb = numb[size_numb // 2 + 1:]
+    left_sum = sum(map(int, left_numb))
+    right_sum = sum(map(int, right_numb))
+    return left_sum == right_sum
+
+
+lucky_and_prime_numbers = filter(lucky_numb, prime_numbers_generator(n=10000))
+for number in lucky_and_prime_numbers:
+    print(number)
 
 

@@ -15,7 +15,6 @@
 # [2018-05-17 01:57] 1234
 
 from abc import ABC, abstractmethod
-from collections import defaultdict
 
 
 class LogParser(ABC):
@@ -24,46 +23,34 @@ class LogParser(ABC):
         self.file_name_in = file_name_in
 
     def __iter__(self):
-        self.list_time_group = []
         self.file = open(file=self.file_name_in, mode='r', encoding='utf8')
         self.count = 0
         self.basic_time = None
+        self.current_line = None
         return self
 
-    # TODO: Этот метод вызывается, когда объект LogParser(), который мы создаем, перестанет существовать.
-    #  А пока он существует, он может несколько раз использован, т.е. файл откроется Х раз, а закроется только 1 раз.
-    #  Как быть?
-    def __del__(self):
-        self.file.close()
-
     def __next__(self):
-        self.file.seek(0)
-
-        # TODO: ну как это? ну что это))
-        #  Мы что цикл по файлу запускаем внутри цикла по файлу?
-        #  .
-        #  Используйте next(), чтобы добыть первую строку из файла, и т.о. иниализировать basic_time и count.
-        #  count будет 0, если первое событие не NOK. А потом запускаем цикл.
-        #  .
-        #  Вторая проблема: зачем мы храним все временные метки? нам достаточно хранить предыдущую метку, чтобы
-        #  с ней сранивать. Т.е. парсим строку и сравниваем time с basic_time, если не изменилось - продолжаем.
-        #  Если изменилась - return количество событий.
-        for line in self.file:
-            time, status = self.parser_line(line=line)
-            if status != 'NOK':
-                continue
-            if time in self.list_time_group:
-                continue
-            self.basic_time = time
-            self.count = 1
+        while True:
+            if self.current_line is None:
+                self.current_line = self.file.readline()
+            self.basic_time, basic_status = self.parser_line(line=self.current_line)
+            if basic_status == 'NOK':
+                self.count = 1
+            else:
+                self.count = 0
             for line in self.file:
                 time, status = self.parser_line(line=line)
-                if status != 'NOK':
-                    continue
                 if time == self.basic_time:
-                    self.count += 1
-            self.list_time_group.append(self.basic_time)
-            return self.basic_time, self.count
+                    if status == 'NOK':
+                        self.count += 1
+                    continue
+                self.current_line = line
+                if self.count == 0:  # Не генерируем значения с 0.
+                    break
+                return self.basic_time, self.count
+            else:
+                break  # Достигли конца файла выходим из цикла while.
+        self.file.close()
         raise StopIteration
 
     @abstractmethod

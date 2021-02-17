@@ -93,12 +93,7 @@ def lucky_numb(numb):
     if size_numb == 1:
         return False
     left_numb = numb[:size_numb // 2]
-
-    # TODO: используйте срез с отрицательным индексом, чтобы 4 строки ниже превратить в 1
-    if size_numb % 2 == 0:
-        right_numb = numb[size_numb // 2:]
-    else:
-        right_numb = numb[size_numb // 2 + 1:]
+    right_numb = numb[-(size_numb // 2):]
     left_sum = sum(map(int, left_numb))
     right_sum = sum(map(int, right_numb))
     return left_sum == right_sum

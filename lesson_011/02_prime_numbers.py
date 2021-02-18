@@ -103,12 +103,18 @@ def lucky_numb(numb):
 def palindromic_numb(numb):
     numb = str(numb)
     size_numb = len(numb)
+
+    # TODO: 3 строки ниже можно объединить.
+    #  Почему? Потому что and оптимизирован, если он увидит, что левый оператор False, то он не будет проверять правый.
+    #  Например:
+    #   False and 1 / 0     # ошибки не будет, т.к. "1/0" не будет исполняться, т.к. по False слева уже понятен итог
     if size_numb == 1:
         return False
-    return numb == numb[::-1]
+    return numb == numb[::-1]       # TODO: Будьте вниманительны. Порядок в and имеет значение. Слева на паправо.
 
 
 def natural_numb(numb):
+    # TODO: упростить до 1 строки. TOD0 выше в помощь
     if numb <= 0:
         return False
     if numb == int(numb):
@@ -133,9 +139,18 @@ def triangular_numb(numb):
     if D > 0:
         x1 = (-b - math.sqrt(D)) / (2 * a)
         x2 = (-b + math.sqrt(D)) / (2 * a)
+
+        # TODO: упростить до 1 строки
         if natural_numb(x1) or natural_numb(x2):
             return True
         return False
+
+    # TODO: посмотреть на 3 if`а выше. Нет-нет, объединять их в систему if/elif не предлагаю.
+    #  Посмотрите. И теперь вопрос: почему в конце функции нет return`а?
+
+    return 100500   # а если он был, то никогда бы не сработал.
+
+    # TODO: оптимизируте условия так, чтобы return здесь появился и он был рабочий. (немного подскажу: дело в условии)
 
 
 # lucky_and_prime_numbers = filter(lucky_numb, prime_numbers_generator(n=10000))

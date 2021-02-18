@@ -2,6 +2,7 @@
 
 
 # Есть функция генерации списка простых чисел
+import math
 
 
 def get_prime_numbers(n):
@@ -99,9 +100,54 @@ def lucky_numb(numb):
     return left_sum == right_sum
 
 
-# TODO: применено верно
-lucky_and_prime_numbers = filter(lucky_numb, prime_numbers_generator(n=10000))
-for number in lucky_and_prime_numbers:
+def palindromic_numb(numb):
+    numb = str(numb)
+    size_numb = len(numb)
+    if size_numb == 1:
+        return False
+    return numb == numb[::-1]
+
+
+def natural_numb(numb):
+    if numb <= 0:
+        return False
+    if numb == int(numb):
+        return True
+    else:
+        return False
+
+
+def triangular_numb(numb):
+    """Формула для определения треугольного числа numb = n * (n + 1) / 2. Если квадратное уравнение имеет хотя бы один
+    корень равный натуральному числу, то число треугольное."""
+    if numb <= 0:
+        return False
+    # n^2 + n + (-2 * numb) = 0
+    a, b, c = 1, 1, -2 * numb
+    D = b ** 2 - 4 * a * c
+    if D < 0:
+        return False
+    if D == 0:
+        x = -b / (2 * a)
+        return natural_numb(x)
+    if D > 0:
+        x1 = (-b - math.sqrt(D)) / (2 * a)
+        x2 = (-b + math.sqrt(D)) / (2 * a)
+        if natural_numb(x1) or natural_numb(x2):
+            return True
+        return False
+
+
+# lucky_and_prime_numbers = filter(lucky_numb, prime_numbers_generator(n=10000))
+lucky_and_prime_numbers = [x for x in prime_numbers_generator(n=10000) if lucky_numb(x)]
+
+# palindromic_and_prime_numbers = filter(palindromic_numb, prime_numbers_generator(n=10000))
+palindromic_and_prime_numbers = [x for x in prime_numbers_generator(n=10000) if palindromic_numb(x)]
+
+# triangular_and_prime_numbers = filter(triangular_numb, prime_numbers_generator(n=10000))
+triangular_and_prime_numbers = [x for x in prime_numbers_generator(n=10000) if triangular_numb(x)]
+
+for number in triangular_and_prime_numbers:
     print(number)
 
 

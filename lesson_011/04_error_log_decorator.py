@@ -6,20 +6,35 @@
 # Имя файла лога - function_errors.log
 # Формат лога: <имя функции> <параметры вызова> <тип ошибки> <текст ошибки>
 # Лог файл открывать каждый раз при ошибке в режиме 'a'
+import os
 
 
-def log_errors(func):
-    pass
-    # TODO здесь ваш код
+def log_errors(name_log):
+    def log(func):
+        if os.path.isfile(name_log):
+            os.remove(name_log)
+
+        def surrogate(*args, **kwargs):
+            result = func
+            name_func = result.__name__
+            try:
+                result(*args, **kwargs)
+            except Exception as exc:
+                with open(name_log, 'a', encoding='utf8') as log_file:
+                    log_file.write(f'{name_func:^15} {str(args):^35} {str(kwargs):^30} {str(type(exc)):^30}: {exc}.\n')
+                raise
+            return result
+        return surrogate
+    return log
 
 
 # Проверить работу на следующих функциях
-@log_errors
+@log_errors('function_errors_1.log')
 def perky(param):
     return param / 0
 
 
-@log_errors
+@log_errors('function_errors_2.log')
 def check_line(line):
     name, email, age = line.split(' ')
     if not name.isalpha():
@@ -38,17 +53,14 @@ lines = [
     'Земфира 86',
     'Равшан wmsuuzsxi@mail.ru 35',
 ]
+
+if os.path.isfile('function_errors.log'):
+    os.remove('function_errors.log')
+
 for line in lines:
     try:
         check_line(line)
     except Exception as exc:
         print(f'Invalid format: {exc}')
+
 perky(param=42)
-
-
-# Усложненное задание (делать по желанию).
-# Написать декоратор с параметром - именем файла
-#
-# @log_errors('function_errors.log')
-# def func():
-#     pass

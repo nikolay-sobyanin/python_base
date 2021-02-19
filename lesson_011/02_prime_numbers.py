@@ -85,8 +85,7 @@ def prime_numbers_generator(n):
 # простых счастливых палиндромных чисел и так далее. Придумать не менее 2х способов.
 #
 # Подсказка: возможно, нужно будет добавить параметр в итератор/генератор.
-# TODO: если что - должно быть 3 функции. См.описание части 3.
-#  (не хватает 2х функций).
+
 
 def lucky_numb(numb):
     numb = str(numb)
@@ -103,24 +102,11 @@ def lucky_numb(numb):
 def palindromic_numb(numb):
     numb = str(numb)
     size_numb = len(numb)
-
-    # TODO: 3 строки ниже можно объединить.
-    #  Почему? Потому что and оптимизирован, если он увидит, что левый оператор False, то он не будет проверять правый.
-    #  Например:
-    #   False and 1 / 0     # ошибки не будет, т.к. "1/0" не будет исполняться, т.к. по False слева уже понятен итог
-    if size_numb == 1:
-        return False
-    return numb == numb[::-1]       # TODO: Будьте вниманительны. Порядок в and имеет значение. Слева на паправо.
+    return size_numb > 1 and numb == numb[::-1]
 
 
 def natural_numb(numb):
-    # TODO: упростить до 1 строки. TOD0 выше в помощь
-    if numb <= 0:
-        return False
-    if numb == int(numb):
-        return True
-    else:
-        return False
+    return numb > 0 and numb == int(numb)
 
 
 def triangular_numb(numb):
@@ -131,26 +117,14 @@ def triangular_numb(numb):
     # n^2 + n + (-2 * numb) = 0
     a, b, c = 1, 1, -2 * numb
     D = b ** 2 - 4 * a * c
-    if D < 0:
-        return False
     if D == 0:
         x = -b / (2 * a)
         return natural_numb(x)
     if D > 0:
         x1 = (-b - math.sqrt(D)) / (2 * a)
         x2 = (-b + math.sqrt(D)) / (2 * a)
-
-        # TODO: упростить до 1 строки
-        if natural_numb(x1) or natural_numb(x2):
-            return True
-        return False
-
-    # TODO: посмотреть на 3 if`а выше. Нет-нет, объединять их в систему if/elif не предлагаю.
-    #  Посмотрите. И теперь вопрос: почему в конце функции нет return`а?
-
-    return 100500   # а если он был, то никогда бы не сработал.
-
-    # TODO: оптимизируте условия так, чтобы return здесь появился и он был рабочий. (немного подскажу: дело в условии)
+        return natural_numb(x1) or natural_numb(x2)
+    return False
 
 
 # lucky_and_prime_numbers = filter(lucky_numb, prime_numbers_generator(n=10000))

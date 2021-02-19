@@ -11,6 +11,8 @@ import os
 
 def log_errors(name_log):
     def log(func):
+        # TODO: Хитро) Но имейте ввиду, что это будет удалять единственный файл, если несколько декорируемых функций
+        #  ссылаются на него.
         if os.path.isfile(name_log):
             os.remove(name_log)
 
@@ -22,11 +24,24 @@ def log_errors(name_log):
             except Exception as exc:
                 with open(name_log, 'a', encoding='utf8') as log_file:
                     log_file.write(f'{name_func:^15} {str(args):^35} {str(kwargs):^30} {str(type(exc)):^30}: {exc}.\n')
+                # TODO: то, что одиночный raise вызывает предыдущее исключени - тонкий момент. Откуда набрались?
                 raise
             return result
         return surrogate
     return log
 
+# TODO: баг после применения декоратора
+def f_1():
+    return 123
+
+
+@log_errors('function_errors.log')
+def f_2():
+    return 456
+
+# TODO: куда делся результат?
+print(f_1(), f_2())
+exit(-1)
 
 # Проверить работу на следующих функциях
 @log_errors('function_errors_1.log')

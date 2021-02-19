@@ -139,4 +139,4 @@ triangular_and_prime_numbers = [x for x in prime_numbers_generator(n=10000) if t
 for number in triangular_and_prime_numbers:
     print(number)
 
-
+# зачет!

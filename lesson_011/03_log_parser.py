@@ -21,8 +21,22 @@ class LogParser(ABC):
 
     def __init__(self, file_name_in):
         self.file_name_in = file_name_in
+        self.file = open(file=self.file_name_in, mode='r', encoding='utf8')
+
+    # Добавил, что бы смоделировать ситуацию открытия файла.
+    def read_two_line(self):
+        print(self.file.readline(), end='')
+        print(self.file.readline(), end='')
+        # self.file.close()
+
+    def __del__(self):
+        self.file.close()
 
     def __iter__(self):
+        print(f'Файл закрыт: {self.file.closed}.')
+        if not self.file.closed:
+            print('Закрыли файл.')
+            self.file.close()
         self.file = open(file=self.file_name_in, mode='r', encoding='utf8')
         self.count = 0
         self.basic_time = None
@@ -34,16 +48,7 @@ class LogParser(ABC):
             if self.current_line is None:
                 self.current_line = self.file.readline()
             self.basic_time, basic_status = self.parser_line(line=self.current_line)
-
-            # TODO: тут можно немного упростить.
-            #  int(True) == 1
-            #  int(False) == 0
-            #  .
-            #  Мы можем избавиться от условия.
-            if basic_status == 'NOK':
-                self.count = 1
-            else:
-                self.count = 0
+            self.count = int(basic_status == 'NOK')
             for line in self.file:
                 time, status = self.parser_line(line=line)
                 if time == self.basic_time:
@@ -55,28 +60,10 @@ class LogParser(ABC):
                     break
                 return self.basic_time, self.count
             else:
+                self.file.close()
                 break  # Достигли конца файла выходим из цикла while.
-
-        # TODO: не факт, что итератор дойдет до конца. Нужно найти место, где закрывать файл, если он был открыт.
-        #  ВНИМАНИЕ: проблема в том, что файл может быть открыт 100500 раз, а закроется не каждый раз.
-        #  Подсказка: прежде чем "переоткрыть", стоит ...
-        self.file.close()
+        print(f'Файл закрыт: {self.file.closed}.')
         raise StopIteration
-
-        # TODO: вообще стоит оговориться:
-        #  Мы с вами работаем в интерпретаторе CPython. Т.е. ядро написано на Си. Для этой версии файл закрывается
-        #  сам, если его забыли закрыть, а программа завершилась.
-        #  .
-        #  Но помимо CPython есть ядро на Java, Jython и на С# - IronPython.
-        #  Язык везде, в каждом интепретаторе будет python, но ядро написано будет на разных языках, и в отличии
-        #  от CPython, остальные версии не закрывают файлы за собой. Поэтому документация настоятельно рекомендует
-        #  контролировать закрытие файлов. Особенно это критично, если открывается куча файлов, в 12ом модуле нас
-        #  это ждет. Для текущей задачи, может я и излишне требователен, но раз документация требует - надо делать,
-        #  иначе на собесе любую аргументацию разобьют словами "документация рекомендует закрывать файл" или
-        #  "значит ваш код стабильно будет работать только под CPython?". Поэтому лучше не создавать бреши в своей
-        #  "броне надежности".
-        #  .
-        #  в конце файла прямая наводка, свертись, когда придумаете как закрыть файл.
 
     @abstractmethod
     def parser_line(self, line):
@@ -89,10 +76,26 @@ class ParserMinute(LogParser):
 
 
 grouped_events = ParserMinute('events.txt')
+grouped_events.read_two_line()
 for time, count in grouped_events:
     print(time, count)
 print('Закончил работу')
 
+
+# вообще стоит оговориться:
+#  Мы с вами работаем в интерпретаторе CPython. Т.е. ядро написано на Си. Для этой версии файл закрывается
+#  сам, если его забыли закрыть, а программа завершилась.
+#  .
+#  Но помимо CPython есть ядро на Java, Jython и на С# - IronPython.
+#  Язык везде, в каждом интепретаторе будет python, но ядро написано будет на разных языках, и в отличии
+#  от CPython, остальные версии не закрывают файлы за собой. Поэтому документация настоятельно рекомендует
+#  контролировать закрытие файлов. Особенно это критично, если открывается куча файлов, в 12ом модуле нас
+#  это ждет. Для текущей задачи, может я и излишне требователен, но раз документация требует - надо делать,
+#  иначе на собесе любую аргументацию разобьют словами "документация рекомендует закрывать файл" или
+#  "значит ваш код стабильно будет работать только под CPython?". Поэтому лучше не создавать бреши в своей
+#  "броне надежности".
+#  .
+#  в конце файла прямая наводка, свертись, когда придумаете как закрыть файл.
 
 # не читать если еще не сделали закрытие файла!
 # .

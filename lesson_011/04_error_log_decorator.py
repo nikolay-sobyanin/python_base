@@ -11,14 +11,14 @@ import os
 
 def log_errors(name_log):
     def log(func):
-        #  Хитро) Но имейте ввиду, что это будет удалять единственный файл, если несколько декорируемых функций
-        #  ссылаются на него.
         if os.path.isfile(name_log):
             os.remove(name_log)
 
         def surrogate(*args, **kwargs):
+            # TODO: а это стоит перенести в обработчик.
             name_func = func.__name__
             try:
+                # TODO: здесь сразу return можно
                 result = func(*args, **kwargs)
             except Exception as exc:
                 with open(name_log, 'a', encoding='utf8') as log_file:
@@ -63,3 +63,5 @@ for line in lines:
         print(f'Invalid format: {exc}')
 
 perky(param=42)
+
+# зачет!

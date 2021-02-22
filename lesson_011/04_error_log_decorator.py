@@ -15,16 +15,14 @@ def log_errors(name_log):
             os.remove(name_log)
 
         def surrogate(*args, **kwargs):
-            # TODO: а это стоит перенести в обработчик.
-            name_func = func.__name__
             try:
-                # TODO: здесь сразу return можно
                 result = func(*args, **kwargs)
+                return result
             except Exception as exc:
+                name_func = func.__name__
                 with open(name_log, 'a', encoding='utf8') as log_file:
                     log_file.write(f'{name_func:^15} {str(args):^35} {str(kwargs):^30} {str(type(exc)):^30}: {exc}.\n')
                 raise
-            return result
         return surrogate
     return log
 

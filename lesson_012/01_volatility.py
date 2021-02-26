@@ -72,5 +72,86 @@
 #
 #     def run(self):
 #         <обработка данных>
+import os
+from operator import itemgetter
+from library.utils import time_track
 
-# TODO написать код в однопоточном/однопроцессорном стиле
+
+class SecidVolatility:
+
+    def __init__(self, file_path):
+        self.file_path = file_path
+        self.name_secid = None
+        self.volatility = None
+
+    def parser_line(self, line):
+        line = line.rstrip()
+        secid, tradetime, full_price, quantity = line.split(',')
+        price = float(full_price) / int(quantity)
+        return secid, price
+
+    def run(self):
+        with open(self.file_path, 'r', encoding='utf8') as file:
+            file.readline()
+            self.name_secid, price = self.parser_line(file.readline())
+            max_price, min_price = price, price
+            for line in file:
+                price = self.parser_line(line)[1]
+                if price > max_price:
+                    max_price = price
+                elif price < min_price:
+                    min_price = price
+        half_sum = (max_price + min_price) / 2
+        self.volatility = ((max_price - min_price) / half_sum) * 100
+
+
+def file_paths(dir_path):
+    for dirpath, dirnames, filenames in os.walk(dir_path):
+        for file in filenames:
+            yield os.path.join(dirpath, file)
+
+
+dict_volatility = {}
+zero_volatility = []
+
+dir_path = 'trades'
+dir_path = os.path.normpath(dir_path)
+
+
+@time_track
+def main():
+    secides = [SecidVolatility(file_path=file_path) for file_path in file_paths(dir_path=dir_path)]
+
+    for secid in secides:
+        secid.run()
+        if secid.volatility == 0:
+            zero_volatility.append(secid.name_secid)
+            continue
+        dict_volatility[secid.name_secid] = secid.volatility
+
+    sort_keys = [i[0] for i in sorted(dict_volatility.items(), key=itemgetter(1), reverse=True)]
+    max_volatility_keys = sort_keys[:3]
+    min_volatility_keys = sort_keys[-3:]
+
+    print('Максимальная волатильность:')
+    for key in max_volatility_keys:
+        print(f'{key} - {round(dict_volatility[key], 2):^5} %')
+
+    print()
+
+    print('Минимальная волатильность:')
+    for key in min_volatility_keys:
+        print(f'{key} - {round(dict_volatility[key], 2):^5} %')
+
+    print()
+
+    print('Нулевая волатильность:')
+    zero_volatility.sort()
+    print(', '.join(zero_volatility))
+
+
+if __name__ == '__main__':
+    main()
+
+
+

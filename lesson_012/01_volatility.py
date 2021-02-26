@@ -79,6 +79,8 @@ from library.utils import time_track
 
 class SecidVolatility:
 
+    # TODO: пусть принимает список файлов. Идея в том, чтобы можно было разделить 100500 файлов на 4 кучки и запустить
+    #  4 исполнителя. В однопоточной версии это бессмысленно, но пригодится в 02 и 03 задачах.
     def __init__(self, file_path):
         self.file_path = file_path
         self.name_secid = None
@@ -86,13 +88,15 @@ class SecidVolatility:
 
     def parser_line(self, line):
         line = line.rstrip()
-        secid, tradetime, full_price, quantity = line.split(',')
-        price = float(full_price) / int(quantity)
-        return secid, price
+        secid, tradetime, full_price, quantity = line.split(',')    # TODO: распаковка всегда дает доп.очки.
+        price = float(full_price) / int(quantity)                   #  те, кто пишет не на питоне, а пришел в питон
+        return secid, price                                         #  ею не пользуются.
 
     def run(self):
         with open(self.file_path, 'r', encoding='utf8') as file:
             file.readline()
+
+            # TODO: Отгадайте с одной попытки какое поле можно заменить локальной переменной?
             self.name_secid, price = self.parser_line(file.readline())
             max_price, min_price = price, price
             for line in file:
@@ -118,6 +122,7 @@ dir_path = 'trades'
 dir_path = os.path.normpath(dir_path)
 
 
+# TODO: упаковать в класс Менеджер. Пусть этот класс создает Исполнителей (SecidVolatility). (см ниже)
 @time_track
 def main():
     secides = [SecidVolatility(file_path=file_path) for file_path in file_paths(dir_path=dir_path)]
@@ -149,6 +154,14 @@ def main():
     zero_volatility.sort()
     print(', '.join(zero_volatility))
 
+# TODO:
+#  class КлассУправленец:
+#  		def получить_набор_файлов()
+#  		def запустить_исполнителей(кол_во_исполнителей=4)    # всех запустим последовательно, но в 02 уже параллельно
+#  		def вывести данные
+#  .
+#  class КлассПарсер:
+#  		def run()
 
 if __name__ == '__main__':
     main()

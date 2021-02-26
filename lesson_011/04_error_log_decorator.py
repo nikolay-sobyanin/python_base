@@ -16,6 +16,7 @@ def log_errors(name_log):
 
         def surrogate(*args, **kwargs):
             try:
+                # TODO: сразу return. result не нужен.
                 result = func(*args, **kwargs)
                 return result
             except Exception as exc:

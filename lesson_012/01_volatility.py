@@ -91,12 +91,17 @@ class SecidParcer:
         return secid, price                                         #  ею не пользуются.
     # Я не понимаю где тут распоковку применять. Если распаковывать строку, то получим список символов.
 
+    # TODO: вы ее уже применили)) строка №2: "secid, tradetime, ....".
+    #  Я и говорю: правильно применили, это дает доп.очки.
+
     def run(self):
         for file_path in self.file_paths:
             with open(file_path, 'r', encoding='utf8') as file:
                 file.readline()
                 # TODO: Отгадайте с одной попытки какое поле можно заменить локальной переменной?
                 # Этого я тоже не понял.
+                # TODO: однако заменили))
+                #  Было поле self.name_secid, а теперь это локальная переменная.
                 name_secid, price = self.parser_line(file.readline())
                 max_price, min_price = price, price
                 for line in file:
@@ -107,6 +112,7 @@ class SecidParcer:
                         min_price = price
             half_sum = (max_price + min_price) / 2
             volatility = ((max_price - min_price) / half_sum) * 100
+
             if volatility == 0:
                 self.zero_volatility.append(name_secid)
                 continue
@@ -114,8 +120,7 @@ class SecidParcer:
 
 
 class SecidManager:
-
-    def __init__(self, dir_path):
+    def __init__(self, dir_path):       # TODO: Добавить параметр "число испольнителей"
         self.dir_path = dir_path
         self.list_file_paths = []
         self.dict_volatility = {}
@@ -123,7 +128,7 @@ class SecidManager:
 
     def start_manager(self):
         self.get_file_paths()
-        self.run_performers(quantity_performer=4)
+        self.run_performers(quantity_performer=3)   # TODO: Использовать здесь
         self.output_result()
 
     def get_file_paths(self):
@@ -134,6 +139,8 @@ class SecidManager:
     def run_performers(self, quantity_performer):
         size_part = len(self.list_file_paths) // quantity_performer
         parts = [self.list_file_paths[size_part * i:size_part * (i + 1)] for i in range(quantity_performer)]
+        print(f'Всего файлов проверено: {quantity_performer*size_part}. А должно быть проверено: {len(self.list_file_paths)}')
+
         for part in parts:
             parser_files = SecidParcer(file_paths=part)
             parser_files.run()

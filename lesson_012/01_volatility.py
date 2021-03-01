@@ -86,22 +86,14 @@ class SecidParcer:
 
     def parser_line(self, line):
         line = line.rstrip()
-        secid, tradetime, full_price, quantity = line.split(',')    # TODO: распаковка всегда дает доп.очки.
-        price = float(full_price) / int(quantity)                   #  те, кто пишет не на питоне, а пришел в питон
-        return secid, price                                         #  ею не пользуются.
-    # Я не понимаю где тут распоковку применять. Если распаковывать строку, то получим список символов.
-
-    # TODO: вы ее уже применили)) строка №2: "secid, tradetime, ....".
-    #  Я и говорю: правильно применили, это дает доп.очки.
+        secid, tradetime, full_price, quantity = line.split(',')
+        price = float(full_price) / int(quantity)
+        return secid, price
 
     def run(self):
         for file_path in self.file_paths:
             with open(file_path, 'r', encoding='utf8') as file:
                 file.readline()
-                # TODO: Отгадайте с одной попытки какое поле можно заменить локальной переменной?
-                # Этого я тоже не понял.
-                # TODO: однако заменили))
-                #  Было поле self.name_secid, а теперь это локальная переменная.
                 name_secid, price = self.parser_line(file.readline())
                 max_price, min_price = price, price
                 for line in file:
@@ -120,15 +112,16 @@ class SecidParcer:
 
 
 class SecidManager:
-    def __init__(self, dir_path):       # TODO: Добавить параметр "число испольнителей"
+    def __init__(self, dir_path, quantity_performer):
         self.dir_path = dir_path
+        self.quantity_performer = quantity_performer
         self.list_file_paths = []
         self.dict_volatility = {}
         self.zero_volatility = []
 
     def start_manager(self):
         self.get_file_paths()
-        self.run_performers(quantity_performer=3)   # TODO: Использовать здесь
+        self.run_performers(quantity_performer=self.quantity_performer)
         self.output_result()
 
     def get_file_paths(self):
@@ -138,10 +131,12 @@ class SecidManager:
 
     def run_performers(self, quantity_performer):
         size_part = len(self.list_file_paths) // quantity_performer
-        parts = [self.list_file_paths[size_part * i:size_part * (i + 1)] for i in range(quantity_performer)]
-        print(f'Всего файлов проверено: {quantity_performer*size_part}. А должно быть проверено: {len(self.list_file_paths)}')
-
-        for part in parts:
+        parts = [self.list_file_paths[size_part * i:size_part * (i + 1)] for i in range(quantity_performer - 1)]
+        parts.append(self.list_file_paths[(quantity_performer - 1) * size_part:])
+        count_files = sum(map(lambda x: len(x), parts))
+        print(f'Всего файлов проверено: {count_files}. А должно быть проверено: {len(self.list_file_paths)}')
+        for i, part in enumerate(parts, 1):
+            print(f'Размер части №{i} - {len(part)}')
             parser_files = SecidParcer(file_paths=part)
             parser_files.run()
             self.dict_volatility.update(parser_files.dict_volatility)
@@ -151,19 +146,16 @@ class SecidManager:
         sort_keys = [i[0] for i in sorted(self.dict_volatility.items(), key=itemgetter(1), reverse=True)]
         max_volatility_keys = sort_keys[:3]
         min_volatility_keys = sort_keys[-3:]
-
+        print()
+        print(f'{"Результат":*^30}')
         print('Максимальная волатильность:')
         for key in max_volatility_keys:
             print(f'{key} - {round(self.dict_volatility[key], 2):^5} %')
-
         print()
-
         print('Минимальная волатильность:')
         for key in min_volatility_keys:
             print(f'{key} - {round(self.dict_volatility[key], 2):^5} %')
-
         print()
-
         print('Нулевая волатильность:')
         self.zero_volatility.sort()
         print(', '.join(self.zero_volatility))
@@ -175,7 +167,7 @@ dir_path = os.path.normpath(dir_path)
 
 @time_track
 def main():
-    SecidManager(dir_path=dir_path).start_manager()
+    SecidManager(dir_path=dir_path, quantity_performer=4).start_manager()
 
 
 if __name__ == '__main__':

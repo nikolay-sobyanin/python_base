@@ -77,94 +77,101 @@ from operator import itemgetter
 from library.utils import time_track
 
 
-class SecidVolatility:
+class SecidParcer:
 
-    # TODO: пусть принимает список файлов. Идея в том, чтобы можно было разделить 100500 файлов на 4 кучки и запустить
-    #  4 исполнителя. В однопоточной версии это бессмысленно, но пригодится в 02 и 03 задачах.
-    def __init__(self, file_path):
-        self.file_path = file_path
-        self.name_secid = None
-        self.volatility = None
+    def __init__(self, file_paths):
+        self.file_paths = file_paths
+        self.dict_volatility = {}
+        self.zero_volatility = []
 
     def parser_line(self, line):
         line = line.rstrip()
         secid, tradetime, full_price, quantity = line.split(',')    # TODO: распаковка всегда дает доп.очки.
         price = float(full_price) / int(quantity)                   #  те, кто пишет не на питоне, а пришел в питон
         return secid, price                                         #  ею не пользуются.
+    # Я не понимаю где тут распоковку применять. Если распаковывать строку, то получим список символов.
 
     def run(self):
-        with open(self.file_path, 'r', encoding='utf8') as file:
-            file.readline()
+        for file_path in self.file_paths:
+            with open(file_path, 'r', encoding='utf8') as file:
+                file.readline()
+                # TODO: Отгадайте с одной попытки какое поле можно заменить локальной переменной?
+                # Этого я тоже не понял.
+                name_secid, price = self.parser_line(file.readline())
+                max_price, min_price = price, price
+                for line in file:
+                    price = self.parser_line(line)[1]
+                    if price > max_price:
+                        max_price = price
+                    elif price < min_price:
+                        min_price = price
+            half_sum = (max_price + min_price) / 2
+            volatility = ((max_price - min_price) / half_sum) * 100
+            if volatility == 0:
+                self.zero_volatility.append(name_secid)
+                continue
+            self.dict_volatility[name_secid] = volatility
 
-            # TODO: Отгадайте с одной попытки какое поле можно заменить локальной переменной?
-            self.name_secid, price = self.parser_line(file.readline())
-            max_price, min_price = price, price
-            for line in file:
-                price = self.parser_line(line)[1]
-                if price > max_price:
-                    max_price = price
-                elif price < min_price:
-                    min_price = price
-        half_sum = (max_price + min_price) / 2
-        self.volatility = ((max_price - min_price) / half_sum) * 100
 
+class SecidManager:
 
-def file_paths(dir_path):
-    for dirpath, dirnames, filenames in os.walk(dir_path):
-        for file in filenames:
-            yield os.path.join(dirpath, file)
+    def __init__(self, dir_path):
+        self.dir_path = dir_path
+        self.list_file_paths = []
+        self.dict_volatility = {}
+        self.zero_volatility = []
 
+    def start_manager(self):
+        self.get_file_paths()
+        self.run_performers(quantity_performer=4)
+        self.output_result()
 
-dict_volatility = {}
-zero_volatility = []
+    def get_file_paths(self):
+        for dirpath, dirnames, filenames in os.walk(dir_path):
+            for file in filenames:
+                self.list_file_paths.append(os.path.join(dirpath, file))
+
+    def run_performers(self, quantity_performer):
+        size_part = len(self.list_file_paths) // quantity_performer
+        parts = [self.list_file_paths[size_part * i:size_part * (i + 1)] for i in range(quantity_performer)]
+        for part in parts:
+            parser_files = SecidParcer(file_paths=part)
+            parser_files.run()
+            self.dict_volatility.update(parser_files.dict_volatility)
+            self.zero_volatility.extend(parser_files.zero_volatility)
+
+    def output_result(self):
+        sort_keys = [i[0] for i in sorted(self.dict_volatility.items(), key=itemgetter(1), reverse=True)]
+        max_volatility_keys = sort_keys[:3]
+        min_volatility_keys = sort_keys[-3:]
+
+        print('Максимальная волатильность:')
+        for key in max_volatility_keys:
+            print(f'{key} - {round(self.dict_volatility[key], 2):^5} %')
+
+        print()
+
+        print('Минимальная волатильность:')
+        for key in min_volatility_keys:
+            print(f'{key} - {round(self.dict_volatility[key], 2):^5} %')
+
+        print()
+
+        print('Нулевая волатильность:')
+        self.zero_volatility.sort()
+        print(', '.join(self.zero_volatility))
+
 
 dir_path = 'trades'
 dir_path = os.path.normpath(dir_path)
 
 
-# TODO: упаковать в класс Менеджер. Пусть этот класс создает Исполнителей (SecidVolatility). (см ниже)
 @time_track
 def main():
-    secides = [SecidVolatility(file_path=file_path) for file_path in file_paths(dir_path=dir_path)]
+    SecidManager(dir_path=dir_path).start_manager()
 
-    for secid in secides:
-        secid.run()
-        if secid.volatility == 0:
-            zero_volatility.append(secid.name_secid)
-            continue
-        dict_volatility[secid.name_secid] = secid.volatility
-
-    sort_keys = [i[0] for i in sorted(dict_volatility.items(), key=itemgetter(1), reverse=True)]
-    max_volatility_keys = sort_keys[:3]
-    min_volatility_keys = sort_keys[-3:]
-
-    print('Максимальная волатильность:')
-    for key in max_volatility_keys:
-        print(f'{key} - {round(dict_volatility[key], 2):^5} %')
-
-    print()
-
-    print('Минимальная волатильность:')
-    for key in min_volatility_keys:
-        print(f'{key} - {round(dict_volatility[key], 2):^5} %')
-
-    print()
-
-    print('Нулевая волатильность:')
-    zero_volatility.sort()
-    print(', '.join(zero_volatility))
-
-# TODO:
-#  class КлассУправленец:
-#  		def получить_набор_файлов()
-#  		def запустить_исполнителей(кол_во_исполнителей=4)    # всех запустим последовательно, но в 02 уже параллельно
-#  		def вывести данные
-#  .
-#  class КлассПарсер:
-#  		def run()
 
 if __name__ == '__main__':
     main()
-
 
 

@@ -17,24 +17,20 @@
 #       ТИКЕР7, ТИКЕР8, ТИКЕР9, ТИКЕР10, ТИКЕР11, ТИКЕР12
 # Волатильности указывать в порядке убывания. Тикеры с нулевой волатильностью упорядочить по имени.
 #
-
-
+import math
 import os
 from operator import itemgetter
 from threading import Thread
-from queue import Queue
 from library.utils import time_track
 
 
 class SecidParcer(Thread):
 
-    def __init__(self, file_paths, holder_dict, holder_list,  *args, **kwargs):
+    def __init__(self, file_paths, dict_volatility, zero_volatility,  *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.file_paths = file_paths
-        self.dict_volatility = {}
-        self.zero_volatility = []
-        self.holder_dict = holder_dict
-        self.holder_list = holder_list
+        self.dict_volatility = dict_volatility
+        self.zero_volatility = zero_volatility
 
     def parser_line(self, line):
         line = line.rstrip()
@@ -62,9 +58,6 @@ class SecidParcer(Thread):
                 continue
             self.dict_volatility[name_secid] = volatility
 
-        self.holder_dict.put(self.dict_volatility)
-        self.holder_list.put(self.zero_volatility)
-
 
 class SecidManager:
     def __init__(self, dir_path, quantity_performer):
@@ -73,11 +66,6 @@ class SecidManager:
         self.list_file_paths = []
         self.dict_volatility = {}
         self.zero_volatility = []
-        # TODO: создавать очереди для поток не обязательно. Все создаваемые потоки находятся в одном процессе,
-        #  т.к. в одном контексте. Это значит, что можно буквально запросить любое поле у Исполнителя и он его выдаст.
-        #  Добавление очереди не принесыт выгоды, а только замедлит работу.
-        self.holder_dict = Queue(maxsize=self.quantity_performer)
-        self.holder_list = Queue(maxsize=self.quantity_performer)
 
     def start_manager(self):
         self.get_file_paths()
@@ -90,20 +78,12 @@ class SecidManager:
                 self.list_file_paths.append(os.path.join(dirpath, file))
 
     def run_performers(self, quantity_performer):
-        size_part = len(self.list_file_paths) // quantity_performer
-        parts = [self.list_file_paths[size_part * i:size_part * (i + 1)] for i in range(quantity_performer - 1)]
-        parts.append(self.list_file_paths[(quantity_performer - 1) * size_part:])
+        size_part = math.ceil(len(self.list_file_paths) / quantity_performer)
+        parts = [self.list_file_paths[size_part * i:size_part * (i + 1)] for i in range(quantity_performer)]
 
-        performers = [SecidParcer(part, self.holder_dict, self.holder_list) for part in parts]
+        performers = [SecidParcer(part, self.dict_volatility, self.zero_volatility) for part in parts]
         for performer in performers:
             performer.start()
-
-        while any(performer.is_alive() for performer in performers):
-            holder_dict = self.holder_dict.get()
-            holder_list = self.holder_list.get()
-            self.dict_volatility.update(holder_dict)
-            self.zero_volatility.extend(holder_list)
-
         for performer in performers:
             performer.join()
 
@@ -137,3 +117,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+

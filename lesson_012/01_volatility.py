@@ -72,6 +72,7 @@
 #
 #     def run(self):
 #         <обработка данных>
+import math
 import os
 from operator import itemgetter
 from library.utils import time_track
@@ -130,14 +131,8 @@ class SecidManager:
                 self.list_file_paths.append(os.path.join(dirpath, file))
 
     def run_performers(self, quantity_performer):
-        # TODO: вот здесь вместо "//" стоит использовать "/" и округление в большую сторону (math.ceil)
-        size_part = len(self.list_file_paths) // quantity_performer
-        parts = [self.list_file_paths[size_part * i:size_part * (i + 1)] for i in range(quantity_performer - 1)]
-        # TODO: Тогда строку ниже можно будет убрать
-        parts.append(self.list_file_paths[(quantity_performer - 1) * size_part:])
-        # TODO: допустим у нас 95 файлов и 6 потоков.
-        #  Это значит первые 5 потоков получат по 15 файлов, а последний - 20.
-        #  А можно - первые 5 - по 16 файлов, а последний - 15 (более равномерно).
+        size_part = math.ceil(len(self.list_file_paths) / quantity_performer)
+        parts = [self.list_file_paths[size_part * i:size_part * (i + 1)] for i in range(quantity_performer)]
 
         count_files = sum(map(lambda x: len(x), parts))
         print(f'Всего файлов проверено: {count_files}. А должно быть проверено: {len(self.list_file_paths)}')
@@ -173,7 +168,7 @@ dir_path = os.path.normpath(dir_path)
 
 @time_track
 def main():
-    SecidManager(dir_path=dir_path, quantity_performer=4).start_manager()
+    SecidManager(dir_path=dir_path, quantity_performer=3).start_manager()
 
 
 if __name__ == '__main__':

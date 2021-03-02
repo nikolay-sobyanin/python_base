@@ -61,6 +61,7 @@ class SecidParcer(Thread):
                 self.zero_volatility.append(name_secid)
                 continue
             self.dict_volatility[name_secid] = volatility
+
         self.holder_dict.put(self.dict_volatility)
         self.holder_list.put(self.zero_volatility)
 
@@ -72,6 +73,9 @@ class SecidManager:
         self.list_file_paths = []
         self.dict_volatility = {}
         self.zero_volatility = []
+        # TODO: создавать очереди для поток не обязательно. Все создаваемые потоки находятся в одном процессе,
+        #  т.к. в одном контексте. Это значит, что можно буквально запросить любое поле у Исполнителя и он его выдаст.
+        #  Добавление очереди не принесыт выгоды, а только замедлит работу.
         self.holder_dict = Queue(maxsize=self.quantity_performer)
         self.holder_list = Queue(maxsize=self.quantity_performer)
 

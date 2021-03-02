@@ -22,16 +22,19 @@
 import os
 from operator import itemgetter
 from threading import Thread
+from queue import Queue
 from library.utils import time_track
 
 
 class SecidParcer(Thread):
 
-    def __init__(self, file_paths, dict_volatility, zero_volatility,  *args, **kwargs):
+    def __init__(self, file_paths, holder_dict, holder_list,  *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.file_paths = file_paths
-        self.dict_volatility = dict_volatility
-        self.zero_volatility = zero_volatility
+        self.dict_volatility = {}
+        self.zero_volatility = []
+        self.holder_dict = holder_dict
+        self.holder_list = holder_list
 
     def parser_line(self, line):
         line = line.rstrip()
@@ -58,6 +61,8 @@ class SecidParcer(Thread):
                 self.zero_volatility.append(name_secid)
                 continue
             self.dict_volatility[name_secid] = volatility
+        self.holder_dict.put(self.dict_volatility)
+        self.holder_list.put(self.zero_volatility)
 
 
 class SecidManager:
@@ -67,6 +72,8 @@ class SecidManager:
         self.list_file_paths = []
         self.dict_volatility = {}
         self.zero_volatility = []
+        self.holder_dict = Queue(maxsize=self.quantity_performer)
+        self.holder_list = Queue(maxsize=self.quantity_performer)
 
     def start_manager(self):
         self.get_file_paths()
@@ -83,9 +90,16 @@ class SecidManager:
         parts = [self.list_file_paths[size_part * i:size_part * (i + 1)] for i in range(quantity_performer - 1)]
         parts.append(self.list_file_paths[(quantity_performer - 1) * size_part:])
 
-        performers = [SecidParcer(part, self.dict_volatility, self.zero_volatility) for part in parts]
+        performers = [SecidParcer(part, self.holder_dict, self.holder_list) for part in parts]
         for performer in performers:
             performer.start()
+
+        while any(performer.is_alive() for performer in performers):
+            holder_dict = self.holder_dict.get()
+            holder_list = self.holder_list.get()
+            self.dict_volatility.update(holder_dict)
+            self.zero_volatility.extend(holder_list)
+
         for performer in performers:
             performer.join()
 

@@ -32,6 +32,8 @@ class SecidParcer(Process):
         self.file_paths = file_paths
         self.holder = holder
 
+    # TODO: лучше имена методам давать "глаголами". Т.е. не "парсер строки", а "парсить строку".
+    #  Методы/функции - это действия, PEP8 рекомендует использовать глаголы/сказуемые.
     def parser_line(self, line):
         line = line.rstrip()
         secid, tradetime, full_price, quantity = line.split(',')
@@ -43,8 +45,11 @@ class SecidParcer(Process):
             with open(file_path, 'r', encoding='utf8') as file:
                 file.readline()
                 name_secid, price = self.parser_line(file.readline())
+
+                # TODO: субъективно предложу вариант: "max_price = min_price = price".
                 max_price, min_price = price, price
                 for line in file:
+                    # TODO: тут читабельнее применить распаковку в "_, price"
                     price = self.parser_line(line)[1]
                     if price > max_price:
                         max_price = price
@@ -92,6 +97,14 @@ class SecidManager:
             # Вопрос.
             # Почему не сработало в конце условие: not any(performer.is_alive() for performer in performers)?
 
+            # TODO: зависало?
+            #  Скорее всего срабатывал такой сценарий: Исполнители все что могли отдали, и завершают, или хотя бы
+            #  один из них (процесс не завершают за 1 нс, уходит некоторое время, пока он может быть жив). За это время
+            #  Менеджер взял из очереди последний элемент, проверил, что есть живой и начал ждать следующий элемент,
+            #  который никогда не придет, т.к. Исполнители вот-вот "умрут".
+            #  .
+            #  get`у нужно добавить таймаут.
+
             # secid = self.holder.get()
             # print(secid)
             # if secid[1] == 0:
@@ -102,15 +115,18 @@ class SecidManager:
             #     break
 
             try:
-                secid = self.holder.get(timeout=0)
+                # TODO: распаковку!
+                secid = self.holder.get(timeout=0)  # TODO: 0 слишком мало. хотя бы 0.05 или 0.1
                 if secid[1] == 0:
                     self.zero_volatility.append(secid[0])
                 else:
+                    # TODO: "[secid[0]] = secid[1]" - не не.
                     self.dict_volatility[secid[0]] = secid[1]
             except Empty:
                 if not any(performer.is_alive() for performer in performers):
                     break
 
+        # TODO: это перестраховка, но лично я считаю адекватная. Мы 100% дожидаемся их завершения.
         for performer in performers:
             performer.join()
 
@@ -121,6 +137,7 @@ class SecidManager:
         print(len(self.dict_volatility) + len(self.zero_volatility), len(self.list_file_paths))
         print(f'{"Результат":*^30}')
         print('Максимальная волатильность:')
+        # TODO: посмотите как реализована задача 03 модуль 05 задача. items!
         for key in max_volatility_keys:
             print(f'{key} - {round(self.dict_volatility[key], 2):^5} %')
         print()

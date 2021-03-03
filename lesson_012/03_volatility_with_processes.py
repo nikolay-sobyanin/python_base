@@ -123,24 +123,24 @@ class SecidManager:
             performer.join()
 
     def output_result(self):
-        sort_keys = [i[0] for i in sorted(self.dict_volatility.items(), key=itemgetter(1), reverse=True)]
-        max_volatility_keys = sort_keys[:3]
-        min_volatility_keys = sort_keys[-3:]
+        sort_dict = [i for i in sorted(self.dict_volatility.items(), key=itemgetter(1), reverse=True)]
+        max_volatility = sort_dict[:3]
+        min_volatility = sort_dict[-3:]
         print(len(self.dict_volatility) + len(self.zero_volatility), len(self.list_file_paths))
         print(f'{"Результат":*^30}')
         print('Максимальная волатильность:')
         # TODO: посмотите как реализована задача 03 модуль 05 задача. items!
         # Не понятно, нужно же распечатать значения словаря по сортированным ключам, которые я уже получил.
         # Я заменил на локальные переменные для улучшения четения кода.
-        for key in max_volatility_keys:
-            secid = key
-            volatility = self.dict_volatility[secid]
+        for items in max_volatility:
+            secid = items[0]
+            volatility = items[1]
             print(f'{secid} - {round(volatility, 2):^5} %')
         print()
         print('Минимальная волатильность:')
-        for key in min_volatility_keys:
-            secid = key
-            volatility = self.dict_volatility[secid]
+        for items in min_volatility:
+            secid = items[0]
+            volatility = items[1]
             print(f'{secid} - {round(volatility, 2):^5} %')
         print()
         print('Нулевая волатильность:')

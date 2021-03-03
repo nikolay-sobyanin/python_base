@@ -32,9 +32,7 @@ class SecidParcer(Process):
         self.file_paths = file_paths
         self.holder = holder
 
-    # TODO: лучше имена методам давать "глаголами". Т.е. не "парсер строки", а "парсить строку".
-    #  Методы/функции - это действия, PEP8 рекомендует использовать глаголы/сказуемые.
-    def parser_line(self, line):
+    def parse_line(self, line):
         line = line.rstrip()
         secid, tradetime, full_price, quantity = line.split(',')
         price = float(full_price) / int(quantity)
@@ -44,13 +42,10 @@ class SecidParcer(Process):
         for file_path in self.file_paths:
             with open(file_path, 'r', encoding='utf8') as file:
                 file.readline()
-                name_secid, price = self.parser_line(file.readline())
-
-                # TODO: субъективно предложу вариант: "max_price = min_price = price".
-                max_price, min_price = price, price
+                name_secid, price = self.parse_line(file.readline())
+                max_price = min_price = price
                 for line in file:
-                    # TODO: тут читабельнее применить распаковку в "_, price"
-                    price = self.parser_line(line)[1]
+                    _, price = self.parse_line(line)
                     if price > max_price:
                         max_price = price
                     elif price < min_price:
@@ -97,7 +92,7 @@ class SecidManager:
             # Вопрос.
             # Почему не сработало в конце условие: not any(performer.is_alive() for performer in performers)?
 
-            # TODO: зависало?
+            #  зависало?
             #  Скорее всего срабатывал такой сценарий: Исполнители все что могли отдали, и завершают, или хотя бы
             #  один из них (процесс не завершают за 1 нс, уходит некоторое время, пока он может быть жив). За это время
             #  Менеджер взял из очереди последний элемент, проверил, что есть живой и начал ждать следующий элемент,
@@ -115,18 +110,15 @@ class SecidManager:
             #     break
 
             try:
-                # TODO: распаковку!
-                secid = self.holder.get(timeout=0)  # TODO: 0 слишком мало. хотя бы 0.05 или 0.1
-                if secid[1] == 0:
-                    self.zero_volatility.append(secid[0])
+                secid, volatility = self.holder.get(timeout=0.05)
+                if volatility == 0:
+                    self.zero_volatility.append(secid)
                 else:
-                    # TODO: "[secid[0]] = secid[1]" - не не.
-                    self.dict_volatility[secid[0]] = secid[1]
+                    self.dict_volatility[secid] = volatility
             except Empty:
                 if not any(performer.is_alive() for performer in performers):
                     break
 
-        # TODO: это перестраховка, но лично я считаю адекватная. Мы 100% дожидаемся их завершения.
         for performer in performers:
             performer.join()
 
@@ -138,12 +130,18 @@ class SecidManager:
         print(f'{"Результат":*^30}')
         print('Максимальная волатильность:')
         # TODO: посмотите как реализована задача 03 модуль 05 задача. items!
+        # Не понятно, нужно же распечатать значения словаря по сортированным ключам, которые я уже получил.
+        # Я заменил на локальные переменные для улучшения четения кода.
         for key in max_volatility_keys:
-            print(f'{key} - {round(self.dict_volatility[key], 2):^5} %')
+            secid = key
+            volatility = self.dict_volatility[secid]
+            print(f'{secid} - {round(volatility, 2):^5} %')
         print()
         print('Минимальная волатильность:')
         for key in min_volatility_keys:
-            print(f'{key} - {round(self.dict_volatility[key], 2):^5} %')
+            secid = key
+            volatility = self.dict_volatility[secid]
+            print(f'{secid} - {round(volatility, 2):^5} %')
         print()
         print('Нулевая волатильность:')
         self.zero_volatility.sort()

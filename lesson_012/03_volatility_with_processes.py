@@ -129,23 +129,11 @@ class SecidManager:
         print(len(self.dict_volatility) + len(self.zero_volatility), len(self.list_file_paths))
         print(f'{"Результат":*^30}')
         print('Максимальная волатильность:')
-        # TODO: посмотите как реализована задача 03 модуль 05 задача. items!
-        # Не понятно, нужно же распечатать значения словаря по сортированным ключам, которые я уже получил.
-        # Я заменил на локальные переменные для улучшения четения кода.
-        # TODO: "items"...
-        #  Применить распаковку! max_volatility ~= self.dict_volatility.items(), только отсортированный.
-        #  Переменная items исчезнет. Будет прям как в "03 модуль 05 задача"
-        for items in max_volatility:
-            # TODO: 2 строки ниже тоже исчезнут.
-            #  p.s. нейминг нормальный, только распаковку не применили.
-            secid = items[0]
-            volatility = items[1]
+        for secid, volatility in max_volatility:
             print(f'{secid} - {round(volatility, 2):^5} %')
         print()
         print('Минимальная волатильность:')
-        for items in min_volatility:
-            secid = items[0]
-            volatility = items[1]
+        for secid, volatility in min_volatility:
             print(f'{secid} - {round(volatility, 2):^5} %')
         print()
         print('Нулевая волатильность:')

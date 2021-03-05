@@ -8,6 +8,10 @@
 # Пример заполнения lesson_013/images/ticket_sample.png
 # Подходящий шрифт искать на сайте ofont.ru
 
+
+
+
+# TODO: не используемый импорт.
 import os
 from PIL import Image, ImageDraw, ImageFont, ImageColor
 
@@ -39,7 +43,7 @@ make_ticket(fio='Константин', from_='Moscow', to='Perm', date='19.04')
 
 
 
-
+# TODO: можно доп.часть
 # Усложненное задание (делать по желанию).
 # Написать консольный скрипт c помощью встроенного python-модуля argparse.
 # Скрипт должен принимать параметры:

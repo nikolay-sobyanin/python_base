@@ -8,9 +8,37 @@
 # Пример заполнения lesson_013/images/ticket_sample.png
 # Подходящий шрифт искать на сайте ofont.ru
 
+import os
+from PIL import Image, ImageDraw, ImageFont, ImageColor
+
+
 def make_ticket(fio, from_, to, date):
-    # TODO здесь ваш код
-    pass
+    data = {
+        fio.upper(): (45, 125),
+        from_.upper(): (45, 195),
+        to.upper(): (45, 260),
+        date.upper(): (287, 260),
+    }
+
+    font = ImageFont.truetype('Hebar.ttf', size=12)
+    ticket = Image.open('images/ticket_template.png')
+    draw = ImageDraw.Draw(ticket)
+    for text, xy in data.items():
+        draw.text(xy=xy, text=text, font=font, fill=ImageColor.colormap['black'])
+    ticket.show()
+    save_ticket = input('Сохранить билет (y/n)? ')
+    if save_ticket.lower() in ['yes', 'y', 'да']:
+        ticket.save('ticket.png')
+        print(f'Билет сохранен!')
+    else:
+        print('Билет не сохранен.')
+
+
+make_ticket(fio='Константин', from_='Moscow', to='Perm', date='19.04')
+
+
+
+
 
 # Усложненное задание (делать по желанию).
 # Написать консольный скрипт c помощью встроенного python-модуля argparse.

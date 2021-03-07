@@ -62,3 +62,5 @@ make_ticket(**args)
 # Для запуска скрипта.
 # Нужно в cmd консоли перейти в папку где расположен скрипт (cd <path>), и выполнить команду:
 # python 01_ticket.py --fio Nick --from Moscow --to Perm --date 19.04
+
+# зачет!

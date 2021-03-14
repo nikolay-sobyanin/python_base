@@ -32,8 +32,27 @@
 # Скрипт должен принимать параметр --result и печатать на консоль:
 #   Количество очков для результатов ХХХ - УУУ.
 
-# TODO тут ваш код
-
 # При написании кода помнить, что заказчик может захотеть доработок и новых возможностей...
 # И, возможно, вам пригодится паттерн проектирования "Состояние",
 #   см https://clck.ru/Fudd8 и https://refactoring.guru/ru/design-patterns/state
+
+from bowling import PlayerResult
+import argparse
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Get player's score. --name --result")
+    parser.add_argument('--name', required=True, type=str, help='Name')
+    parser.add_argument('--result', required=True, type=str, help='From')
+    args = parser.parse_args()
+
+    player = PlayerResult(name_player=args.name, game_result=args.result)
+    player.get_score()
+    print(f'{"Результат игрока":-^21}')
+    print(f'{player.name_player:^10}|{player.score:^10}')
+
+
+if __name__ == '__main__':
+    main()
+
+# X153/1-53-/X--62-6 равно 99

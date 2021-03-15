@@ -5,6 +5,7 @@ class PlayerResult:
         self.name_player = name_player
         self.game_result = game_result
         self.score = 0
+        # TODO: 2 константы ниже стоит сделать полями класса. Почему?
         self.QUANTITY_FRAMES = 10
         self.GAME_SYMBOLS = '123456789X/-'
 
@@ -16,14 +17,20 @@ class PlayerResult:
             self.count_score(frame)
 
     def get_result_list(self):
+        # TODO: добавьте поддержку больших и маленьких букв. Икс и Ха.
         result = self.game_result.replace('X', 'X-')
         return [result[i:i + 2] for i in range(0, len(result), 2)]
 
     def check_result(self, result_list):
+        # TODO:
+        #  1. если использовать поле self.game_result, то один из циклов можно будет убрать;
+        #  2. стоит убрать квадратные скобки. Почему стоит убрать
+        #     all(i in self.GAME_SYMBOLS for frame in result_list for i in frame) - почему лучше? (а но лучше)
         if not all([i in self.GAME_SYMBOLS for frame in result_list for i in frame]):
             raise ValueError(f'Имеются недопустимые символы. Используйте только "{self.GAME_SYMBOLS}".')
         elif len(result_list) != self.QUANTITY_FRAMES:
             raise ValueError(f'Введене неверное количество фреймов. Их должно быть {self.QUANTITY_FRAMES}.')
+        # TODO: внутрь all передавать генераторное выражение.
         elif not all([len(i) == 2 for i in result_list]):
             raise ValueError(f'Последний фрейм не полный.')
 
@@ -41,8 +48,10 @@ class PlayerResult:
         elif frame[1] == '/':
             self.score += 15
         elif frame.isdigit():
+            # TODO: генарторное выражение или списковое, вот в чем вопрос
             self.score += sum([int(i) for i in frame])
         elif '-' in frame:
+            # TODO: тоже
             self.score += sum([int(i) for i in frame if i.isdigit()])
 
 

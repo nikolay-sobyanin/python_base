@@ -33,6 +33,12 @@ class TestCountScore(unittest.TestCase):
         self.player.get_score()
         self.assertEqual(self.player.score, 0)
 
+    # TODO:
+    #  with self.assertRaisesRegex(ValueError, ....):
+    #      pass
+    #  .
+    #  Это поможет нам)
+
 
 if __name__ == '__main__':
     unittest.main()

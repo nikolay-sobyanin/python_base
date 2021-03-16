@@ -1,13 +1,15 @@
 
 class PlayerResult:
 
+    QUANTITY_FRAMES = 10
+    GAME_SYMBOLS = '123456789X/-'
+    # Потому что это константы и они одинаковы для все объектов данного класса. Я сделал так сначала,
+    # но я забыл как их использовать
+
     def __init__(self, name_player, game_result):
         self.name_player = name_player
         self.game_result = game_result
         self.score = 0
-        # TODO: 2 константы ниже стоит сделать полями класса. Почему?
-        self.QUANTITY_FRAMES = 10
-        self.GAME_SYMBOLS = '123456789X/-'
 
     def get_score(self):
         result_list = self.get_result_list()
@@ -17,21 +19,28 @@ class PlayerResult:
             self.count_score(frame)
 
     def get_result_list(self):
-        # TODO: добавьте поддержку больших и маленьких букв. Икс и Ха.
-        result = self.game_result.replace('X', 'X-')
+        result = ''
+        for i in self.game_result:
+            if i.upper() in ['X', 'Х']:
+                i = 'X-'
+            result += i
         return [result[i:i + 2] for i in range(0, len(result), 2)]
 
     def check_result(self, result_list):
-        # TODO:
-        #  1. если использовать поле self.game_result, то один из циклов можно будет убрать;
-        #  2. стоит убрать квадратные скобки. Почему стоит убрать
-        #     all(i in self.GAME_SYMBOLS for frame in result_list for i in frame) - почему лучше? (а но лучше)
-        if not all([i in self.GAME_SYMBOLS for frame in result_list for i in frame]):
+        #  если использовать поле self.game_result, то один из циклов можно будет убрать;
+        #  self.game_result тут в исходном виде, я никак не преобразую его. И я думаю лучше оставить его так.
+        #  Мало нужно будет вывести исходную запись результата и тд.
+
+        #  стоит убрать квадратные скобки. Почему стоит убрать
+        #  all(i in self.GAME_SYMBOLS for frame in result_list for i in frame) - почему лучше? (а но лучше)
+        #  Генератор значений получается и если встречатеся первое False, то сразу if выполняется и выкидивает искл.
+        #  Не нужно весь список создавать и потом по нему заново проходить.
+
+        if not all(i in self.GAME_SYMBOLS for frame in result_list for i in frame):
             raise ValueError(f'Имеются недопустимые символы. Используйте только "{self.GAME_SYMBOLS}".')
         elif len(result_list) != self.QUANTITY_FRAMES:
-            raise ValueError(f'Введене неверное количество фреймов. Их должно быть {self.QUANTITY_FRAMES}.')
-        # TODO: внутрь all передавать генераторное выражение.
-        elif not all([len(i) == 2 for i in result_list]):
+            raise ValueError(f'Введено неверное количество фреймов. Их должно быть {self.QUANTITY_FRAMES}.')
+        elif len(result_list[-1]) != 2:
             raise ValueError(f'Последний фрейм не полный.')
 
     def check_frame(self, frame):
@@ -48,16 +57,15 @@ class PlayerResult:
         elif frame[1] == '/':
             self.score += 15
         elif frame.isdigit():
-            # TODO: генарторное выражение или списковое, вот в чем вопрос
-            self.score += sum([int(i) for i in frame])
+            self.score += sum(int(i) for i in frame)
         elif '-' in frame:
-            # TODO: тоже
-            self.score += sum([int(i) for i in frame if i.isdigit()])
+            self.score += sum(int(i) for i in frame if i.isdigit())
 
 
 def main():
-    kolya = PlayerResult(name_player='Nikolay', game_result='X153/1-53-/X--62-6')
+    kolya = PlayerResult(name_player='Nikolay', game_result='х153/1-53-/X--62-6')
     kolya.get_score()
+    print(kolya.game_result, kolya.get_result_list())
     print(kolya.name_player, kolya.score)
 
 

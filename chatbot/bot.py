@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import logging
 
 from _token import token
 
@@ -8,6 +9,11 @@ from vk_api import bot_longpoll
 
 group_id = 203294647
 
+log = logging.getLogger('bot')
+stream_handler = logging.StreamHandler()
+log.addHandler(stream_handler)
+log.setLevel(logging.DEBUG)
+stream_handler.setLevel(logging.DEBUG)
 
 class Bot:
 
@@ -24,19 +30,22 @@ class Bot:
         for event in self.long_poller.listen():
             try:
                 self.on_event(event)
-                self.api.messages.send(
-                    message=event.object.message['text'],
-                    random_id=random.randint(0, 2 ** 20),
-                    peer_id=event.object.message['peer_id']
-                )
-            except Exception as exc:
-                print(exc)
+            except Exception:
+                log.exception('Ошибка в обработке события.')
+                # print(exc)
 
     def on_event(self, event):
-        if event.type in [bot_longpoll.VkBotEventType.MESSAGE_NEW, bot_longpoll.VkBotEventType.MESSAGE_REPLY]:
-            print('Ты сказал:', event.object.message['text'])
+        if event.type == bot_longpoll.VkBotEventType.MESSAGE_NEW:
+            self.api.messages.send(
+                message=event.object.message['text'],
+                random_id=random.randint(0, 2 ** 20),
+                peer_id=event.object.message['peer_id']
+            )
+            log.info('Отправили сообщение назад.')
+            # print('Ты сказал:', event.object.message['text'])
         else:
-            print(f'Мы пока не умеем обрабатывать события тип {event.type}')
+            log.debug(f'Мы пока не умеем обрабатывать события тип {event.type}')
+            # print(f'Мы пока не умеем обрабатывать события тип {event.type}')
 
 
 def main():

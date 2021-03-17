@@ -7,6 +7,8 @@ import random
 import vk_api
 from vk_api import bot_longpoll
 
+# TODO: сделайте отдельный файл local_config.py
+#  В него вынесите id группы и токен. Сам файл добавьте в гит.игнор.
 group_id = 203294647
 
 log = logging.getLogger('bot')
@@ -21,6 +23,10 @@ class Bot:
         self.group_id = group_id
         self.token = token
 
+        # TODO: переключитесь на API версии 5.120, не меньше.
+        #  У VkApi есть параметр api_version, который по умолчанию стоит на 5.92 (это старая динозавр-версия)
+        #  Не забудьте в группе поменять версию API.
+        #  Так же учтите, что event в run изменится. Текст сообщения начнет хранится в другом поле!
         self.vk = vk_api.VkApi(token=self.token)
         self.long_poller = bot_longpoll.VkBotLongPoll(self.vk, self.group_id)
 

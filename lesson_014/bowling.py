@@ -5,6 +5,7 @@ class PlayerResult:
     GAME_SYMBOLS = '123456789X/-'
     # Потому что это константы и они одинаковы для все объектов данного класса. Я сделал так сначала,
     # но я забыл как их использовать
+    # TODO: через self.QUANTITY_FRAMES или через PlayerResult.QUANTITY_FRAMES
 
     def __init__(self, name_player, game_result):
         self.name_player = name_player
@@ -20,6 +21,10 @@ class PlayerResult:
 
     def get_result_list(self):
         result = ''
+        # TODO: вариант ниже был вполе разумный.
+        #       result = self.game_result.replace('X', 'X-')
+        #  .
+        #  сделайте up все строки и замените Ха на Икс. Дальше алгоритм как был.
         for i in self.game_result:
             if i.upper() in ['X', 'Х']:
                 i = 'X-'
@@ -30,11 +35,13 @@ class PlayerResult:
         #  если использовать поле self.game_result, то один из циклов можно будет убрать;
         #  self.game_result тут в исходном виде, я никак не преобразую его. И я думаю лучше оставить его так.
         #  Мало нужно будет вывести исходную запись результата и тд.
+        # TODO: убедили. согласен.
 
         #  стоит убрать квадратные скобки. Почему стоит убрать
         #  all(i in self.GAME_SYMBOLS for frame in result_list for i in frame) - почему лучше? (а но лучше)
         #  Генератор значений получается и если встречатеся первое False, то сразу if выполняется и выкидивает искл.
         #  Не нужно весь список создавать и потом по нему заново проходить.
+        # TODO: абсолютно верно. Экономим время и память.
 
         if not all(i in self.GAME_SYMBOLS for frame in result_list for i in frame):
             raise ValueError(f'Имеются недопустимые символы. Используйте только "{self.GAME_SYMBOLS}".')

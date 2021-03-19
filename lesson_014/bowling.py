@@ -20,6 +20,7 @@ class PlayerResult:
             self.count_score(frame)
 
     def get_result_list(self):
+        # TODO: upper И replace`ы можно прицепить подряд. Такой код вполне очевиден, поэтому читабельность не подкосит.
         result = self.game_result.upper()
         result = result.replace('Х', 'X')
         result = result.replace('X', 'X-')

@@ -12,6 +12,12 @@ class PlayerResult:
         self.game_result = game_result
         self.score = 0
 
+    def __str__(self):
+        return f'{self.name_player:<8}{self.game_result:<24}{self.score}'
+
+    def __gt__(self, other):
+        return self.score > other
+
     def get_score(self):
         result_list = self.get_result_list()
         self.check_result(result_list)
@@ -20,10 +26,7 @@ class PlayerResult:
             self.count_score(frame)
 
     def get_result_list(self):
-        # TODO: upper И replace`ы можно прицепить подряд. Такой код вполне очевиден, поэтому читабельность не подкосит.
-        result = self.game_result.upper()
-        result = result.replace('Х', 'X')
-        result = result.replace('X', 'X-')
+        result = self.game_result.upper().replace('Х', 'X').replace('X', 'X-')
         return [result[i:i + 2] for i in range(0, len(result), 2)]
 
     def check_result(self, result_list):

@@ -16,6 +16,9 @@ class PlayerResult:
         return f'{self.name_player:<8}{self.game_result:<24}{self.score}'
 
     def __gt__(self, other):
+        # TODO: тут есть ошибка.
+        #  Что с чем мы сравниваем?
+        #  Посмотрите в 08 модуле, доп. задачу, мы уже перегружали такой оператор.
         return self.score > other
 
     def get_score(self):

@@ -17,6 +17,10 @@ from bowling import PlayerResult
 #  .
 #  Второе. Насколько помню, '1  2	3'.split() по умолчанию сработает на табы и пробелы.
 
+#  Это все понятно. Знак табуляции \t. Вопрос в том, что табуляция в файле имеет различный размер. Где то она равна
+# 2-ум пробелам, где то трем и тд. За счет этого достигается выравнивание текса в исходном файле. Мне интересно как
+# сделали этот разный размер табуляции?
+
 
 # Второе. Структура кода в классе. Основаная проблема не понятно как возвращаться continue из функции, а также
 # нужно локальные переменные как то передавать между функциями. Как то очень сложно получается. А в таком виде код не
@@ -62,12 +66,13 @@ class TournamentBowling:
 
                     if line.startswith('### Tour'):
                         *_, numb_tour = line.split()
-                        win_name, win_score = None, 0
+                        win_player = None
                         output_file.write(line + '\n')
                         tour_start = True
                         continue
                     elif line.startswith('winner is'):
-                        output_file.write(f'winner is {win_name}\n\n')
+                        output_file.write(f'winner is {win_player.name_player}\n\n')
+                        self.win_games[win_player.name_player] += 1
                         tour_start = False
                         continue
 
@@ -78,15 +83,15 @@ class TournamentBowling:
                         try:
                             player.get_score()
                         except ValueError as exc:
-                            print(f'Произошла ошибка в туре {numb_tour}. Строка: {name} {game_result}.\n'
+                            print(f'Произошла ошибка в туре {numb_tour}. '
+                                  f'Строка: {player.name_player} {player.game_result}.\n'
                                   f'Ошибка: {exc}\n')
                             continue
 
-                        # TODO: неее. логичнее будет сранивать 2х игроков.
-                        if player > win_score:
-                            # TODO: а здесь будет перезапоминать победителя
-                            win_name, win_score = player.name_player, player.score
-                            self.win_games[name] += 1
+                        if win_player is None:
+                            win_player = player
+                        elif player > win_player:
+                            win_player = player
 
                         output_file.write(player.__str__() + '\n')
 

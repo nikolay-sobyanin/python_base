@@ -97,4 +97,3 @@ class TournamentBowling:
 tournament = TournamentBowling('tournament.txt', 'result_tournament.txt')
 tournament.get_result_tournament()
 tournament.print_result_tournament()
-

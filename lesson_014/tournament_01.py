@@ -15,9 +15,8 @@ class TournamentBowling:
         with open(self.output_file, 'w', encoding='utf8') as output_file:
             for line in self.parser_tour.read_file():
 
-                if self.parser_tour.start_tour(line):
-                    numb_tour = self.parser_tour.get_numb_tour(line)
-                    tour = Tour(numb_tour)
+                if self.parser_tour.is_start_tour(line):
+                    tour = self.parser_tour.build_tour(line)
                     output_file.write(line + '\n')
                     continue
                 elif self.parser_tour.end_tour(line):
@@ -26,13 +25,13 @@ class TournamentBowling:
                     tour = None
 
                 if tour is not None:
-                    name, game_result = self.parser_tour.get_name_result(line)
+                    player = self.parser_tour.get_player(line)
                     try:
-                        player = tour.get_result_player(name, game_result)
+                        tour.get_result_player(player)
                     except ValueError:
                         continue
 
-                    tour.get_win_player(player)
+                    tour.write_win_player(player)
                     output_file.write(player.__str__() + '\n')
 
     def print_result_tournament(self):
@@ -55,24 +54,19 @@ class ParserTour:
         with open(self.input_file, 'r', encoding='utf8') as input_file:
             for line in input_file:
                 line = line.strip()
-                # TODO: 3 строки упростить до 2
-                if not line:
-                    continue
-                yield line
+                if line:
+                    yield line
 
-    # TODO: is_start_tour? так будет понятнее
-    def start_tour(self, line):
+    def is_start_tour(self, line):
         return line.startswith('### Tour')
 
-    # TODO: может лучше сразу Tour? да и лучше не get, а build_tour
-    def get_numb_tour(self, line):
+    def build_tour(self, line):
         *_, numb_tour = line.split()
-        return numb_tour
+        return Tour(numb_tour)
 
-    # TODO: может лучше сразу Player?
-    def get_name_result(self, line):
+    def get_player(self, line):
         name, game_result = line.split('\t')
-        return name, game_result
+        return PlayerResult(name, game_result)
 
     def end_tour(self, line):
         return line.startswith('winner is')
@@ -84,23 +78,20 @@ class Tour:
         self.numb_tour = numb_tour
         self.win_player = None
 
-    def get_result_player(self, name_player, game_result):
-        player = PlayerResult(name_player, game_result)
+    def get_result_player(self, player):
         try:
-            player.get_score()
+            player.compute_score()
         except ValueError as exc:
             print(f'Произошла ошибка в туре {self.numb_tour}. '
                   f'Строка: {player.name_player} {player.game_result}.\n'
                   f'Ошибка: {exc}\n')
             raise
-        return player
 
-    def get_win_player(self, player):
-        # TODO: метод называется "get_*", а ничего не возвращает.
+    def write_win_player(self, player):
         if self.win_player is None:
             self.win_player = player
-        elif player > self.win_player:
-            self.win_player = player
+        else:
+            self.win_player = max(player, self.win_player)
 
 
 def main():

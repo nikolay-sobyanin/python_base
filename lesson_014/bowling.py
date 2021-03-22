@@ -18,8 +18,7 @@ class PlayerResult:
     def __gt__(self, other):
         return self.score > other.score
 
-    # TODO: скорее compute_score
-    def get_score(self):
+    def compute_score(self):
         result_list = self.get_result_list()
         self.check_result(result_list)
         for frame in result_list:
@@ -70,7 +69,7 @@ class PlayerResult:
 
 def main():
     kolya = PlayerResult(name_player='Nikolay', game_result='х153/1-53-/X--62-6')
-    kolya.get_score()
+    kolya.compute_score()
     print(kolya.game_result, kolya.get_result_list())
     print(kolya.name_player, kolya.score)
 

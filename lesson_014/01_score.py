@@ -47,7 +47,7 @@ def main():
     args = parser.parse_args()
 
     player = PlayerResult(name_player=args.name, game_result=args.result)
-    player.get_score()
+    player.compute_score()
     print(f'{"Результат игрока":-^21}')
     print(f'{player.name_player:^10}|{player.score:^10}')
 

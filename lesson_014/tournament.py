@@ -106,6 +106,10 @@ class TournamentBowling:
                         else:
                             win_player = max(player, win_player)
 
+                        # TODO: идея была такая
+                        # if win_player is None or player > win_player:
+                        #     win_player = player
+
                         output_file.write(player.__str__() + '\n')
 
     def print_result_tournament(self):

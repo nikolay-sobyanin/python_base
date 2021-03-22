@@ -13,7 +13,7 @@ except ImportError:
 # TO DO: сделайте отдельный файл local_config.py
 #  В него вынесите id группы и токен. Сам файл добавьте в гит.игнор.
 
-# TODO: осталось local_config.py удалить. Вы его сначала запушили, а потом добавили в гитигнор.
+#  осталось local_config.py удалить. Вы его сначала запушили, а потом добавили в гитигнор.
 #  Т.е. он сейчас индексируется. Если я сделаю изменения, они отобразятся у вас.
 #  .
 #  И еще из local_config.py.default удалите настоящие данные.
@@ -48,13 +48,16 @@ class Bot:
         self.group_id = group_id
         self.token = token
 
-        # TODO: переключитесь на API версии 5.120, не меньше.
+        #  переключитесь на API версии 5.120, не меньше.
         #  У VkApi есть параметр api_version, который по умолчанию стоит на 5.92 (это старая динозавр-версия)
         #  Не забудьте в группе поменять версию API.
         #  Так же учтите, что event в run изменится. Текст сообщения начнет хранится в другом поле!
         # Я в самом начале переключил на версию 5.130. Я изменил уже путь к тексту сообщения.
-        # TODO:  прочитайте TOD0 выше еще раз. Не только в группе меняется версия API.
-        self.vk = vk_api.VkApi(token=self.token)
+        # прочитайте TOD0 выше еще раз. Не только в группе меняется версия API.
+
+        # Текст сообщения хранится в том же поле.
+
+        self.vk = vk_api.VkApi(token=self.token, api_version='5.130')
         self.long_poller = bot_longpoll.VkBotLongPoll(self.vk, self.group_id)
 
         self.api = self.vk.get_api()
@@ -64,8 +67,9 @@ class Bot:
         for event in self.long_poller.listen():
             try:
                 self.on_event(event)
-            # TODO: если это Exception то можно не указывать. просто 'except:'
-            except Exception:
+                print(event)
+                print(self.vk.api_version)
+            except:
                 log.exception('Ошибка в обработке события.')
 
     def on_event(self, event):

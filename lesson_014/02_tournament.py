@@ -26,8 +26,26 @@
 #
 # Из текущего файла сделать консольный скрипт для формирования файла с результатами турнира.
 # Параметры скрипта: --input <файл протокола турнира> и --output <файл результатов турнира>
+import argparse
 
-# TODO тут ваш код
+from tournament_01 import TournamentBowling
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Get tournament's score. --input_file --output_file")
+    parser.add_argument('--input_file', required=True, type=str, help='Input file')
+    parser.add_argument('--output_file', required=True, type=str, help='Output file')
+    args = parser.parse_args()
+
+    tournament = TournamentBowling(input_file=args.input_file, output_file=args.output_file)
+    tournament.get_result_tournament()
+    tournament.print_result_tournament()
+
+
+if __name__ == '__main__':
+    main()
+
+# python 02_tournament.py --input_file tournament.txt --output_file result.txt
 
 # Усложненное задание (делать по желанию)
 #

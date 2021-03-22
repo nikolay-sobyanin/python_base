@@ -25,7 +25,7 @@ from bowling import PlayerResult
 # Второе. Структура кода в классе. Основаная проблема не понятно как возвращаться continue из функции, а также
 # нужно локальные переменные как то передавать между функциями. Как то очень сложно получается. А в таком виде код не
 # динамически не изменяемый.
-# TODO: насколько понял вопрос: не нравится, что у нас в классе Парсера одна мега функция, которая все почти делает.
+# насколько понял вопрос: не нравится, что у нас в классе Парсера одна мега функция, которая все почти делает.
 #  Можно сделать более ОППэшно, но всё всегда зависит от времени и ТЗ:
 #   * если нам говорят: "пиши толково, парсер будет расширяться и дополняться", то мы будет делать так:
 #          вводим классы:
@@ -106,6 +106,11 @@ class TournamentBowling:
             print(line)
 
 
-tournament = TournamentBowling('tournament.txt', 'result_tournament.txt')
-tournament.get_result_tournament()
-tournament.print_result_tournament()
+def main():
+    tournament = TournamentBowling('tournament.txt', 'result_tournament_01.txt')
+    tournament.get_result_tournament()
+    tournament.print_result_tournament()
+
+
+if __name__ == '__main__':
+    main()

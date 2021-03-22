@@ -57,6 +57,9 @@ class Bot:
 
         # Текст сообщения хранится в том же поле.
 
+        # TODO: и да, и нет (см.ниже)
+        #  Но версию мы не из-за текста переключали.
+
         self.vk = vk_api.VkApi(token=self.token, api_version='5.130')
         self.long_poller = bot_longpoll.VkBotLongPoll(self.vk, self.group_id)
 
@@ -78,12 +81,20 @@ class Bot:
         :param event: VkBotMessageEvent object
         :return: None
         """
+
+        # TODO: теперь можно обращаться
+        #  "event.message.text" вместо "event.object.message['text']"
+
         if event.type == bot_longpoll.VkBotEventType.MESSAGE_NEW:
             self.api.messages.send(
-                message=event.object.message['text'],
+                message=event.message.text,         # <===== TODO:
                 random_id=random.randint(0, 2 ** 20),
-                peer_id=event.object.message['peer_id']
+                peer_id=event.object.message['peer_id']     # TODO: с peer_id и остальными полям так же
             )
+            # TODO: немного удобнее.
+            #  Еще раз подчеркну: цель апдейта API было не удобство работы с полями, а защита своего бота о того, что
+            #  он перестанет работать. Старый API постепенно выпиливают. И 5.92 тоже убрана из документации.
+            #  По старым API они не хранят всю доку.
             log.debug('Отправили сообщение назад.')
         else:
             log.debug(f'Мы пока не умеем обрабатывать события тип {event.type}')

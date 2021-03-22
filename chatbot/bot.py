@@ -10,8 +10,15 @@ except ImportError:
     exit('Do cp local_config.py.default local_config.py and set token')
 
 
-# TODO: сделайте отдельный файл local_config.py
+# TO DO: сделайте отдельный файл local_config.py
 #  В него вынесите id группы и токен. Сам файл добавьте в гит.игнор.
+
+# TODO: осталось local_config.py удалить. Вы его сначала запушили, а потом добавили в гитигнор.
+#  Т.е. он сейчас индексируется. Если я сделаю изменения, они отобразятся у вас.
+#  .
+#  И еще из local_config.py.default удалите настоящие данные.
+#  А токен вообще теперь нужно регенировать. Токены никогда не палим. Иначе ваш бот начнет слать просьбы сделать
+#  перевод на чью-нибудь карту.
 
 log = logging.getLogger('bot')
 log.setLevel(logging.DEBUG)
@@ -46,6 +53,7 @@ class Bot:
         #  Не забудьте в группе поменять версию API.
         #  Так же учтите, что event в run изменится. Текст сообщения начнет хранится в другом поле!
         # Я в самом начале переключил на версию 5.130. Я изменил уже путь к тексту сообщения.
+        # TODO:  прочитайте TOD0 выше еще раз. Не только в группе меняется версия API.
         self.vk = vk_api.VkApi(token=self.token)
         self.long_poller = bot_longpoll.VkBotLongPoll(self.vk, self.group_id)
 
@@ -56,6 +64,7 @@ class Bot:
         for event in self.long_poller.listen():
             try:
                 self.on_event(event)
+            # TODO: если это Exception то можно не указывать. просто 'except:'
             except Exception:
                 log.exception('Ошибка в обработке события.')
 

@@ -1,6 +1,9 @@
 # Created by .ignore support plugin (hsz.mobi)
 
+chatbot/local_config.py
+*.log
 probe.py
+
 
 # User-specific stuff:
 .idea/

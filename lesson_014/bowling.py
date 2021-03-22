@@ -18,6 +18,7 @@ class PlayerResult:
     def __gt__(self, other):
         return self.score > other.score
 
+    # TODO: скорее compute_score
     def get_score(self):
         result_list = self.get_result_list()
         self.check_result(result_list)

@@ -55,17 +55,21 @@ class ParserTour:
         with open(self.input_file, 'r', encoding='utf8') as input_file:
             for line in input_file:
                 line = line.strip()
+                # TODO: 3 строки упростить до 2
                 if not line:
                     continue
                 yield line
 
+    # TODO: is_start_tour? так будет понятнее
     def start_tour(self, line):
         return line.startswith('### Tour')
 
+    # TODO: может лучше сразу Tour? да и лучше не get, а build_tour
     def get_numb_tour(self, line):
         *_, numb_tour = line.split()
         return numb_tour
 
+    # TODO: может лучше сразу Player?
     def get_name_result(self, line):
         name, game_result = line.split('\t')
         return name, game_result
@@ -92,6 +96,7 @@ class Tour:
         return player
 
     def get_win_player(self, player):
+        # TODO: метод называется "get_*", а ничего не возвращает.
         if self.win_player is None:
             self.win_player = player
         elif player > self.win_player:

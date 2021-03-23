@@ -35,9 +35,10 @@ def main():
     parser = argparse.ArgumentParser(description="Get tournament's score. --input_file --output_file")
     parser.add_argument('--input_file', required=True, type=str, help='Input file')
     parser.add_argument('--output_file', required=True, type=str, help='Output file')
+    parser.add_argument('--rules', required=True, type=str, help='Local or External')
     args = parser.parse_args()
 
-    tournament = TournamentBowling(input_file=args.input_file, output_file=args.output_file)
+    tournament = TournamentBowling(input_file=args.input_file, output_file=args.output_file, rules=args.rules)
     tournament.get_result_tournament()
     tournament.print_result_tournament()
 
@@ -45,7 +46,7 @@ def main():
 if __name__ == '__main__':
     main()
 
-# python 02_tournament.py --input_file tournament.txt --output_file result.txt
+# python 02_tournament.py --input_file tournament.txt --output_file result.txt --rules external
 
 # Усложненное задание (делать по желанию)
 #

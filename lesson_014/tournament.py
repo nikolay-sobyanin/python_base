@@ -1,6 +1,6 @@
 from collections import defaultdict
 
-from bowling import PlayerResult
+from bowling import LocalBowlingRules, ExternalBowlingRules
 
 # Работает, но мне не нравится как написан код, решил отправить что бы получить обратную связь и на выходных было чем
 # заняться.
@@ -63,9 +63,10 @@ from bowling import PlayerResult
 
 class TournamentBowling:
 
-    def __init__(self, input_file, output_file):
+    def __init__(self, input_file, output_file, rules='local'):
         self.input_file = input_file
         self.output_file = output_file
+        self.rules = rules
         self.win_games = defaultdict(int)
 
     def get_result_tournament(self):
@@ -91,7 +92,12 @@ class TournamentBowling:
 
                     if tour_start:
                         name, game_result = line.split('\t')
-                        player = PlayerResult(name, game_result)
+                        if self.rules.upper() == 'EXTERNAL':
+                            player = ExternalBowlingRules(name, game_result)
+                        elif self.rules.upper() == 'LOCAL':
+                            player = LocalBowlingRules(name, game_result)
+                        else:
+                            raise ValueError(f'Неверно введен параметр "rules" {self.rules}.')
 
                         try:
                             player.compute_score()
@@ -101,14 +107,8 @@ class TournamentBowling:
                                   f'Ошибка: {exc}\n')
                             continue
 
-                        if win_player is None:
+                        if win_player is None or player > win_player:
                             win_player = player
-                        else:
-                            win_player = max(player, win_player)
-
-                        # TODO: идея была такая
-                        # if win_player is None or player > win_player:
-                        #     win_player = player
 
                         output_file.write(player.__str__() + '\n')
 
@@ -124,9 +124,13 @@ class TournamentBowling:
 
 
 def main():
-    tournament = TournamentBowling('tournament.txt', 'result_tournament_01.txt')
-    tournament.get_result_tournament()
-    tournament.print_result_tournament()
+    tournament_local = TournamentBowling('tournament.txt', 'result_local_tournament_01.txt', rules='local')
+    tournament_local.get_result_tournament()
+    tournament_local.print_result_tournament()
+
+    tournament_external = TournamentBowling('tournament.txt', 'result_external_tournament_01.txt', rules='external')
+    tournament_external.get_result_tournament()
+    tournament_external.print_result_tournament()
 
 
 if __name__ == '__main__':

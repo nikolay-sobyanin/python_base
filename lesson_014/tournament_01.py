@@ -1,14 +1,15 @@
 from collections import defaultdict
 
-from bowling import PlayerResult
+from bowling import LocalBowlingRules, ExternalBowlingRules
 
 
 class TournamentBowling:
 
-    def __init__(self, input_file, output_file):
+    def __init__(self, input_file, output_file, rules='local'):
         self.input_file = input_file
         self.output_file = output_file
-        self.parser_tour = ParserTour(self.input_file)
+        self.rules = rules
+        self.parser_tour = ParserTour(self.input_file, self.rules)
         self.win_games = defaultdict(int)
 
     def get_result_tournament(self):
@@ -47,8 +48,9 @@ class TournamentBowling:
 
 class ParserTour:
 
-    def __init__(self, input_file):
+    def __init__(self, input_file, rules):
         self.input_file = input_file
+        self.rules = rules
 
     def read_file(self):
         with open(self.input_file, 'r', encoding='utf8') as input_file:
@@ -66,7 +68,13 @@ class ParserTour:
 
     def get_player(self, line):
         name, game_result = line.split('\t')
-        return PlayerResult(name, game_result)
+        if self.rules.upper() == 'EXTERNAL':
+            player = ExternalBowlingRules(name, game_result)
+        elif self.rules.upper() == 'LOCAL':
+            player = LocalBowlingRules(name, game_result)
+        else:
+            raise ValueError(f'Неверно введен параметр "rules" {self.rules}.')
+        return player
 
     def end_tour(self, line):
         return line.startswith('winner is')
@@ -88,16 +96,18 @@ class Tour:
             raise
 
     def write_win_player(self, player):
-        if self.win_player is None:
+        if self.win_player is None or player > self.win_player:
             self.win_player = player
-        else:
-            self.win_player = max(player, self.win_player)
 
 
 def main():
-    tournament = TournamentBowling('tournament.txt', 'result_tournament_01.txt')
-    tournament.get_result_tournament()
-    tournament.print_result_tournament()
+    tournament_local = TournamentBowling('tournament.txt', 'result_local_tournament_01.txt', rules='local')
+    tournament_local.get_result_tournament()
+    tournament_local.print_result_tournament()
+
+    tournament_external = TournamentBowling('tournament.txt', 'result_external_tournament_01.txt', rules='external')
+    tournament_external.get_result_tournament()
+    tournament_external.print_result_tournament()
 
 
 if __name__ == '__main__':

@@ -1,11 +1,11 @@
 import unittest
-from bowling import PlayerResult
+from bowling import LocalBowlingRules, ExternalBowlingRules
 
 
 class TestCheckGameResult(unittest.TestCase):
 
     def setUp(self):
-        self.player = PlayerResult(name_player='Nikolay', game_result=None)
+        self.player = LocalBowlingRules(name_player='Nikolay', game_result=None)
         self.player.QUANTITY_FRAMES = 10
 
     def test_valid_symbol(self):
@@ -17,7 +17,7 @@ class TestCheckGameResult(unittest.TestCase):
     def test_quantity_frames(self):
         self.player.game_result = 'х153/1-53-/X--62'
         massage_error = f'Введено неверное количество фреймов. Их должно быть {self.player.QUANTITY_FRAMES}.'
-        self.assertRaisesRegex(ValueError, massage_error, self.player.compute_score)  # для практики использования данной функции
+        self.assertRaisesRegex(ValueError, massage_error, self.player.compute_score)
 
     def test_full_frames(self):
         self.player.game_result = 'х153/1-53-/X--62-'
@@ -29,7 +29,7 @@ class TestCheckGameResult(unittest.TestCase):
 class TestCheckFrame(unittest.TestCase):
 
     def setUp(self):
-        self.player = PlayerResult(name_player='Nikolay', game_result=None)
+        self.player = LocalBowlingRules(name_player='Nikolay', game_result=None)
 
     def test_error_spare(self):
         frame = '/6'
@@ -50,10 +50,10 @@ class TestCheckFrame(unittest.TestCase):
             self.player.check_frame(frame)
 
 
-class TestCountScore(unittest.TestCase):
+class TestCountScoreLocalRules(unittest.TestCase):
 
     def setUp(self):
-        self.player = PlayerResult(name_player='Nikolay', game_result=None)
+        self.player = LocalBowlingRules(name_player='Nikolay', game_result=None)
         self.player.QUANTITY_FRAMES = 1
 
     def test_strike(self):
@@ -65,6 +65,40 @@ class TestCountScore(unittest.TestCase):
         self.player.game_result = '8/'
         self.player.compute_score()
         self.assertEqual(self.player.score, 15)
+
+    def test_two_throws(self):
+        self.player.game_result = '54'
+        self.player.compute_score()
+        self.assertEqual(self.player.score, 9)
+
+    def test_one_throw(self):
+        self.player.game_result = '-5'
+        self.player.compute_score()
+        self.assertEqual(self.player.score, 5)
+
+    def test_miss(self):
+        self.player.game_result = '--'
+        self.player.compute_score()
+        self.assertEqual(self.player.score, 0)
+
+
+class TestCountScoreExternalRules(unittest.TestCase):
+
+    def setUp(self):
+        self.player = ExternalBowlingRules(name_player='Nikolay', game_result=None)
+        self.player.QUANTITY_FRAMES = 1
+
+    def test_strike(self):
+        self.player.QUANTITY_FRAMES = 3
+        self.player.game_result = 'XXX'
+        self.player.compute_score()
+        self.assertEqual(self.player.score, 60)
+
+    def test_spare(self):
+        self.player.QUANTITY_FRAMES = 2
+        self.player.game_result = '1/5/'
+        self.player.compute_score()
+        self.assertEqual(self.player.score, 25)
 
     def test_two_throws(self):
         self.player.game_result = '54'

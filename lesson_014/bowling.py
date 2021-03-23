@@ -1,5 +1,7 @@
+from abc import ABC, abstractmethod
 
-class PlayerResult:
+
+class PlayerResult(ABC):
 
     QUANTITY_FRAMES = 10
     GAME_SYMBOLS = '123456789X/-'
@@ -21,9 +23,7 @@ class PlayerResult:
     def compute_score(self):
         result_list = self.get_result_list()
         self.check_result(result_list)
-        for frame in result_list:
-            self.check_frame(frame)
-            self.count_score(frame)
+        self.count_score(result_list)
 
     def get_result_list(self):
         result = self.game_result.upper().replace('Х', 'X').replace('X', 'X-')
@@ -56,19 +56,72 @@ class PlayerResult:
         elif frame.isdigit() and sum([int(i) for i in frame]) > 9:
             raise ValueError(f'Фрейм - "{frame}". Сумма двух бросков не может быть больше 9.')
 
-    def count_score(self, frame):
-        if frame == 'X-':
-            self.score += 20
-        elif frame[1] == '/':
-            self.score += 15
-        elif frame.isdigit():
-            self.score += sum(int(i) for i in frame)
-        elif '-' in frame:
-            self.score += sum(int(i) for i in frame if i.isdigit())
+    @abstractmethod
+    def count_score(self, result_list):
+        pass
+
+
+class LocalBowlingRules(PlayerResult):
+
+    def count_score(self, result_list):
+        for frame in result_list:
+            self.check_frame(frame)
+
+            if frame == 'X-':
+                self.score += 20
+            elif frame[1] == '/':
+                self.score += 15
+            else:
+                self.score += sum(int(i) for i in frame if i.isdigit())
+
+
+class ExternalBowlingRules(PlayerResult):
+
+    def count_score(self, result_list):
+        for i, frame in enumerate(result_list):
+            self.check_frame(frame)
+
+            if frame == 'X-':
+                self.count_strike(i, result_list)
+            elif frame[1] == '/':
+                self.count_spare(i, result_list)
+            else:
+                self.score += sum(int(i) for i in frame if i.isdigit())
+
+    def count_strike(self, i, result_list):
+        self.score += 10
+        if i == len(result_list) - 1:
+            return
+        if result_list[i + 1] == 'X-':
+            self.score += 10
+            if i == len(result_list) - 2:
+                return
+            if result_list[i + 2] == 'X-':
+                self.score += 10
+            elif result_list[i + 2][0].isdigit():
+                self.score += int(result_list[i + 2][0])
+        elif result_list[i + 1][1] == '/':
+            self.score += 10
+        else:
+            self.score += sum(int(i) for i in result_list[i + 1] if i.isdigit())
+
+    def count_spare(self, i, result_list):
+        self.score += 10
+        if i == len(result_list) - 1:
+            return
+        if result_list[i + 1] == 'X-':
+            self.score += 10
+        elif result_list[i + 1][0].isdigit():
+            self.score += int(result_list[i + 1][0])
 
 
 def main():
-    kolya = PlayerResult(name_player='Nikolay', game_result='х153/1-53-/X--62-6')
+    kolya = LocalBowlingRules(name_player='Nikolay', game_result='х153/1-53-/X--62X')
+    kolya.compute_score()
+    print(kolya.game_result, kolya.get_result_list())
+    print(kolya.name_player, kolya.score)
+
+    kolya = ExternalBowlingRules(name_player='Nikolay', game_result='х153/1-53-/X--62X')
     kolya.compute_score()
     print(kolya.game_result, kolya.get_result_list())
     print(kolya.name_player, kolya.score)

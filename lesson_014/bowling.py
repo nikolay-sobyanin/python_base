@@ -76,42 +76,56 @@ class Local(BowlingRules):
 
 class Global(BowlingRules):
 
+    def __init__(self):
+        super().__init__()
+        self._bonus = []
+
     def count_score(self, check_frame, result_list):
         for i, frame in enumerate(result_list):
             check_frame(frame)
+            self.computer_bonus_throws(i, frame)
             if frame == 'X-':
-                self.count_strike(i, result_list)
+                self.score += 10
             elif frame[1] == '/':
-                self.count_spare(i, result_list)
+                self.score += 10
             else:
                 self.score += sum(int(i) for i in frame if i.isdigit())
         return self.score
 
-    def count_strike(self, i, result_list):
-        self.score += 10
-        if i == len(result_list) - 1:
-            return
-        if result_list[i + 1] == 'X-':
-            self.score += 10
-            if i == len(result_list) - 2:
-                return
-            if result_list[i + 2] == 'X-':
-                self.score += 10
-            elif result_list[i + 2][0].isdigit():
-                self.score += int(result_list[i + 2][0])
-        elif result_list[i + 1][1] == '/':
-            self.score += 10
-        else:
-            self.score += sum(int(i) for i in result_list[i + 1] if i.isdigit())
+    def computer_bonus_throws(self, i, frame):
+        if i > 0:
+            if self._bonus[i - 1] == 2:
+                if frame == 'X-':
+                    self.score += 10
+                    self._bonus[i - 1] -= 1
+                elif frame[1] == '/':
+                    self.score += 10
+                    self._bonus[i - 1] -= 2
+                else:
+                    self.score += sum(int(i) for i in frame if i.isdigit())
+                    self._bonus[i - 1] -= 2
+            elif self._bonus[i - 1] == 1:
+                if frame == 'X-':
+                    self.score += 10
+                    self._bonus[i - 1] -= 1
+                elif frame[0].isdigit():
+                    self._bonus[i - 1] -= 1
+                    self.score += int(frame[0])
 
-    def count_spare(self, i, result_list):
-        self.score += 10
-        if i == len(result_list) - 1:
-            return
-        if result_list[i + 1] == 'X-':
-            self.score += 10
-        elif result_list[i + 1][0].isdigit():
-            self.score += int(result_list[i + 1][0])
+            if i > 1 and self._bonus[i - 2] == 1:
+                if frame == 'X-':
+                    self.score += 10
+                    self._bonus[i - 2] -= 1
+                elif frame[0].isdigit():
+                    self._bonus[i - 2] -= 1
+                    self.score += int(frame[0])
+
+        if frame == 'X-':
+            self._bonus.append(2)
+        elif frame[1] == '/':
+            self._bonus.append(1)
+        else:
+            self._bonus.append(0)
 
 
 def main():

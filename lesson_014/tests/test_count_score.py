@@ -1,11 +1,11 @@
 import unittest
-from bowling import LocalBowlingRules, ExternalBowlingRules
+from bowling import PlayerResult, Local, Global
 
 
 class TestCheckGameResult(unittest.TestCase):
 
     def setUp(self):
-        self.player = LocalBowlingRules(name_player='Nikolay', game_result=None)
+        self.player = PlayerResult(name_player='Nikolay', game_result=None, rules=Local())
         self.player.QUANTITY_FRAMES = 10
 
     def test_valid_symbol(self):
@@ -29,7 +29,7 @@ class TestCheckGameResult(unittest.TestCase):
 class TestCheckFrame(unittest.TestCase):
 
     def setUp(self):
-        self.player = LocalBowlingRules(name_player='Nikolay', game_result=None)
+        self.player = PlayerResult(name_player='Nikolay', game_result=None, rules=Local())
 
     def test_error_spare(self):
         frame = '/6'
@@ -53,7 +53,7 @@ class TestCheckFrame(unittest.TestCase):
 class TestCountScoreLocalRules(unittest.TestCase):
 
     def setUp(self):
-        self.player = LocalBowlingRules(name_player='Nikolay', game_result=None)
+        self.player = PlayerResult(name_player='Nikolay', game_result=None, rules=Local())
         self.player.QUANTITY_FRAMES = 1
 
     def test_strike(self):
@@ -82,10 +82,10 @@ class TestCountScoreLocalRules(unittest.TestCase):
         self.assertEqual(self.player.score, 0)
 
 
-class TestCountScoreExternalRules(unittest.TestCase):
+class TestCountScoreGlobalRules(unittest.TestCase):
 
     def setUp(self):
-        self.player = ExternalBowlingRules(name_player='Nikolay', game_result=None)
+        self.player = PlayerResult(name_player='Nikolay', game_result=None, rules=Global())
         self.player.QUANTITY_FRAMES = 1
 
     def test_strike(self):

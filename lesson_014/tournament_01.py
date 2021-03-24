@@ -1,6 +1,6 @@
 from collections import defaultdict
 
-from bowling import LocalBowlingRules, ExternalBowlingRules
+from bowling import PlayerResult, Global, Local
 
 
 class TournamentBowling:
@@ -68,10 +68,10 @@ class ParserTour:
 
     def get_player(self, line):
         name, game_result = line.split('\t')
-        if self.rules.upper() == 'EXTERNAL':
-            player = ExternalBowlingRules(name, game_result)
+        if self.rules.upper() == 'GLOBAL':
+            player = PlayerResult(name, game_result, Global())
         elif self.rules.upper() == 'LOCAL':
-            player = LocalBowlingRules(name, game_result)
+            player = PlayerResult(name, game_result, Local())
         else:
             raise ValueError(f'Неверно введен параметр "rules" {self.rules}.')
         return player
@@ -105,7 +105,7 @@ def main():
     tournament_local.get_result_tournament()
     tournament_local.print_result_tournament()
 
-    tournament_external = TournamentBowling('tournament.txt', 'result_external_tournament_01.txt', rules='external')
+    tournament_external = TournamentBowling('tournament.txt', 'result_external_tournament_01.txt', rules='global')
     tournament_external.get_result_tournament()
     tournament_external.print_result_tournament()
 

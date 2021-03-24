@@ -92,6 +92,11 @@ class TournamentBowling:
 
                     if tour_start:
                         name, game_result = line.split('\t')
+
+                        # TODO: нет! Тип правил должен попасть снаружи!.
+                        #  Иначе класс придется править, если добавится новый вид правил.
+                        #  Это класс, который использует разные стратегии. И они попадают извне, и для класса все на
+                        #  одно лицо (BowlingRules).
                         if self.rules.upper() == 'GLOBAL':
                             player = PlayerResult(name, game_result, Global())
                         elif self.rules.upper() == 'LOCAL':
@@ -110,6 +115,8 @@ class TournamentBowling:
                         if win_player is None or player > win_player:
                             win_player = player
 
+                        # TODO: Мы никогда не вызываем операторы в лоб. Единственное исключение:
+                        #  super().__init__. Вместо "player.__str__()" надо "str(player)"
                         output_file.write(player.__str__() + '\n')
 
     def print_result_tournament(self):

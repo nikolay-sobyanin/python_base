@@ -42,6 +42,8 @@ class PlayerResult:
         elif frame.isdigit() and sum([int(i) for i in frame]) > 9:
             raise ValueError(f'Фрейм - "{frame}". Сумма двух бросков не может быть больше 9.')
 
+    # TODO: почему мы сделали сеттер и проперти?
+    #  Почему бы нам просто не сделать поле "self.rules" вместо "self._rules"?
     @property
     def rules(self):
         return self._rules
@@ -93,6 +95,12 @@ class Global(BowlingRules):
         return self.score
 
     def computer_bonus_throws(self, i, frame):
+        # TODO: что ж так сложно-то.
+        #   frame.replace(...)          # 'X-' на [10]; '2/' на [2, 8]
+        #   цикл по frame`ам:           # 2 итерации, т.к. 2 удара в frame или одна, если [10]
+        #      цикл по бонусам:
+        #         плюсуем к очкам и минусуем бонусы
+        #      ударить все бонусы, которые стали 0.
         if i > 0:
             if self._bonus[i - 1] == 2:
                 if frame == 'X-':

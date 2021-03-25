@@ -42,8 +42,9 @@ class PlayerResult:
         elif frame.isdigit() and sum([int(i) for i in frame]) > 9:
             raise ValueError(f'Фрейм - "{frame}". Сумма двух бросков не может быть больше 9.')
 
-    # TODO: почему мы сделали сеттер и проперти?
+    # почему мы сделали сеттер и проперти?
     #  Почему бы нам просто не сделать поле "self.rules" вместо "self._rules"?
+    # Я так и сделал изначально, но уидел эти фичи и решил их применить на практике.
     @property
     def rules(self):
         return self._rules
@@ -85,55 +86,38 @@ class Global(BowlingRules):
     def count_score(self, check_frame, result_list):
         for i, frame in enumerate(result_list):
             check_frame(frame)
-            self.computer_bonus_throws(i, frame)
+            self.computer_bonus_throws(frame)
             if frame == 'X-':
                 self.score += 10
+                self._bonus.append(2)
             elif frame[1] == '/':
                 self.score += 10
+                self._bonus.append(1)
             else:
                 self.score += sum(int(i) for i in frame if i.isdigit())
         return self.score
 
-    def computer_bonus_throws(self, i, frame):
-        # TODO: что ж так сложно-то.
-        #   frame.replace(...)          # 'X-' на [10]; '2/' на [2, 8]
-        #   цикл по frame`ам:           # 2 итерации, т.к. 2 удара в frame или одна, если [10]
-        #      цикл по бонусам:
-        #         плюсуем к очкам и минусуем бонусы
-        #      ударить все бонусы, которые стали 0.
-        if i > 0:
-            if self._bonus[i - 1] == 2:
-                if frame == 'X-':
-                    self.score += 10
-                    self._bonus[i - 1] -= 1
-                elif frame[1] == '/':
-                    self.score += 10
-                    self._bonus[i - 1] -= 2
-                else:
-                    self.score += sum(int(i) for i in frame if i.isdigit())
-                    self._bonus[i - 1] -= 2
-            elif self._bonus[i - 1] == 1:
-                if frame == 'X-':
-                    self.score += 10
-                    self._bonus[i - 1] -= 1
-                elif frame[0].isdigit():
-                    self._bonus[i - 1] -= 1
-                    self.score += int(frame[0])
-
-            if i > 1 and self._bonus[i - 2] == 1:
-                if frame == 'X-':
-                    self.score += 10
-                    self._bonus[i - 2] -= 1
-                elif frame[0].isdigit():
-                    self._bonus[i - 2] -= 1
-                    self.score += int(frame[0])
-
+    def computer_bonus_throws(self, frame):
+        frame_list = []
         if frame == 'X-':
-            self._bonus.append(2)
+            frame_list = [10]
         elif frame[1] == '/':
-            self._bonus.append(1)
+            if frame[0].isdigit():
+                frame_list = [int(frame[0]), 10 - int(frame[0])]
+            else:
+                frame_list = [0, 10]
         else:
-            self._bonus.append(0)
+            for throw in frame:
+                if throw == '-':
+                    frame_list.append(0)
+                else:
+                    frame_list.append(int(throw))
+
+        for throw in frame_list:
+            for i, bonus in enumerate(self._bonus):
+                self.score += throw
+                self._bonus[i] -= 1
+            self._bonus = list(filter(lambda num: num != 0, self._bonus))
 
 
 def main():

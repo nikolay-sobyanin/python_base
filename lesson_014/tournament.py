@@ -63,7 +63,7 @@ from bowling import PlayerResult, Global, Local
 
 class TournamentBowling:
 
-    def __init__(self, input_file, output_file, rules='local'):
+    def __init__(self, input_file, output_file, rules):
         self.input_file = input_file
         self.output_file = output_file
         self.rules = rules
@@ -92,18 +92,7 @@ class TournamentBowling:
 
                     if tour_start:
                         name, game_result = line.split('\t')
-
-                        # TODO: нет! Тип правил должен попасть снаружи!.
-                        #  Иначе класс придется править, если добавится новый вид правил.
-                        #  Это класс, который использует разные стратегии. И они попадают извне, и для класса все на
-                        #  одно лицо (BowlingRules).
-                        if self.rules.upper() == 'GLOBAL':
-                            player = PlayerResult(name, game_result, Global())
-                        elif self.rules.upper() == 'LOCAL':
-                            player = PlayerResult(name, game_result, Local())
-                        else:
-                            raise ValueError(f'Неверно введен параметр "rules" {self.rules}.')
-
+                        player = PlayerResult(name, game_result, self.rules())
                         try:
                             player.compute_score()
                         except ValueError as exc:
@@ -114,10 +103,7 @@ class TournamentBowling:
 
                         if win_player is None or player > win_player:
                             win_player = player
-
-                        # TODO: Мы никогда не вызываем операторы в лоб. Единственное исключение:
-                        #  super().__init__. Вместо "player.__str__()" надо "str(player)"
-                        output_file.write(player.__str__() + '\n')
+                        output_file.write(str(player) + '\n')
 
     def print_result_tournament(self):
         column_width = 10
@@ -131,11 +117,11 @@ class TournamentBowling:
 
 
 def main():
-    tournament_local = TournamentBowling('tournament.txt', 'result_local_tournament_01.txt', rules='local')
+    tournament_local = TournamentBowling('tournament.txt', 'result_local_tournament_01.txt', rules=Local)
     tournament_local.get_result_tournament()
     tournament_local.print_result_tournament()
 
-    tournament_external = TournamentBowling('tournament.txt', 'result_external_tournament_01.txt', rules='global')
+    tournament_external = TournamentBowling('tournament.txt', 'result_local_tournament_01.txt', rules=Global)
     tournament_external.get_result_tournament()
     tournament_external.print_result_tournament()
 

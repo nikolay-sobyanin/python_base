@@ -5,7 +5,7 @@ from bowling import PlayerResult, Global, Local
 
 class TournamentBowling:
 
-    def __init__(self, input_file, output_file, rules='local'):
+    def __init__(self, input_file, output_file, rules):
         self.input_file = input_file
         self.output_file = output_file
         self.rules = rules
@@ -68,12 +68,7 @@ class ParserTour:
 
     def get_player(self, line):
         name, game_result = line.split('\t')
-        if self.rules.upper() == 'GLOBAL':
-            player = PlayerResult(name, game_result, Global())
-        elif self.rules.upper() == 'LOCAL':
-            player = PlayerResult(name, game_result, Local())
-        else:
-            raise ValueError(f'Неверно введен параметр "rules" {self.rules}.')
+        player = PlayerResult(name, game_result, self.rules())
         return player
 
     def end_tour(self, line):
@@ -101,11 +96,11 @@ class Tour:
 
 
 def main():
-    tournament_local = TournamentBowling('tournament.txt', 'result_local_tournament_01.txt', rules='local')
+    tournament_local = TournamentBowling('tournament.txt', 'result_local_tournament_01.txt', rules=Local)
     tournament_local.get_result_tournament()
     tournament_local.print_result_tournament()
 
-    tournament_external = TournamentBowling('tournament.txt', 'result_external_tournament_01.txt', rules='global')
+    tournament_external = TournamentBowling('tournament.txt', 'result_global_tournament_01.txt', rules=Global)
     tournament_external.get_result_tournament()
     tournament_external.print_result_tournament()
 

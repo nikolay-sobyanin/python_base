@@ -36,6 +36,11 @@ def main():
     parser.add_argument('--input_file', required=True, type=str, help='Input file')
     parser.add_argument('--output_file', required=True, type=str, help='Output file')
     # Как тогда подставлять сигнатуру типа "класс"?
+    # TODO: тут можно подставить bool (пока их только 2 вида). Указали флаг "--мировые_правила", значит при создании
+    #  TournamentBowling подставим МировыеПравила, а если не указали - классические.
+    #  Т.е. тут наше узкое горлышко. Если буду добавлять новые виды, то if`ы у нас будут плодиться здесь.
+    #  И это оправдано, т.к. это консольный интерфейс программы.
+    #  Альтернатива: можем сделать сразу строку, т.е. чтобы пользователь вводил --rules "world"
     parser.add_argument('--rules', required=True, help='Local or Global')
     args = parser.parse_args()
 

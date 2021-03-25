@@ -66,6 +66,10 @@ class TournamentBowling:
     def __init__(self, input_file, output_file, rules):
         self.input_file = input_file
         self.output_file = output_file
+        # TODO: сейчас у нас внутри класса есть "self.rules()", т.е. мы создаем объект правил сами.
+        #  Пусть лучше готовый объект попадает извне. Как правило рано или поздно появляется тип объекта, который мы не
+        #  можем сделать внутри, нам нужны какие-то аргументы для него. Поэтому лучше собрать его снаружи, а здесь
+        #  начинать использовать.
         self.rules = rules
         self.win_games = defaultdict(int)
 

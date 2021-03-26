@@ -68,7 +68,8 @@ class ParserTour:
 
     def get_player(self, line):
         name, game_result = line.split('\t')
-        player = PlayerResult(name, game_result, self.rules())
+        self.rules.score = 0
+        player = PlayerResult(name, game_result, self.rules)
         return player
 
     def end_tour(self, line):
@@ -96,13 +97,16 @@ class Tour:
 
 
 def main():
-    tournament_local = TournamentBowling('tournament.txt', 'result_local_tournament_01.txt', rules=Local)
+    local_rules = Local()
+    global_rules = Global()
+
+    tournament_local = TournamentBowling('tournament.txt', 'result_local_tournament_01.txt', rules=local_rules)
     tournament_local.get_result_tournament()
     tournament_local.print_result_tournament()
 
-    tournament_external = TournamentBowling('tournament.txt', 'result_global_tournament_01.txt', rules=Global)
-    tournament_external.get_result_tournament()
-    tournament_external.print_result_tournament()
+    tournament_global = TournamentBowling('tournament.txt', 'result_global_tournament_01.txt', rules=global_rules)
+    tournament_global.get_result_tournament()
+    tournament_global.print_result_tournament()
 
 
 if __name__ == '__main__':

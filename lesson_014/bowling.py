@@ -46,7 +46,7 @@ class PlayerResult:
     #  Почему бы нам просто не сделать поле "self.rules" вместо "self._rules"?
     # Я так и сделал изначально, но уидел эти фичи и решил их применить на практике.
 
-    # TODO: хорошо. Если мы оба помнимаем, что так делать не надо. Но сделано ради эксперимента и опыта, то все ок.
+    # хорошо. Если мы оба помнимаем, что так делать не надо. Но сделано ради эксперимента и опыта, то все ок.
     #  Обычно за такую обертку прячут что-то, до чего трудно добраться (много ключей или сложная вложенность).
     #  Или же используют первое, без сеттера, чтобы дать доступ только на чтение.
     @property
@@ -102,26 +102,13 @@ class Global(BowlingRules):
         return self.score
 
     def computer_bonus_throws(self, frame):
-        frame_list = []
-
-
-        # TODO: предварительная обработка данных replace`ом сильно упрощает алгоритм.
-        # frame.replace('-', '0')
-
-        # TODO: упростите if`ы ниже до 6 строк. (replace выше поможет это сделать)
-        if frame == 'X-':
+        frame = frame.replace('-', '0')
+        if frame == 'X0':
             frame_list = [10]
         elif frame[1] == '/':
-            if frame[0].isdigit():
-                frame_list = [int(frame[0]), 10 - int(frame[0])]
-            else:
-                frame_list = [0, 10]
+            frame_list = [int(frame[0]), 10 - int(frame[0])]
         else:
-            for throw in frame:
-                if throw == '-':
-                    frame_list.append(0)
-                else:
-                    frame_list.append(int(throw))
+            frame_list = [int(i) for i in frame]
 
         for throw in frame_list:
             for i, bonus in enumerate(self._bonus):
@@ -131,7 +118,8 @@ class Global(BowlingRules):
 
 
 def main():
-    kolya = PlayerResult(name_player='Nikolay', game_result='х153/1-53-/X--62X', rules=Local())
+    local_rules = Local()
+    kolya = PlayerResult(name_player='Nikolay', game_result='х153/1-53-/X--62X', rules=local_rules)
     kolya.compute_score()
     print(kolya.game_result, kolya.get_result_list())
     print(kolya.name_player, kolya.score)

@@ -29,22 +29,22 @@
 import argparse
 
 from tournament_01 import TournamentBowling
+from bowling import Local, Global
 
 
 def main():
     parser = argparse.ArgumentParser(description="Get tournament's score. --input_file --output_file")
     parser.add_argument('--input_file', required=True, type=str, help='Input file')
     parser.add_argument('--output_file', required=True, type=str, help='Output file')
-    # Как тогда подставлять сигнатуру типа "класс"?
-    # TODO: тут можно подставить bool (пока их только 2 вида). Указали флаг "--мировые_правила", значит при создании
-    #  TournamentBowling подставим МировыеПравила, а если не указали - классические.
-    #  Т.е. тут наше узкое горлышко. Если буду добавлять новые виды, то if`ы у нас будут плодиться здесь.
-    #  И это оправдано, т.к. это консольный интерфейс программы.
-    #  Альтернатива: можем сделать сразу строку, т.е. чтобы пользователь вводил --rules "world"
-    parser.add_argument('--rules', required=True, help='Local or Global')
+    parser.add_argument('--rules', required=True, type=str, help='Local or World')
     args = parser.parse_args()
 
-    tournament = TournamentBowling(input_file=args.input_file, output_file=args.output_file, rules=args.rules)
+    if args.rules.upper() == 'WORLD':
+        rules = Global()
+    else:
+        rules = Local()
+
+    tournament = TournamentBowling(input_file=args.input_file, output_file=args.output_file, rules=rules)
     tournament.get_result_tournament()
     tournament.print_result_tournament()
 
@@ -52,7 +52,7 @@ def main():
 if __name__ == '__main__':
     main()
 
-# python 02_tournament.py --input_file tournament.txt --output_file result.txt --rules Global
+# python 02_tournament.py --input_file tournament.txt --output_file result.txt --rules World
 
 # Усложненное задание (делать по желанию)
 #

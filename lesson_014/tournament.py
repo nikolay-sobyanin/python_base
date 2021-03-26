@@ -70,6 +70,7 @@ class TournamentBowling:
         #  Пусть лучше готовый объект попадает извне. Как правило рано или поздно появляется тип объекта, который мы не
         #  можем сделать внутри, нам нужны какие-то аргументы для него. Поэтому лучше собрать его снаружи, а здесь
         #  начинать использовать.
+        # Ниже вопрос возник
         self.rules = rules
         self.win_games = defaultdict(int)
 
@@ -96,7 +97,12 @@ class TournamentBowling:
 
                     if tour_start:
                         name, game_result = line.split('\t')
-                        player = PlayerResult(name, game_result, self.rules())
+                        # Раньше когда создавался объект нового игрока, создавался заново объект правил.
+                        # Сейчас я передаю его из вне и он всегда постоянный, получается что количество очко не
+                        # обнуляется. Поэтому приходится перед созданием нового игрока обнулять очки принудительно.
+                        # Я думаю это как то не логично, как фиксить еще тоже не особо понятно.
+                        self.rules.score = 0
+                        player = PlayerResult(name, game_result, self.rules)
                         try:
                             player.compute_score()
                         except ValueError as exc:
@@ -121,13 +127,16 @@ class TournamentBowling:
 
 
 def main():
-    tournament_local = TournamentBowling('tournament.txt', 'result_local_tournament_01.txt', rules=Local)
+    local_rules = Local()
+    global_rules = Global()
+
+    tournament_local = TournamentBowling('tournament.txt', 'result_local_tournament_01.txt', rules=local_rules)
     tournament_local.get_result_tournament()
     tournament_local.print_result_tournament()
 
-    tournament_external = TournamentBowling('tournament.txt', 'result_local_tournament_01.txt', rules=Global)
-    tournament_external.get_result_tournament()
-    tournament_external.print_result_tournament()
+    tournament_global = TournamentBowling('tournament.txt', 'result_global_tournament_01.txt', rules=global_rules)
+    tournament_global.get_result_tournament()
+    tournament_global.print_result_tournament()
 
 
 if __name__ == '__main__':

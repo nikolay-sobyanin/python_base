@@ -66,11 +66,6 @@ class TournamentBowling:
     def __init__(self, input_file, output_file, rules):
         self.input_file = input_file
         self.output_file = output_file
-        # TODO: сейчас у нас внутри класса есть "self.rules()", т.е. мы создаем объект правил сами.
-        #  Пусть лучше готовый объект попадает извне. Как правило рано или поздно появляется тип объекта, который мы не
-        #  можем сделать внутри, нам нужны какие-то аргументы для него. Поэтому лучше собрать его снаружи, а здесь
-        #  начинать использовать.
-        # Ниже вопрос возник
         self.rules = rules
         self.win_games = defaultdict(int)
 
@@ -97,11 +92,6 @@ class TournamentBowling:
 
                     if tour_start:
                         name, game_result = line.split('\t')
-                        # Раньше когда создавался объект нового игрока, создавался заново объект правил.
-                        # Сейчас я передаю его из вне и он всегда постоянный, получается что количество очко не
-                        # обнуляется. Поэтому приходится перед созданием нового игрока обнулять очки принудительно.
-                        # Я думаю это как то не логично, как фиксить еще тоже не особо понятно.
-                        self.rules.score = 0
                         player = PlayerResult(name, game_result, self.rules)
                         try:
                             player.compute_score()

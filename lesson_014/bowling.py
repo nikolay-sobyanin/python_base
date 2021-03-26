@@ -59,8 +59,6 @@ class PlayerResult:
 
 
 class BowlingRules(ABC):
-    def __init__(self):
-        self.score = 0
 
     @abstractmethod
     def count_score(self, check_frame, result_list):
@@ -70,15 +68,16 @@ class BowlingRules(ABC):
 class Local(BowlingRules):
 
     def count_score(self, check_frame, result_list):
+        score = 0
         for frame in result_list:
             check_frame(frame)
             if frame == 'X-':
-                self.score += 20
+                score += 20
             elif frame[1] == '/':
-                self.score += 15
+                score += 15
             else:
-                self.score += sum(int(i) for i in frame if i.isdigit())
-        return self.score
+                score += sum(int(i) for i in frame if i.isdigit())
+        return score
 
 
 class Global(BowlingRules):
@@ -88,20 +87,22 @@ class Global(BowlingRules):
         self._bonus = []
 
     def count_score(self, check_frame, result_list):
+        score = 0
         for i, frame in enumerate(result_list):
             check_frame(frame)
-            self.computer_bonus_throws(frame)
+            score += self.computer_bonus_throws(frame)
             if frame == 'X-':
-                self.score += 10
+                score += 10
                 self._bonus.append(2)
             elif frame[1] == '/':
-                self.score += 10
+                score += 10
                 self._bonus.append(1)
             else:
-                self.score += sum(int(i) for i in frame if i.isdigit())
-        return self.score
+                score += sum(int(i) for i in frame if i.isdigit())
+        return score
 
     def computer_bonus_throws(self, frame):
+        bonus_score = 0
         frame = frame.replace('-', '0')
         if frame == 'X0':
             frame_list = [10]
@@ -112,9 +113,10 @@ class Global(BowlingRules):
 
         for throw in frame_list:
             for i, bonus in enumerate(self._bonus):
-                self.score += throw
+                bonus_score += throw
                 self._bonus[i] -= 1
             self._bonus = list(filter(lambda num: num != 0, self._bonus))
+        return bonus_score
 
 
 def main():

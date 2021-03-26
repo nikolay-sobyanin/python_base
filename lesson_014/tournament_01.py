@@ -68,7 +68,6 @@ class ParserTour:
 
     def get_player(self, line):
         name, game_result = line.split('\t')
-        self.rules.score = 0
         player = PlayerResult(name, game_result, self.rules)
         return player
 

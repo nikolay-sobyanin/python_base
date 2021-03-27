@@ -2,13 +2,12 @@
 import logging
 import random
 import vk_api
-from vk_api import bot_longpoll
+from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 
 try:
     from local_config import GROUP_ID, TOKEN
 except ImportError:
     exit('Do cp local_config.py.default local_config.py and set token')
-
 
 # TO DO: сделайте отдельный файл local_config.py
 #  В него вынесите id группы и токен. Сам файл добавьте в гит.игнор.
@@ -21,25 +20,31 @@ except ImportError:
 #  перевод на чью-нибудь карту.
 
 log = logging.getLogger('bot')
-log.setLevel(logging.DEBUG)
 
-stream_handler = logging.StreamHandler()
-stream_handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(message)s"))
-stream_handler.setLevel(logging.INFO)
 
-file_handler = logging.FileHandler(filename='bot.log', encoding="utf8")
-file_handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(message)s"))
-file_handler.setLevel(logging.DEBUG)
+def config_logging():
+    log.setLevel(logging.DEBUG)
 
-log.addHandler(stream_handler)
-log.addHandler(file_handler)
+    strfmt = '[%(asctime)s] [%(name)s] [%(levelname)s] > %(message)s'
+    datefmt = '%Y-%m-%d %H:%M:%S'
 
+    stream_handler = logging.StreamHandler()
+    stream_handler.setFormatter(logging.Formatter(fmt=strfmt, datefmt=datefmt))
+    stream_handler.setLevel(logging.INFO)
+
+    file_handler = logging.FileHandler(filename='bot.log', encoding="utf8")
+    file_handler.setFormatter(logging.Formatter(fmt=strfmt, datefmt=datefmt))
+    file_handler.setLevel(logging.DEBUG)
+
+    log.addHandler(stream_handler)
+    log.addHandler(file_handler)
 
 class Bot:
     """
     Echo bot for vk.com
     Use Python 3.8
     """
+
     def __init__(self, group_id, token):
         """
         :param group_id: group id from vk.com
@@ -47,19 +52,8 @@ class Bot:
         """
         self.group_id = group_id
         self.token = token
-
-        #  переключитесь на API версии 5.120, не меньше.
-        #  У VkApi есть параметр api_version, который по умолчанию стоит на 5.92 (это старая динозавр-версия)
-        #  Не забудьте в группе поменять версию API.
-        #  Так же учтите, что event в run изменится. Текст сообщения начнет хранится в другом поле!
-        # Я в самом начале переключил на версию 5.130. Я изменил уже путь к тексту сообщения.
-        # прочитайте TOD0 выше еще раз. Не только в группе меняется версия API.
-
-        # Текст сообщения хранится в том же поле
-
         self.vk = vk_api.VkApi(token=self.token, api_version='5.130')
-        self.long_poller = bot_longpoll.VkBotLongPoll(self.vk, self.group_id)
-
+        self.long_poller = VkBotLongPoll(self.vk, self.group_id)
         self.api = self.vk.get_api()
 
     def run(self):
@@ -67,8 +61,6 @@ class Bot:
         for event in self.long_poller.listen():
             try:
                 self.on_event(event)
-                print(event)
-                print(self.vk.api_version)
             except:
                 log.exception('Ошибка в обработке события.')
 
@@ -79,7 +71,7 @@ class Bot:
         :return: None
         """
 
-        if event.type == bot_longpoll.VkBotEventType.MESSAGE_NEW:
+        if event.type == VkBotEventType.MESSAGE_NEW:
             self.api.messages.send(
                 message=event.message.text,
                 random_id=random.randint(0, 2 ** 20),
@@ -87,10 +79,11 @@ class Bot:
             )
             log.debug('Отправили сообщение назад.')
         else:
-            log.debug(f'Мы пока не умеем обрабатывать события тип {event.type}')
+            log.info(f'Мы пока не умеем обрабатывать события тип {event.type}')
 
 
 def main():
+    config_logging()
     bot = Bot(GROUP_ID, TOKEN)
     bot.run()
 

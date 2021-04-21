@@ -93,10 +93,39 @@
 # и так далее...
 
 
+import json
+import re
+from pprint import pprint
+
 remaining_time = '123456.0987654321'
 # если изначально не писать число в виде строки - теряется точность!
 field_names = ['current_location', 'current_experience', 'current_date']
 
-# TODO тут ваш код
+location = r'Location_\d_tm\d{1-10}'
+monster = r'Mob_exp\d_tm\d'
+
+
+with open('rpg.json', 'r') as file:
+    game_file = json.load(file)
+
+pprint(game_file)
+
+
+def go_to_dict(game_dict):
+    for key, values in game_dict.items():
+        print(key)  # Location
+        if type(values) is list:
+            for elem in values:
+                if type(elem) is dict:
+                    go_to_dict(elem)
+                else:
+                    print(elem)  # Monster
+        else:
+            print(values)
+
+
+# функцию как ходить по списку я сделал. Но я не понимаю как заментяь строки на объкты в данном случае?
+go_to_dict(game_file)
+
 
 # Учитывая время и опыт, не забывайте о точности вычислений!

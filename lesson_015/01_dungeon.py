@@ -91,6 +91,7 @@
 #  ...
 #
 # и так далее...
+# Учитывая время и опыт, не забывайте о точности вычислений!
 
 
 import json
@@ -101,31 +102,86 @@ remaining_time = '123456.0987654321'
 # если изначально не писать число в виде строки - теряется точность!
 field_names = ['current_location', 'current_experience', 'current_date']
 
-location = r'Location_\d_tm\d{1-10}'
-monster = r'Mob_exp\d_tm\d'
+monster_pattern = r'(?:Mob|Boss|Boss\d{1,})_exp\d{1,}_tm\d{1,}'
+location_pattern = r'Location_(?:[A-F]\d{1,}|\d{1,})_tm(?:\d{1,}\.\d{1,}|\d{1,})'
+hatch_pattern = r'Hatch_tm(?:\d{1,}\.\d{1,}|\d{1,})'
 
+
+class Monster:
+    
+    def __init__(self, name_monster):
+        self.name_monster = name_monster
+
+    def __str__(self):
+        return self.name_monster
+
+    def interact(self):
+        pass
+
+
+class Location:
+
+    def __init__(self, name_location, objects_list):
+        self.name_location = name_location
+        self.objects_list = objects_list
+
+    def __str__(self):
+        return self.name_location
+
+    def interact(self):
+        pass
+
+
+class Hero:
+
+    def __init__(self):
+        self.exp = 0
+        self.tm = 0
+
+
+# Game
 
 with open('rpg.json', 'r') as file:
     game_file = json.load(file)
 
-pprint(game_file)
+# Я вот так считываю объект локации. По сути же это словарь с одним элементом. Мне кажется это не совсем правильным.
+for name, objects in game_file.items():
+    start_location = Location(name, objects)
+
+actual_location = start_location
+actual_list_objects = []
+
+for elem in actual_location.objects_list:
+    if isinstance(elem, dict):
+        for name, objects in elem.items():
+            actual_list_objects.append(Location(name, objects))
+    else:
+        actual_list_objects.append(Monster(elem))
+
+while True:
+
+    for i, elem in enumerate(actual_list_objects, 1):
+        print(i, elem)
+
+    enter = input('Введите номер действия: ')
+
+    enter = int(enter) - 1
+
+    if isinstance(actual_list_objects[enter], Monster):
+        actual_list_objects.pop(enter)
+    elif isinstance(actual_list_objects[enter], Location):
+        actual_location = actual_list_objects[enter]
+        actual_list_objects = []
+
+        for elem in actual_location.objects_list:
+            if isinstance(elem, dict):
+                for name, objects in elem.items():
+                    actual_list_objects.append(Location(name, objects))
+            else:
+                actual_list_objects.append(Monster(elem))
 
 
-def go_to_dict(game_dict):
-    for key, values in game_dict.items():
-        print(key)  # Location
-        if type(values) is list:
-            for elem in values:
-                if type(elem) is dict:
-                    go_to_dict(elem)
-                else:
-                    print(elem)  # Monster
-        else:
-            print(values)
 
 
-# функцию как ходить по списку я сделал. Но я не понимаю как заментяь строки на объкты в данном случае?
-go_to_dict(game_file)
 
 
-# Учитывая время и опыт, не забывайте о точности вычислений!

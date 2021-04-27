@@ -145,12 +145,19 @@ with open('rpg.json', 'r') as file:
     game_file = json.load(file)
 
 # Я вот так считываю объект локации. По сути же это словарь с одним элементом. Мне кажется это не совсем правильным.
+# TODO: используйте next?
+#   >>> d = {1: [2,3,4,5,6]}
+#   >>> key, value = next(iter(d.items()))
+#  .
+#  Но это если мы точно знаем, что ключ есть. Если наверняка не уверены, то цикл ниже самый разумный способ.
 for name, objects in game_file.items():
     start_location = Location(name, objects)
 
 actual_location = start_location
 actual_list_objects = []
 
+# TODO: логично будет сделать парсинг карты внутри конструктора Location.
+#  Т.е. будет рекурсия. actual_list_objects станет полем объекта Location
 for elem in actual_location.objects_list:
     if isinstance(elem, dict):
         for name, objects in elem.items():
@@ -158,6 +165,8 @@ for elem in actual_location.objects_list:
     else:
         actual_list_objects.append(Monster(elem))
 
+# TODO: вот это кусок класса Game.
+#  Нужен еще Герой.
 while True:
 
     for i, elem in enumerate(actual_list_objects, 1):
@@ -167,6 +176,14 @@ while True:
 
     enter = int(enter) - 1
 
+    # TODO: чтобы не приходилось городить фавелы из elif`ов, стоит реализовать interact`ы у классов
+    #  т.е. тут мы будет писать просто:
+    #    hero.actual_location.actual_list_objects[enter].interact(hero)
+    #  .
+    #  В строке выше, мы берем у объекта Герой поле "текущая локация", у текущей локации берем "доступные для взаимо-
+    #  действия объекты", среди них выбираем объект №i и вызываем у него interact. Лучше чтобы interact принимал на
+    #  вход объект hero, т.к. перемещение по локациям должно изменять "hero.actual_location", а
+    #  убийство монстров должно влиять на hero.actual_location.actual_list_objects и hero.счетчики
     if isinstance(actual_list_objects[enter], Monster):
         actual_list_objects.pop(enter)
     elif isinstance(actual_list_objects[enter], Location):

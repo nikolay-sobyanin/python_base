@@ -122,6 +122,7 @@ class Monster:
 class Location:
 
     def __init__(self, name_location, actual_list_objects):
+        # TODO: мы же внутри Location? Значит не обязательно писать "self.name_location". Достаточно просто self.name
         self.name_location = name_location
         self.actual_list_objects = actual_list_objects
 

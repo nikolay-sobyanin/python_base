@@ -95,10 +95,11 @@
 
 
 import json
+from decimal import Decimal
 import re
-from pprint import pprint
+from termcolor import cprint
 
-remaining_time = '123456.0987654321'
+# remaining_time = '123456.0987654321'
 # если изначально не писать число в виде строки - теряется точность!
 field_names = ['current_location', 'current_experience', 'current_date']
 
@@ -109,34 +110,63 @@ hatch_pattern = r'Hatch_tm(?:\d{1,}\.\d{1,}|\d{1,})'
 
 class Monster:
     
-    def __init__(self, name_monster):
-        self.name_monster = name_monster
+    def __init__(self, name):
+        self.name = name
+        self.exp = 0
+        self.time = 0
 
     def __str__(self):
-        return self.name_monster
+        return self.name
+
+    def get_exp_time(self):
+        if re.fullmatch(monster_pattern, self.name):
+            _, exp, time = self.name.split('_')
+            self.exp = Decimal(exp[3:])
+            self.time = Decimal(time[2:])
+        else:
+            raise ValueError('Неверно задано имя Монстра!')
 
     def interact(self, hero):
+        self.get_exp_time()
+        hero.exp += self.exp
+        hero.past_time += self.time
+        hero.remaining_time -= self.time
         hero.actual_location.actual_list_objects.remove(self)
 
 
 class Location:
 
-    def __init__(self, name_location, actual_list_objects):
-        # TODO: мы же внутри Location? Значит не обязательно писать "self.name_location". Достаточно просто self.name
-        self.name_location = name_location
+    def __init__(self, name, actual_list_objects):
+        self.name = name
         self.actual_list_objects = actual_list_objects
+        self.time = 0
 
     def __str__(self):
-        return self.name_location
+        return self.name
+
+    def get_time(self):
+        if re.fullmatch(location_pattern, self.name) or re.fullmatch(hatch_pattern, self.name):
+            *_, time = self.name.split('_')
+            self.time = Decimal(time[2:])
+        else:
+            raise ValueError('Неверно задано имя Монстра!')
 
     def interact(self, hero):
+        self.get_time()
+        hero.past_time += self.time
+        hero.remaining_time -= self.time
         hero.actual_location = self
 
 
 class Hero:
 
+    PLAY_TIME = Decimal('123456.0987654321')
+
     def __init__(self, actual_location):
         self.actual_location = actual_location
+        self.remaining_time = self.PLAY_TIME
+        self.exp = 0
+        self.past_time = 0
 
 
 class Game:
@@ -146,16 +176,25 @@ class Game:
 
     def play(self):
         game_map = self.get_game_map()
-        start_location = self.get_locations(game_map)
-        hero = Hero(start_location)
+        hero = self.get_new_hero(game_map)
         while True:
-            print(hero.actual_location.name_location)
-            for i, elem in enumerate(hero.actual_location.actual_list_objects, 1):
-                print(i, elem)
-            enter = input('Введите номер действия: ')
-            enter = int(enter) - 1
+            self.print_result(hero)
+
+            enter = self.choose_action(hero)
+            if enter is None:
+                cprint('Game over!', 'red')
+                break
 
             hero.actual_location.actual_list_objects[enter].interact(hero)
+
+            check = self.check_end_game(hero)
+            if check is None:
+                continue
+            elif not check:
+                hero = self.get_new_hero(game_map)
+                continue
+            else:
+                break
 
     def get_game_map(self):
         with open(self.path_game_file, 'r') as file:
@@ -174,6 +213,56 @@ class Game:
             return Location(name, list_objects)
         else:
             raise ValueError('Неверно задана локация!!!')
+
+    def get_new_hero(self, game_map):
+        start_location = self.get_locations(game_map)
+        return Hero(start_location)
+
+    def choose_action(self, hero):
+        while True:
+            enter = input('Выберите действие: ')
+            if enter.isdigit() and 1 <= int(enter) <= len(hero.actual_location.actual_list_objects):
+                return int(enter) - 1
+            elif enter.lower() == 'exit':
+                return None
+            else:
+                print('Выбрано недействительное действие. Повторите выбор.')
+                continue
+
+    def print_result(self, hero):
+        print()
+        print('-' * 30)
+        cprint(f'Вы находитесь в {hero.actual_location}.', 'green')
+        cprint(f'У вас {hero.exp} опыта.', 'green')
+        cprint(f'Осталось {hero.remaining_time} сек. до наводнения.', 'green')
+        cprint(f'Прошло времени: {hero.past_time} сек.', 'green')
+        print('-' * 30)
+        print('Вы можете:')
+        for i, elem in enumerate(hero.actual_location.actual_list_objects, 1):
+            if isinstance(elem, Location):
+                cprint(f'{i}) Перейти в {elem}', 'blue')
+            elif isinstance(elem, Monster):
+                cprint(f'{i}) Атаковать {elem}', 'blue')
+        print('Введите exit, чтобы сдаться и выйти из игры!!!')
+
+    def check_end_game(self, hero):
+        if hero.remaining_time < 0:
+            print('Наводнение!!! Вы не успели выйти!\n'
+                  'Игра начинается заново')
+            return False
+        elif len(hero.actual_location.actual_list_objects) == 0:
+            print('Ты пришел в тупик! Выхода нет!\n'
+                  'Игра начинается заново')
+            return False
+        elif re.fullmatch(hatch_pattern, hero.actual_location.name):
+            if hero.exp >= 280:
+                print('Ура ты выиграл!')
+                return True
+            else:
+                print('Ты нашел люк, но недостаточно опыта его открыть!\n'
+                      'Игра начинается заново')
+                return False
+        return None
 
 
 def main():

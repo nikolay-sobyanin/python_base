@@ -239,6 +239,8 @@ class Game:
         print('-' * 30)
         print('Вы можете:')
         for i, elem in enumerate(hero.actual_location.actual_list_objects, 1):
+            # TODO: перегрузите у Location и Monster методы __str__, чтобы здесь просто print elem`а делать:
+            #   cprint(f'{i}) {elem}', 'blue')
             if isinstance(elem, Location):
                 cprint(f'{i}) Перейти в {elem}', 'blue')
             elif isinstance(elem, Monster):
@@ -247,10 +249,13 @@ class Game:
 
     def check_end_game(self, hero):
         if hero.remaining_time < 0:
+            # TODO: пусть надпись будет красным?) Чтобы прям в глаза бросилась
             print('Наводнение!!! Вы не успели выйти!\n'
                   'Игра начинается заново')
+            # TODO: и еще sleep небольшой не помешал бы, чтобы было время у пользователя заметить)
             return False
         elif len(hero.actual_location.actual_list_objects) == 0:
+            # TODO: и здесь
             print('Ты пришел в тупик! Выхода нет!\n'
                   'Игра начинается заново')
             return False
@@ -258,7 +263,9 @@ class Game:
             if hero.exp >= 280:
                 print('Ура ты выиграл!')
                 return True
+            # TODO: else думаю не обязателен. т.к. выше в if`е return.
             else:
+                # TODO: сразу этот код.
                 print('Ты нашел люк, но недостаточно опыта его открыть!\n'
                       'Игра начинается заново')
                 return False

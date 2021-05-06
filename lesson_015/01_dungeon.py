@@ -95,13 +95,16 @@
 
 
 import json
+import os
+import time
+import datetime
+import csv
 from decimal import Decimal
 import re
 from termcolor import cprint
 
 # remaining_time = '123456.0987654321'
 # если изначально не писать число в виде строки - теряется точность!
-field_names = ['current_location', 'current_experience', 'current_date']
 
 monster_pattern = r'(?:Mob|Boss|Boss\d{1,})_exp\d{1,}_tm\d{1,}'
 location_pattern = r'Location_(?:[A-F]\d{1,}|\d{1,})_tm(?:\d{1,}\.\d{1,}|\d{1,})'
@@ -116,7 +119,7 @@ class Monster:
         self.time = 0
 
     def __str__(self):
-        return self.name
+        return f'Атаковать {self.name}'
 
     def get_exp_time(self):
         if re.fullmatch(monster_pattern, self.name):
@@ -142,7 +145,7 @@ class Location:
         self.time = 0
 
     def __str__(self):
-        return self.name
+        return f'Перейти в {self.name}'
 
     def get_time(self):
         if re.fullmatch(location_pattern, self.name) or re.fullmatch(hatch_pattern, self.name):
@@ -169,6 +172,26 @@ class Hero:
         self.past_time = 0
 
 
+class Logger:
+
+    FIELD_NAMES = ['current_location', 'current_experience', 'current_date']
+
+    def __init__(self):
+        self.name_file = 'dungeon.csv'
+
+    def run(self):
+        if os.path.isfile(self.name_file):
+            os.remove(self.name_file)
+        with open(self.name_file, 'a', newline='') as log_csv:
+            writer = csv.writer(log_csv)
+            writer.writerow(self.FIELD_NAMES)
+
+    def add_log(self, log):
+        with open(self.name_file, 'a', newline='') as log_csv:
+            writer = csv.writer(log_csv)
+            writer.writerow(log)
+
+
 class Game:
 
     def __init__(self, path_file_game):
@@ -177,7 +200,15 @@ class Game:
     def play(self):
         game_map = self.get_game_map()
         hero = self.get_new_hero(game_map)
+        logger = Logger()
+        logger.run()
+
         while True:
+
+            now_time = datetime.datetime.today().strftime('%d-%m-%y %H:%M:%S')
+            log = [hero.actual_location.name, hero.exp, now_time]
+            logger.add_log(log)
+
             self.print_result(hero)
 
             enter = self.choose_action(hero)
@@ -239,36 +270,28 @@ class Game:
         print('-' * 30)
         print('Вы можете:')
         for i, elem in enumerate(hero.actual_location.actual_list_objects, 1):
-            # TODO: перегрузите у Location и Monster методы __str__, чтобы здесь просто print elem`а делать:
-            #   cprint(f'{i}) {elem}', 'blue')
             if isinstance(elem, Location):
-                cprint(f'{i}) Перейти в {elem}', 'blue')
+                cprint(f'{i}) {elem}', 'blue')
             elif isinstance(elem, Monster):
-                cprint(f'{i}) Атаковать {elem}', 'blue')
+                cprint(f'{i}) {elem}', 'blue')
         print('Введите exit, чтобы сдаться и выйти из игры!!!')
 
     def check_end_game(self, hero):
         if hero.remaining_time < 0:
-            # TODO: пусть надпись будет красным?) Чтобы прям в глаза бросилась
-            print('Наводнение!!! Вы не успели выйти!\n'
-                  'Игра начинается заново')
-            # TODO: и еще sleep небольшой не помешал бы, чтобы было время у пользователя заметить)
+            cprint('Наводнение!!! Вы не успели выйти!\nИгра начинается заново', 'red')
+            time.sleep(3)
             return False
         elif len(hero.actual_location.actual_list_objects) == 0:
-            # TODO: и здесь
-            print('Ты пришел в тупик! Выхода нет!\n'
-                  'Игра начинается заново')
+            cprint('Ты пришел в тупик! Выхода нет!\nИгра начинается заново', 'red')
+            time.sleep(3)
             return False
         elif re.fullmatch(hatch_pattern, hero.actual_location.name):
             if hero.exp >= 280:
                 print('Ура ты выиграл!')
                 return True
-            # TODO: else думаю не обязателен. т.к. выше в if`е return.
-            else:
-                # TODO: сразу этот код.
-                print('Ты нашел люк, но недостаточно опыта его открыть!\n'
-                      'Игра начинается заново')
-                return False
+            cprint('Ты нашел люк, но недостаточно опыта его открыть!\nИгра начинается заново', 'red')
+            time.sleep(3)
+            return False
         return None
 
 

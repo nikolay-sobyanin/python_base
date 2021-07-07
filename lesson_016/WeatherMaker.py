@@ -25,6 +25,29 @@ class Weather(BaseTable):
 
 
 database.create_tables([Weather])
+# TODO При добавлении новых данных в базу попробуйте использовать метод get_or_create
+# TODO Он либо создаст новую запись, либо укажет на то, что запись уже существует
+# TODO По возвращенному айди можно будет обновить старую запись, вместо создания новой.
+# TODO Обратите внимание на описание этого метода и на то, что он возвращает при использовании
+# http://docs.peewee-orm.com/en/latest/peewee/api.html#Model.get_or_create
+# TODO Returns:
+#  Tuple of Model instance and boolean indicating if a new object was created.
+# TODO Т.е. возвращается кортеж с ID элемента, который был найден или был создан
+# TODO И возвращается True/False объект, который говорит о том, был ли объект создан
+# TODO Если объект не был создан - его хорошо было бы обновить по вернувшемуся ID
+# TODO Принцип примерно следующий:
+# for data in data_to_save:
+# TODO Сперва получаем данные из get_or_create по одному из полей(в данном случае по дате)
+#     weather, created = Weather.get_or_create(
+#         date=data['date'],
+# TODO В defaults указываются остальные данные, которые будут использованы при создании записи
+#         defaults={'temperature': data['temperature'], 'pressure': data['pressure'],
+#                   'conditions': data['conditions'], 'wind': data['wind']})
+#     if not created:
+# TODO Если запись не создана - обновляем её
+#         query = Weather.update(temperature=data['temperature'], pressure=data['pressure'],
+#                                conditions=data['conditions'], wind=data['wind']).where(Weather.id == weather.id)
+#         query.execute()
 
 if response.status_code == 200:
     html_doc = BeautifulSoup(response.text, features='html.parser')

@@ -16,7 +16,7 @@
 
 # Добавить класс ImageMaker.
 # Снабдить его методом рисования открытки
-# (использовать OpenCV, в качестве заготовки брать lesson_016/python_snippets/external_data/probe.jpg):
+# (использовать OpenCV, в качестве заготовки брать lesson_016/python_snippets/external_data/base.jpg):
 #   С текстом, состоящим из полученных данных (пригодится cv2.putText)
 #   С изображением, соответствующим типу погоды
 # (хранятся в lesson_016/python_snippets/external_data/weather_img ,но можно нарисовать/добавить свои)
@@ -46,3 +46,56 @@
 # Приконнектится по полученному url-пути к базе данных
 # Инициализировать её через DatabaseProxy()
 # https://peewee.readthedocs.io/en/latest/peewee/database.html#dynamically-defining-a-database
+
+
+import datetime
+
+from WeatherEngine.WeatherMaker import WeatherMarker
+import WeatherEngine.DataBase as DataBase
+from WeatherEngine.ImageMaker import ImageMarker
+
+# Создаем базу данных и таблицу в ней
+DataBase.create_weather_table()
+
+# парсим данные и получаем список прогноза погоды
+weather = WeatherMarker()
+weather.get_weather_forecast()
+period = weather.get_period()
+
+# Получаем данные за необходимый пероид
+print(f'Доступен прогноз погоды с {period[0]} по {period[1]}')
+print(f'Добавление данных в базу данных')
+first_date = input(f'Введите начала периода в формате YYYY-MM-DD: ')
+end_date = input(f'Введите окончание периода в формате YYYY-MM-DD: ')
+
+first_date = datetime.datetime.strptime(first_date, '%Y-%m-%d').date()
+end_date = datetime.datetime.strptime(end_date, '%Y-%m-%d').date()
+weather_period = weather.get_weather_forecast_period(first_date, end_date)
+
+# Добавляем элементы в базу данных или обновляем их
+for elem in weather_period:
+    DataBase.add_or_update_field(
+        date=elem['date'],
+        weather=elem['weather'],
+        temperature=elem['temperature']
+    )
+
+enter = input('Создать откртки по базе данных?: ')
+
+if enter.lower() in ['да', 'yes']:
+    for elem in DataBase.Weather.select():
+        ImageMarker(elem.date.date(), elem.weather, elem.temperature).create_card()
+else:
+    print('Карточки не созданы!')
+
+
+
+
+
+
+
+
+
+
+
+

@@ -53,7 +53,7 @@ import datetime
 from WeatherEngine.WeatherMaker import WeatherMarker
 import WeatherEngine.DataBase as DataBase
 from WeatherEngine.ImageMaker import ImageMarker
-
+# TODO Разнесите код по соответствующим модулям, тут должен остаться только код запуска программы
 # Создаем базу данных и таблицу в ней
 DataBase.create_weather_table()
 

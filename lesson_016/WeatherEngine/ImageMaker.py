@@ -9,7 +9,13 @@ class ImageMarker:
         self.date = date
         self.weather = weather
         self.temperature = temperature
-        self.img = cv2.imread('WeatherEngine\image\\base.jpg')
+        self.img = cv2.imread('WeatherEngine/image/base.jpg')
+        # TODO Имена файлов надо присваивать константам и использовать в основном коде только их.
+        #  Имена констант пишутся большими буквами. Располагают константы в начале модуля, сразу после
+        #  импортов сторонних модулей.
+        #  Может возникнуть необходимость изменить имя файла и через константу это делать удобнее - константа это
+        #  единое место изменения, а примениться она может во многих местах. Поэтому вверху её легко найти для изменения
+        #  без необходимости перелопачивания кода проекта.
 
     def create_card(self):
         self.draw_bg()
@@ -19,6 +25,7 @@ class ImageMarker:
         self.save_card()
 
     def viewImage(self, name_of_window):   # Просмотр изображения
+        # TODO имя метода пишется также как имя переменной - маленькими буквами и с подчёркиванием между словами
         cv2.namedWindow(name_of_window, cv2.WINDOW_NORMAL)
         cv2.imshow(name_of_window, self.img)
         cv2.waitKey(0)
@@ -59,7 +66,7 @@ class ImageMarker:
     def insert_icon(self):
         icon_list = ['sun.jpg', 'cloud.jpg', 'rain.jpg', 'snow.jpg']
         random_icon = random.choice(icon_list)
-        icon = cv2.imread(f'WeatherEngine\image\weather_img\\{random_icon}')
+        icon = cv2.imread(f'WeatherEngine/image/weather_img/{random_icon}')
         icon_height, icon_width, _ = icon.shape
         sx = 25
         sy = 25
@@ -80,8 +87,8 @@ class ImageMarker:
         cv2.putText(self.img, text_temperature, (150, 140), font, size, color, 1)
 
     def save_card(self):
-        if not os.path.isdir('WeatherEngine\weather_cards'):
-            os.mkdir('WeatherEngine\weather_cards')
-        path = f'WeatherEngine\weather_cards\\{self.date}_card.jpg'
+        if not os.path.isdir('WeatherEngine/weather_cards'):
+            os.mkdir('WeatherEngine/weather_cards')
+        path = f'WeatherEngine/weather_cards/{self.date}_card.jpg'
         cv2.imwrite(path, self.img)
 

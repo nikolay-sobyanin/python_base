@@ -87,15 +87,3 @@ if enter.lower() in ['да', 'yes']:
         ImageMarker(elem.date.date(), elem.weather, elem.temperature).create_card()
 else:
     print('Карточки не созданы!')
-
-
-
-
-
-
-
-
-
-
-
-

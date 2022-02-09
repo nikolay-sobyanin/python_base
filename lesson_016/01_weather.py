@@ -50,7 +50,7 @@
 
 import datetime
 
-from WeatherEngine.WeatherMaker import WeatherMarker
+# from WeatherEngine.WeatherMaker import WeatherMarker
 import WeatherEngine.DataBase as DataBase
 from WeatherEngine.ImageMaker import ImageMarker
 # TODO Разнесите код по соответствующим модулям, тут должен остаться только код запуска программы
@@ -58,7 +58,7 @@ from WeatherEngine.ImageMaker import ImageMarker
 DataBase.create_weather_table()
 
 # парсим данные и получаем список прогноза погоды
-weather = WeatherMarker()
+# weather = WeatherMarker()
 weather.get_weather_forecast()
 period = weather.get_period()
 

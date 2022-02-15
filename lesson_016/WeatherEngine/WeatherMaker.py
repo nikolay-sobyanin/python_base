@@ -3,8 +3,80 @@
 import requests
 from bs4 import BeautifulSoup
 from datetime import date, datetime
-
 from peewee import *
+import os
+import random
+import cv2
+
+DB = SqliteDatabase('weather.db')
+TABLE_NAME = 'Forecast weather'
+
+
+# База данных
+class ForecastWeather(Model):
+    date = DateField()
+    weather = CharField()
+    temperature = CharField()
+
+    class Meta:
+        database = DB
+        db_table = TABLE_NAME
+
+
+class DataBaseWeather:
+    db_table = ForecastWeather
+
+    if TABLE_NAME not in DB.get_tables():
+        db_table.create_table()
+
+    def clean_table(self):
+        self.db_table.drop_table()
+        self.db_table.create_table()
+
+    def update_table(self, list_forecast):
+        for day in list_forecast:
+            self._add_or_update_field(
+                date=day['date'],
+                weather=day['weather'],
+                temperature=day['temperature']
+            )
+
+    def _add_or_update_field(self, date, weather, temperature):
+        day_weather, created = self.db_table.get_or_create(date=date, defaults={
+            'weather': weather,
+            'temperature': temperature,
+        })
+
+        if not created:
+            query = self.db_table.update(
+                weather=weather,
+                temperature=temperature,
+            ).where(self.db_table.id == day_weather.id)
+            query.execute()
+
+    def get_all_forecasts(self):
+        data = []
+        for day in self.db_table.select().order_by(self.db_table.date):
+            data.append({'date': day.date, 'weather': day.weather, 'temperature': day.temperature})
+        return data
+
+    def get_forecasts(self, from_day, to_day=None):
+        data = []
+        if to_day is None:
+            day = self.db_table.select().where(self.db_table.date == from_day)
+            data.append({'date': day.date, 'weather': day.weather, 'temperature': day.temperature})
+        else:
+            for day in self.db_table.select().where((from_day <= self.db_table.date) % (self.db_table.date <= to_day)):
+                data.append({'date': day.date, 'weather': day.weather, 'temperature': day.temperature})
+        return data
+
+    def del_forecasts(self, from_day, to_day=None):
+        if to_day is None:
+            query = self.db_table.delete().where(self.db_table.date == from_day)
+            query.execute()
+        else:
+            query = self.db_table.delete().where((from_day <= self.db_table.date) % (self.db_table.date <= to_day))
+            query.execute()
 
 
 class ParserWeather:
@@ -106,80 +178,121 @@ class ParserWeather:
         })
 
 
-# База данных
-db = SqliteDatabase('weather.db')
-table_name = 'Forecast weather'
+class PostcardMaker:
 
+    IMG_BASE = 'image/base.jpg'
 
-class ForecastWeather(Model):
-    date = DateField()
-    weather = CharField()
-    temperature = CharField()
+    def __init__(self, date, weather, temperature):
+        self.day = date
+        self.weather = weather
+        self.temperature = temperature
+        self.img_base = cv2.imread(self.IMG_BASE)
 
-    class Meta:
-        database = db
-        db_table = table_name
+    def create_card(self):
+        draw_bg, name_icon = self._get_bg_and_icon()
+        draw_bg()
+        self._insert_icon(name_icon)
+        self._insert_text_weather()
+        self._save_card()
 
+    def view_image(self, name_of_window):
+        cv2.namedWindow(name_of_window, cv2.WINDOW_NORMAL)
+        cv2.imshow(name_of_window, self.img_base)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
 
-class DataBaseWeather:
-    db_table = ForecastWeather
+    def _draw_bg(self):
+        list_bg = [self.draw_bg_yellow, self.draw_bg_blue, self.draw_bg_grey]
+        random_bg = random.choice(list_bg)
+        random_bg()
 
-    if table_name not in db.get_tables():
-        db_table.create_table()
+    def _draw_bg_sunny(self):
+        img_width = self.img_base.shape[1]
+        i = 0
+        k = 0
+        for _ in range(img_width):
+            self.img_base[:, i:i + 2] = (k, 255, 255)
+            i += 2
+            k += 1
 
-    def clean_table(self):
-        self.db_table.drop_table()
-        self.db_table.create_table()
+    def _draw_bg_snowy(self):
+        img_width = self.img_base.shape[1]
+        i = 0
+        k = 0
+        for _ in range(img_width):
+            self.img_base[:, i:i + 2] = (255, k, k)
+            i += 2
+            k += 1
 
-    def update_table(self, list_forecast):
-        for day in list_forecast:
-            self._add_or_update_field(
-                date=day['date'],
-                weather=day['weather'],
-                temperature=day['temperature']
-            )
+    def _draw_bg_cloudy(self):
+        img_width = self.img_base.shape[1]
+        i = 0
+        k = 0
+        for _ in range(img_width):
+            self.img_base[:, i:i + 2] = (128 + k, 128 + k, 128 + k)
+            i += 2
+            k += 0.5
 
-    def _add_or_update_field(self, date, weather, temperature):
-        day_weather, created = self.db_table.get_or_create(date=date, defaults={
-            'weather': weather,
-            'temperature': temperature,
-        })
+    def _draw_bg_rainy(self):
+        img_width = self.img_base.shape[1]
+        i = 0
+        k = 0
+        for _ in range(img_width):
+            self.img_base[:, i:i + 2] = (128 + k, 128 + k, 128 + k)
+            i += 2
+            k += 0.5
 
-        if not created:
-            query = self.db_table.update(
-                weather=weather,
-                temperature=temperature,
-            ).where(self.db_table.id == day_weather.id)
-            query.execute()
-
-    def get_all_forecasts(self):
-        data = []
-        for day in self.db_table.select().order_by(self.db_table.date):
-            data.append({'date': day.date, 'weather': day.weather, 'temperature': day.temperature})
-        return data
-
-    def get_forecasts(self, from_day, to_day=None):
-        data = []
-        if to_day is None:
-            day = self.db_table.select().where(self.db_table.date == from_day)
-            data.append({'date': day.date, 'weather': day.weather, 'temperature': day.temperature})
+    def _get_bg_and_icon(self):
+        if 'дождь' in self.weather:
+            return self._draw_bg_rainy, 'rain.jpg'
+        elif 'гроза' in self.weather:
+            return self._draw_bg_rainy, 'rain.jpg'
+        elif 'осадки' in self.weather:
+            return self._draw_bg_rainy, 'rain.jpg'
+        elif 'снег' in self.weather:
+            return self._draw_bg_snowy, 'snow.jpg'
+        elif 'град' in self.weather:
+            return self._draw_bg_snowy, 'snow.jpg'
+        elif 'облачно' in self.weather:
+            return self._draw_bg_cloudy, 'cloud.jpg'
+        elif 'пасмурно' in self.weather:
+            return self._draw_bg_cloudy, 'cloud.jpg'
+        elif 'ясно' in self.weather:
+            return self._draw_bg_sunny, 'sun.jpg'
         else:
-            for day in self.db_table.select().where((from_day <= self.db_table.date) % (self.db_table.date <= to_day)):
-                data.append({'date': day.date, 'weather': day.weather, 'temperature': day.temperature})
-        return data
+            print('Не нашли такую погоду!')
 
-    def del_forecasts(self, from_day, to_day=None):
-        if to_day is None:
-            query = self.db_table.delete().where(self.db_table.date == from_day)
-            query.execute()
-        else:
-            query = self.db_table.delete().where((from_day <= self.db_table.date) % (self.db_table.date <= to_day))
-            query.execute()
+    def _insert_icon(self, name_icon):
+        icon = cv2.imread(f'image/weather_img/{name_icon}')
+        icon_height, icon_width, _ = icon.shape
+        sx = 25
+        sy = 25
+        self.img_base[sx:sx + icon_width, sy: sy + icon_height] = icon
+
+    def _insert_text_weather(self):
+        font = cv2.FONT_HERSHEY_COMPLEX
+        size = 0.5
+        color = (0, 0, 0)
+
+        text_date = f'Дата {self.day}'
+        cv2.putText(self.img_base, text_date, (150, 100), font, size, color, 1)
+
+        text_weather = f'Погода {self.weather}'
+        cv2.putText(self.img_base, text_weather, (150, 120), font, size, color, 1)
+
+        text_temperature = f'Температура {self.temperature}'
+        cv2.putText(self.img_base, text_temperature, (150, 140), font, size, color, 1)
+
+    def _save_card(self):
+        if not os.path.isdir('weather_cards'):
+            os.mkdir('weather_cards')
+        path = f'weather_cards/{self.day}_card.jpg'
+        cv2.imwrite(path, self.img_base)
 
 
 def main():
-    day_1 = date(2022, 2, 2)
-    day_2 = date(2022, 2, 12)
+    day_1 = date(2021, 6, 1)
+    day_2 = date(2021, 6, 10)
     parse_data = ParserWeather(from_date=day_1, to_date=day_2).parse()
 
     table_forecast = DataBaseWeather()
@@ -187,10 +300,9 @@ def main():
     table_forecast.update_table(list_forecast=parse_data)
 
     data = table_forecast.get_all_forecasts()
-    print(data)
-    table_forecast.del_forecasts(date(2022, 2, 4), date(2022, 2, 9))
-    data = table_forecast.get_all_forecasts()
-    print(data)
+
+    for i in data:
+        PostcardMaker(**i).create_card()
 
 
 if __name__ == '__main__':

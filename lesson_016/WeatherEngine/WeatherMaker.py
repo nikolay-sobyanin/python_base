@@ -2,17 +2,16 @@
 
 import requests
 from bs4 import BeautifulSoup
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from peewee import *
 import os
-import random
 import cv2
+import re
 
 DB = SqliteDatabase('weather.db')
 TABLE_NAME = 'Forecast weather'
 
 
-# База данных
 class ForecastWeather(Model):
     date = DateField()
     weather = CharField()
@@ -60,14 +59,12 @@ class DataBaseWeather:
             data.append({'date': day.date, 'weather': day.weather, 'temperature': day.temperature})
         return data
 
-    def get_forecasts(self, from_day, to_day=None):
+    def get_forecasts(self, from_date, to_date=None):
         data = []
-        if to_day is None:
-            day = self.db_table.select().where(self.db_table.date == from_day)
+        if to_date is None:
+            to_date = from_date
+        for day in self.db_table.select().where((from_date <= self.db_table.date) % (self.db_table.date <= to_date)):
             data.append({'date': day.date, 'weather': day.weather, 'temperature': day.temperature})
-        else:
-            for day in self.db_table.select().where((from_day <= self.db_table.date) % (self.db_table.date <= to_day)):
-                data.append({'date': day.date, 'weather': day.weather, 'temperature': day.temperature})
         return data
 
     def del_forecasts(self, from_day, to_day=None):
@@ -97,19 +94,15 @@ class ParserWeather:
         12: 'декабрь',
     }
 
-    def __init__(self, from_date, to_date=None):
-        self.from_date = from_date
-        self.to_date = to_date
-        self.end_date_reached = False
+    def __init__(self):
         self.forecast_weather = []
 
-    def parse(self):
-        url = self._get_url_start(search_date=self.from_date)
+    def parse(self, from_date, to_date=None):
+        url = self._get_url_start(search_date=from_date)
 
         while True:
             html_data = self._get_html_data(url=url)
-            self._parse_html(html_data=html_data)
-            if self.end_date_reached:
+            if self._parse_html(html_data, from_date, to_date):
                 break
             else:
                 url = self._get_url_next_month(html_data)
@@ -121,7 +114,6 @@ class ParserWeather:
 
     def _get_url_start(self, search_date):
         today = date.today()
-
         if today.year == search_date.year and today.month <= search_date.month:
             return self.DOMAIN + f'/погода-на-{self.MONTHS[search_date.month]}'
         else:
@@ -132,27 +124,19 @@ class ParserWeather:
         soup = BeautifulSoup(response.text, features='html.parser')
         return soup
 
-    def _parse_html(self, html_data):
-        if self.to_date is None:
-            for tag in html_data.find_all(self._is_day):
-                current_date = self._convert_ms_to_date(ms=int(tag['time']))
-
-                if current_date == self.from_date:
-                    weather, temperature_min, temperature_max = self._parse_day(tag)
-                    self._add_day(current_date, weather, temperature_min, temperature_max)
-
-                    self.end_date_reached = True
+    def _parse_html(self, html_data, from_date, to_date):
+        end_date_reached = False
+        if to_date is None:
+            to_date = from_date
+        for tag in html_data.find_all(self._is_day):
+            current_date = self._convert_ms_to_date(ms=int(tag['time']))
+            if from_date <= current_date <= to_date:
+                weather, temperature_min, temperature_max = self._parse_day(tag)
+                self._add_day(current_date, weather, temperature_min, temperature_max)
+                if current_date == to_date:
+                    end_date_reached = True
                     break
-        else:
-            for tag in html_data.find_all(self._is_day):
-                current_date = self._convert_ms_to_date(ms=int(tag['time']))
-                if self.from_date <= current_date <= self.to_date:
-                    weather, temperature_min, temperature_max = self._parse_day(tag)
-                    self._add_day(current_date, weather, temperature_min, temperature_max)
-
-                    if current_date == self.to_date:
-                        self.end_date_reached = True
-                        break
+        return end_date_reached
 
     def _is_day(self, tag):
         return True if tag.name == 'td' and 'time' in tag.attrs else False
@@ -181,6 +165,15 @@ class ParserWeather:
 class PostcardMaker:
 
     IMG_BASE = 'image/base.jpg'
+    ICONS = {
+        'rain': 'rain.jpg',
+        'snow': 'snow.jpg',
+        'cloud': 'cloud.jpg',
+        'sun': 'sun.jpg',
+    }
+
+    PATH_ICONS = 'image/weather_img'
+    DIR_POSTCARD = 'weather_cards'
 
     def __init__(self, date, weather, temperature):
         self.day = date
@@ -201,10 +194,10 @@ class PostcardMaker:
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 
-    def _draw_bg(self):
-        list_bg = [self.draw_bg_yellow, self.draw_bg_blue, self.draw_bg_grey]
-        random_bg = random.choice(list_bg)
-        random_bg()
+    def del_all_postcard(self):
+        if not os.path.isdir(self.DIR_POSTCARD):
+            os.rmdir(self.DIR_POSTCARD)
+            os.mkdir(self.DIR_POSTCARD)
 
     def _draw_bg_sunny(self):
         img_width = self.img_base.shape[1]
@@ -240,7 +233,7 @@ class PostcardMaker:
         for _ in range(img_width):
             self.img_base[:, i:i + 2] = (128 + k, 128 + k, 128 + k)
             i += 2
-            k += 0.5
+            k += 2
 
     def _get_bg_and_icon(self):
         if 'дождь' in self.weather:
@@ -263,7 +256,7 @@ class PostcardMaker:
             print('Не нашли такую погоду!')
 
     def _insert_icon(self, name_icon):
-        icon = cv2.imread(f'image/weather_img/{name_icon}')
+        icon = cv2.imread(self.PATH_ICONS + f'/{name_icon}')
         icon_height, icon_width, _ = icon.shape
         sx = 25
         sy = 25
@@ -284,25 +277,143 @@ class PostcardMaker:
         cv2.putText(self.img_base, text_temperature, (150, 140), font, size, color, 1)
 
     def _save_card(self):
-        if not os.path.isdir('weather_cards'):
-            os.mkdir('weather_cards')
-        path = f'weather_cards/{self.day}_card.jpg'
+        if not os.path.isdir(self.DIR_POSTCARD):
+            os.mkdir(self.DIR_POSTCARD)
+        path = self.DIR_POSTCARD + f'/{self.day}.jpg'
         cv2.imwrite(path, self.img_base)
 
 
+class WeatherMarker:
+
+    DATE_FORMAT = '%d.%m.%Y'
+
+    def __init__(self):
+        self.today = date.today()
+        self.data_base = DataBaseWeather()
+        self.parser = ParserWeather()
+        self.actions = {
+            1: {'name': 'Посмотреть всю базу данных', 'action': self.print_db},
+            2: {'name': 'Посмотреть базу данных за определенный период', 'action': self.print_part_db},
+            3: {'name': 'Добавить в базу данных новые прогнозы', 'action': self.add_forecasts},
+            4: {'name': 'Удалить из базы данных прогнозы', 'action': self.del_forecasts},
+            5: {'name': 'Удалить из базы данных прогнозы', 'action': self.del_all_forecasts},
+            6: {'name': 'Создать открытки из базы данных', 'action': self.create_postcards},
+            7: {'name': 'Удалить все открытки', 'action': self.del_all_postcards},
+        }
+
+    def run(self):
+        self.start()
+
+        while True:
+            action = self.menu()
+            if action is None:
+                print('Работа скрипта окончена. Пока!')
+                break
+            action()
+
+    def start(self):
+        print(f'Привет!\n'
+              f'Ты запустил скрипт для создания базы данных прогноза погоды!\n'
+              f'Сегодня {self.today.strftime(self.DATE_FORMAT)}. '
+              f'Добавить или обновить в базе данных прогноз погоды на 7 дней?')
+
+        while True:
+            enter = input('Ответ да\\нет: ')
+            if enter.lower() in ['да', 'yes', 'нет', 'no']:
+                break
+            else:
+                print('Неверный ввод! Попробуй еще раз!\n')
+
+        if enter.lower() in ['да', 'yes']:
+            data = self.parser.parse(from_date=self.today, to_date=(self.today + timedelta(days=7)))
+            self.data_base.update_table(data)
+
+    def menu(self):
+        print('Меню:')
+        for key, value in sorted(self.actions.items(), key=lambda x: x[0]):
+            print(f'{key} - {value["name"]}')
+        print('0 - Окончание работы скрипта')
+
+        while True:
+            enter = input('Выберите действие: ')
+            if enter.isdigit() and 0 <= int(enter) <= len(self.actions):
+                break
+            else:
+                print('Неверный ввод! Попробуй еще раз!\n')
+
+        if enter == '0':
+            return None
+        else:
+            return self.actions[int(enter)]['action']
+
+    def print_db(self):
+        data = self.data_base.get_all_forecasts()
+        self.print_table(data)
+
+    def print_part_db(self):
+        from_date, to_date = self.input_period()
+        data = self.data_base.get_forecasts(from_date, to_date)
+        self.print_table(data)
+
+    def input_period(self):
+        print('Дата начала.')
+        from_date = self.input_date()
+        print('Дата окончания (введи 0 если не требуется).')
+        to_date = self.input_date()
+        return from_date, to_date
+
+    def input_date(self):
+        pattern = r'\d{2}.\d{2}.\d{4}'
+        while True:
+            enter = input('Введите дату в формате DD.MM.YYYY: ')
+            if re.match(pattern, enter):
+                date = datetime.strptime(enter, self.DATE_FORMAT).date()
+                break
+            elif enter == '0':
+                date = None
+                break
+            else:
+                print('Неверный ввод! Попробуй еще раз!\n')
+        return date
+
+    def print_table(self, data):
+        width = 30
+        string_line = '-' * (width * 3 + 4)
+        print(string_line)
+        print(f'|{"Дата":^{width}}|{"Погода":^{width}}|{"Температура":^{width}}|')
+        print(string_line)
+
+        for day in data:
+            print(
+                f'|{day["date"].strftime(self.DATE_FORMAT):^{width}}'
+                f'|{day["weather"]:^{width}}'
+                f'|{day["temperature"]:^{width}}|')
+            print(string_line)
+
+    def add_forecasts(self):
+        from_date, to_date = self.input_period()
+        data = self.parser.parse(from_date=from_date, to_date=to_date)
+        self.data_base.update_table(data)
+
+    def del_forecasts(self):
+        from_date, to_date = self.input_period()
+        self.data_base.del_forecasts(from_date, to_date)
+
+    def del_all_forecasts(self):
+        self.data_base.clean_table()
+
+    def create_postcards(self):
+        data = self.data_base.get_all_forecasts()
+        for day in data:
+            PostcardMaker(**day).create_card()
+
+    def del_all_postcards(self):
+        PostcardMaker(None, None, None).del_all_postcard()
+
+
 def main():
-    day_1 = date(2021, 6, 1)
-    day_2 = date(2021, 6, 10)
-    parse_data = ParserWeather(from_date=day_1, to_date=day_2).parse()
-
-    table_forecast = DataBaseWeather()
-    table_forecast.clean_table()
-    table_forecast.update_table(list_forecast=parse_data)
-
-    data = table_forecast.get_all_forecasts()
-
-    for i in data:
-        PostcardMaker(**i).create_card()
+    weather_marker = WeatherMarker()
+    weather_marker.run()
 
 
 if __name__ == '__main__':

@@ -7,6 +7,7 @@ from peewee import *
 import os
 import cv2
 import re
+import shutil
 
 DB = SqliteDatabase('weather.db')
 TABLE_NAME = 'Forecast weather'
@@ -175,13 +176,24 @@ class PostcardMaker:
     PATH_ICONS = 'image/weather_img'
     DIR_POSTCARD = 'weather_cards'
 
-    def __init__(self, date, weather, temperature):
+    KEYS_FORECAST = {
+        'rain': ['дождь', 'гроза', 'осадки'],
+        'snow': ['снег', 'град'],
+        'cloud': ['облачно', 'пасмурно'],
+        'sun': ['ясно', 'солнце'],
+    }
+
+    def __init__(self):
+        self.day = None
+        self.weather = None
+        self.temperature = None
+        self.img_base = cv2.imread(self.IMG_BASE)
+
+    def create_card(self, date, weather, temperature):
         self.day = date
         self.weather = weather
         self.temperature = temperature
-        self.img_base = cv2.imread(self.IMG_BASE)
 
-    def create_card(self):
         draw_bg, name_icon = self._get_bg_and_icon()
         draw_bg()
         self._insert_icon(name_icon)
@@ -195,8 +207,8 @@ class PostcardMaker:
         cv2.destroyAllWindows()
 
     def del_all_postcard(self):
-        if not os.path.isdir(self.DIR_POSTCARD):
-            os.rmdir(self.DIR_POSTCARD)
+        if os.path.isdir(self.DIR_POSTCARD):
+            shutil.rmtree(self.DIR_POSTCARD)
             os.mkdir(self.DIR_POSTCARD)
 
     def _draw_bg_sunny(self):
@@ -231,29 +243,24 @@ class PostcardMaker:
         i = 0
         k = 0
         for _ in range(img_width):
-            self.img_base[:, i:i + 2] = (128 + k, 128 + k, 128 + k)
+            self.img_base[:, i:i + 2] = (150, k, k)
             i += 2
-            k += 2
+            k += 1
 
     def _get_bg_and_icon(self):
-        if 'дождь' in self.weather:
-            return self._draw_bg_rainy, 'rain.jpg'
-        elif 'гроза' in self.weather:
-            return self._draw_bg_rainy, 'rain.jpg'
-        elif 'осадки' in self.weather:
-            return self._draw_bg_rainy, 'rain.jpg'
-        elif 'снег' in self.weather:
-            return self._draw_bg_snowy, 'snow.jpg'
-        elif 'град' in self.weather:
-            return self._draw_bg_snowy, 'snow.jpg'
-        elif 'облачно' in self.weather:
-            return self._draw_bg_cloudy, 'cloud.jpg'
-        elif 'пасмурно' in self.weather:
-            return self._draw_bg_cloudy, 'cloud.jpg'
-        elif 'ясно' in self.weather:
-            return self._draw_bg_sunny, 'sun.jpg'
+        if list(filter(self.substring_in_string, self.KEYS_FORECAST['rain'])):
+            return self._draw_bg_rainy, self.ICONS['rain']
+        elif list(filter(self.substring_in_string, self.KEYS_FORECAST['snow'])):
+            return self._draw_bg_snowy, self.ICONS['snow']
+        elif list(filter(self.substring_in_string, self.KEYS_FORECAST['sun'])):
+            return self._draw_bg_sunny, self.ICONS['sun']
+        elif list(filter(self.substring_in_string, self.KEYS_FORECAST['cloud'])):
+            return self._draw_bg_cloudy, self.ICONS['cloud']
         else:
             print('Не нашли такую погоду!')
+
+    def substring_in_string(self, sub):
+        return bool([word for word in self.weather.split() if sub.lower() in word.lower()])
 
     def _insert_icon(self, name_icon):
         icon = cv2.imread(self.PATH_ICONS + f'/{name_icon}')
@@ -291,27 +298,27 @@ class WeatherMarker:
         self.today = date.today()
         self.data_base = DataBaseWeather()
         self.parser = ParserWeather()
+        self.postcard_maker = PostcardMaker()
         self.actions = {
-            1: {'name': 'Посмотреть всю базу данных', 'action': self.print_db},
-            2: {'name': 'Посмотреть базу данных за определенный период', 'action': self.print_part_db},
-            3: {'name': 'Добавить в базу данных новые прогнозы', 'action': self.add_forecasts},
-            4: {'name': 'Удалить из базы данных прогнозы', 'action': self.del_forecasts},
-            5: {'name': 'Удалить из базы данных прогнозы', 'action': self.del_all_forecasts},
-            6: {'name': 'Создать открытки из базы данных', 'action': self.create_postcards},
-            7: {'name': 'Удалить все открытки', 'action': self.del_all_postcards},
+            1: {'name': 'Посмотреть всю базу данных', 'action': self._print_db},
+            2: {'name': 'Посмотреть базу данных за определенный период', 'action': self._print_part_db},
+            3: {'name': 'Добавить в базу данных новые прогнозы', 'action': self._add_forecasts},
+            4: {'name': 'Удалить из базы данных прогнозы', 'action': self._del_forecasts},
+            5: {'name': 'Удалить из базы данных все прогнозы', 'action': self._del_all_forecasts},
+            6: {'name': 'Создать открытки из базы данных', 'action': self._create_postcards},
+            7: {'name': 'Удалить все открытки', 'action': self._del_all_postcards},
         }
 
     def run(self):
-        self.start()
-
+        self._start()
         while True:
-            action = self.menu()
+            action = self._menu()
             if action is None:
                 print('Работа скрипта окончена. Пока!')
                 break
             action()
 
-    def start(self):
+    def _start(self):
         print(f'Привет!\n'
               f'Ты запустил скрипт для создания базы данных прогноза погоды!\n'
               f'Сегодня {self.today.strftime(self.DATE_FORMAT)}. '
@@ -328,7 +335,7 @@ class WeatherMarker:
             data = self.parser.parse(from_date=self.today, to_date=(self.today + timedelta(days=7)))
             self.data_base.update_table(data)
 
-    def menu(self):
+    def _menu(self):
         print('Меню:')
         for key, value in sorted(self.actions.items(), key=lambda x: x[0]):
             print(f'{key} - {value["name"]}')
@@ -346,37 +353,39 @@ class WeatherMarker:
         else:
             return self.actions[int(enter)]['action']
 
-    def print_db(self):
+    def _print_db(self):
         data = self.data_base.get_all_forecasts()
-        self.print_table(data)
+        self._print_table(data)
 
-    def print_part_db(self):
-        from_date, to_date = self.input_period()
+    def _print_part_db(self):
+        from_date, to_date = self._input_period()
         data = self.data_base.get_forecasts(from_date, to_date)
-        self.print_table(data)
+        self._print_table(data)
 
-    def input_period(self):
-        print('Дата начала.')
-        from_date = self.input_date()
-        print('Дата окончания (введи 0 если не требуется).')
-        to_date = self.input_date()
-        return from_date, to_date
+    def _input_period(self):
+        while True:
+            print('Дата начала.')
+            from_date = self._input_date()
+            print('Дата окончания (введи 0 если не требуется).')
+            to_date = self._input_date()
 
-    def input_date(self):
+            if to_date is None or from_date <= to_date:
+                return from_date, to_date
+            else:
+                print('Неверный ввод дат! Попробуй еще раз!\n')
+
+    def _input_date(self):
         pattern = r'\d{2}.\d{2}.\d{4}'
         while True:
             enter = input('Введите дату в формате DD.MM.YYYY: ')
             if re.match(pattern, enter):
-                date = datetime.strptime(enter, self.DATE_FORMAT).date()
-                break
+                return datetime.strptime(enter, self.DATE_FORMAT).date()
             elif enter == '0':
-                date = None
-                break
+                return None
             else:
                 print('Неверный ввод! Попробуй еще раз!\n')
-        return date
 
-    def print_table(self, data):
+    def _print_table(self, data):
         width = 30
         string_line = '-' * (width * 3 + 4)
         print(string_line)
@@ -390,25 +399,30 @@ class WeatherMarker:
                 f'|{day["temperature"]:^{width}}|')
             print(string_line)
 
-    def add_forecasts(self):
-        from_date, to_date = self.input_period()
+    def _add_forecasts(self):
+        from_date, to_date = self._input_period()
         data = self.parser.parse(from_date=from_date, to_date=to_date)
         self.data_base.update_table(data)
+        print('Прогнозы погоды добавлены в базу данных!\n')
 
-    def del_forecasts(self):
-        from_date, to_date = self.input_period()
+    def _del_forecasts(self):
+        from_date, to_date = self._input_period()
         self.data_base.del_forecasts(from_date, to_date)
+        print('Прогнозы погоды удалены из базы данных!\n')
 
-    def del_all_forecasts(self):
+    def _del_all_forecasts(self):
         self.data_base.clean_table()
+        print('База данных очищена!\n')
 
-    def create_postcards(self):
+    def _create_postcards(self):
         data = self.data_base.get_all_forecasts()
         for day in data:
-            PostcardMaker(**day).create_card()
+            self.postcard_maker.create_card(**day)
+        print('Открытки созданы!\n')
 
-    def del_all_postcards(self):
-        PostcardMaker(None, None, None).del_all_postcard()
+    def _del_all_postcards(self):
+        self.postcard_maker.del_all_postcard()
+        print('Открытки удалены!\n')
 
 
 def main():
@@ -418,3 +432,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+

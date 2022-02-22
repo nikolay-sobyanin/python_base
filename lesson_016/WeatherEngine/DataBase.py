@@ -1,6 +1,6 @@
 from peewee import *
 
-db = SqliteDatabase('WeatherEngine\weather.db')
+db = SqliteDatabase('WeatherEngine\weather.db')  # TODO папка не нужна, оставьте только имя файла
 
 
 class BaseTable(Model):

@@ -60,7 +60,7 @@ DataBase.create_weather_table()
 # парсим данные и получаем список прогноза погоды
 weather = WeatherMarker()
 weather.get_weather_forecast()
-period = weather.get_period()
+period = weather.get_period()  # TODO тут падает, потому что не получает данных от яндекса
 
 # Получаем данные за необходимый пероид
 print(f'Доступен прогноз погоды с {period[0]} по {period[1]}')

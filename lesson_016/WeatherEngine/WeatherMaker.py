@@ -11,6 +11,7 @@ import shutil
 
 DB = SqliteDatabase('weather.db')
 TABLE_NAME = 'Forecast weather'
+BASE_DIR = os.path.dirname(__file__)
 
 
 class ForecastWeather(Model):
@@ -165,7 +166,7 @@ class ParserWeather:
 
 class PostcardMaker:
 
-    IMG_BASE = 'image/base.jpg'
+    IMG_BASE = os.path.join(BASE_DIR, 'image/base.jpg')
     ICONS = {
         'rain': 'rain.jpg',
         'snow': 'snow.jpg',
@@ -173,8 +174,8 @@ class PostcardMaker:
         'sun': 'sun.jpg',
     }
 
-    PATH_ICONS = 'image/weather_img'
-    DIR_POSTCARD = 'weather_cards'
+    PATH_ICONS = os.path.join(BASE_DIR, 'image/weather_img')
+    DIR_POSTCARD = os.path.join(BASE_DIR, 'weather_cards')
 
     KEYS_FORECAST = {
         'rain': ['дождь', 'гроза', 'осадки'],
